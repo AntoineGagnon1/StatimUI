@@ -49,7 +49,14 @@ namespace Sandbox
             GL.ClearColor(new Color4(0, 32, 48, 255));
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
-            ImGui.ShowDemoWindow();
+
+            if (ImGui.Begin("fwfwafawfwafafaw"))
+            {
+                ImGui.Text("fawfawf");
+                StatimUI.Window window = new();
+                window.Update();
+            }
+            ImGui.End();
 
             _controller.Render();
 

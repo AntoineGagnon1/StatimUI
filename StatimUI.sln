@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatimUI", "StatimUI\StatimUI.csproj", "{69A8ACE0-F59F-4598-BE30-B8F3176B9932}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{B40D1B66-3A4A-4906-B066-F8B82C6FC88F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{69A8ACE0-F59F-4598-BE30-B8F3176B9932} = {69A8ACE0-F59F-4598-BE30-B8F3176B9932}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

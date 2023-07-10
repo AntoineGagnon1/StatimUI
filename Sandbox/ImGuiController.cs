@@ -9,6 +9,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Diagnostics;
 using ErrorCode = OpenTK.Graphics.OpenGL4.ErrorCode;
+using System.Drawing;
 
 namespace Sandbox
 {
@@ -53,8 +54,11 @@ namespace Sandbox
             IntPtr context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
             var io = ImGui.GetIO();
-            io.Fonts.AddFontDefault();
+            //io.Fonts.AddFontDefault();
 
+            io.Fonts.AddFontFromFileTTF("C:\\Users\\minio\\OneDrive\\Documents\\NewBlue\\Titler Pro\\Library\\Project Templates\\_LEGACY\\Social Media Collection\\fonts\\Roboto-Regular.ttf", 14f);
+
+            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.NavEnableKeyboard;
             io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 
             CreateDeviceResources();
@@ -214,11 +218,30 @@ void main()
                 ImGui.Render();
             }
 
+            UpdateMouseCursor(wnd);
             SetPerFrameImGuiData(deltaSeconds);
             UpdateImGuiInput(wnd);
 
             _frameBegun = true;
             ImGui.NewFrame();
+            ImGui.DockSpaceOverViewport();
+        }
+
+        private static Dictionary<ImGuiMouseCursor, MouseCursor> _cursors = new()
+        {
+            [ImGuiMouseCursor.None] = MouseCursor.Empty,
+            [ImGuiMouseCursor.Arrow] = MouseCursor.Default,
+            [ImGuiMouseCursor.TextInput] = MouseCursor.IBeam,
+            [ImGuiMouseCursor.Hand] = MouseCursor.Hand,
+            [ImGuiMouseCursor.ResizeEW] = MouseCursor.HResize,
+            [ImGuiMouseCursor.ResizeNS] = MouseCursor.VResize
+        };
+        public static void UpdateMouseCursor(GameWindow wnd)
+        {
+            if (_cursors.TryGetValue(ImGui.GetMouseCursor(), out MouseCursor? mouseCursor))
+                wnd.Cursor = mouseCursor;
+            else
+                wnd.Cursor = MouseCursor.Default;
         }
 
         /// <summary>
@@ -420,7 +443,6 @@ void main()
                     }
                     else
                     {
-                        GL.ActiveTexture(TextureUnit.Texture0);
                         GL.BindTexture(TextureTarget.Texture2D, (int)pcmd.TextureId);
                         CheckGLError("Texture");
 

@@ -12,7 +12,7 @@ namespace StatimUI
 
         override public void Render()
         {
-            ImGuiNET.ImGui.Text(Content);
+            ImGuiNET.ImGui.Button("123");
         }
     }
 }
