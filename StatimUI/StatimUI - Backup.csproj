@@ -5,5 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <EmbeddedResource Include="Class1.cs" />
+  </ItemGroup>
+
 </Project>
