@@ -11,10 +11,11 @@ namespace StatimUI
 
     public class XMLComponent : Component
     {
-        public List<Component> Children { get; private set; }
+        public Component Child { get; private set; }
 
         public override void Update()
         {
+            Child.Update();
         }
 
         public static IReadOnlyCollection<string> Names { get; }
@@ -27,7 +28,7 @@ namespace StatimUI
         public XMLComponent(string name)
         {
             var document = new XmlDocument();
-            document.LoadXml("<text></text>");
+            document.LoadXml("<text>hello</text>");
             foreach (XmlNode xmlNode in document.ChildNodes)
             {
                 Parse(xmlNode);
@@ -41,8 +42,8 @@ namespace StatimUI
                 var component = Activator.CreateInstance(componentType) as Component;
                 if (component != null)
                 {
-                    component.GetType().GetProperty("Content")!.SetValue(component, node.InnerText);
-                    Children.Add(component);
+                    component.GetType().GetProperty("Content")!.SetValue(component, new Property<string>(() => node.InnerText, (str) => { }));
+                    Child = component;
                 }
             }
         }
