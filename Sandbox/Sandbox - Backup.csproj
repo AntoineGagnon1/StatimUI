@@ -9,14 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Label.statim" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Label.statim" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.89.4" />
     <PackageReference Include="OpenTK" Version="4.7.7" />
   </ItemGroup>
