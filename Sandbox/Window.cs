@@ -10,12 +10,15 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using System.Diagnostics;
+using StatimUI;
 
 namespace Sandbox
 {
     public class Window : GameWindow
     {
         ImGuiController _controller;
+
+        StatimUI.Window window = new();
 
         public Window() : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(1600, 900), APIVersion = new Version(3, 3) })
         { }
@@ -52,9 +55,8 @@ namespace Sandbox
 
             if (ImGui.Begin("fwfwafawfwafafaw"))
             {
-                ImGui.Text("fawfawf");
-                StatimUI.Window window = new();
                 window.Update();
+                (window.Root as TextComponent).Content = "123";
             }
             ImGui.End();
 
