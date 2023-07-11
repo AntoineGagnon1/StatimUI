@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
+    [Component("text")]
     public class TextComponent : Component
     {
         public Property<string> Content;
