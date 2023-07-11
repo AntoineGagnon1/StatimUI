@@ -8,11 +8,25 @@ namespace StatimUI
 {
     public class TextComponent : Component
     {
-        public string Content { get; set; } = "Hello";
+        private string _content = "";
+        public string Content 
+        {
+            get => _content;
+            set
+            {
+                if (_content != value)
+                {
+                    _content = value;
+                    HasChanged = true;
+                }
+            }
+        }
 
         override public void Render()
         {
-            ImGuiNET.ImGui.Button("123");
+            ImGuiNET.ImGui.Text(Content);
+            
+            HasChanged = false;
         }
     }
 }
