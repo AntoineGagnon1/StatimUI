@@ -1,0 +1,6 @@
+﻿<script>
+Property<string> text
+</script>
+
+<text>{text}</text>
+
