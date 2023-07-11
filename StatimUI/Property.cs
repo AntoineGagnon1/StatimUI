@@ -7,7 +7,13 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
-    public class Property<T>
+    public abstract class Property
+    {
+        public abstract void SetValue(object value);
+        public abstract object GetValue(object value);
+    }
+
+    public class Property<T> : Property
     {
         private Func<T> getter;
         private Action<T> setter;
@@ -35,5 +41,16 @@ namespace StatimUI
         public static implicit operator T(Property<T> p) => p.Value;
 
         public bool HasChanged { get; internal set; }
+
+        public override void SetValue(object value)
+        {
+            // TODO: WILL CRASH
+            Value = (T)value;
+        }
+
+        public override object GetValue(object value)
+        {
+            return value;
+        }
     }
 }

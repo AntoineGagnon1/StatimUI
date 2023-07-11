@@ -23,6 +23,31 @@ namespace StatimUI
 
         abstract public bool HasChanged();
 
+        private Dictionary<string, Action<object>> propertySetters = new();
+        public virtual void SetProperty(string name, object value)
+        {
+            if (propertySetters.TryGetValue(name, out var setter))
+            {
+                setter.Invoke(value);
+            }
+        }
+
+        public virtual void InitProperty(string name, Property customProperty)
+        {
+            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+
+            if (property == null)
+                return;
+
+            property.SetValue(this, customProperty);
+
+            propertySetters.Add(name, value => customProperty.SetValue(value));
+        }
+
+        public Component()
+        {
+        }
+
         public static Dictionary<string, Type> ComponentByName { get; private set; } = new();
 
         static Component()

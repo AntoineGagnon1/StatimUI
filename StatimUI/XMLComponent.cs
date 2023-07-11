@@ -15,42 +15,35 @@ namespace StatimUI
 
         public override void Update()
         {
-            Child.Update();
+            Child?.Update();
         }
 
-        public static IReadOnlyCollection<string> Names { get; }
+        public static Dictionary<string, Stream> XMLComponentByName { get; } = new();
 
         public override bool HasChanged()
         {
             throw new NotImplementedException();
         }
 
+        private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment };
         public XMLComponent(string name)
         {
-            var document = new XmlDocument();
-            document.LoadXml("<text>hello</text>");
-            foreach (XmlNode xmlNode in document.ChildNodes)
-            {
-                Parse(xmlNode);
-            }
-        }
+            var fragments = XMLParser.ParseFragment(XmlReader.Create(XMLComponentByName[name], xmlSettings));
+            XElement root = new XElement("root", fragments);
 
-        private void Parse(XmlNode node)
-        {
-            if (ComponentByName.TryGetValue(node.Name, out var componentType))
+            foreach (XElement element in root.Elements())
             {
-                var component = Activator.CreateInstance(componentType) as Component;
-                if (component != null)
+                if (element.Name == "script")
                 {
-                    component.GetType().GetProperty("Content")!.SetValue(component, new Property<string>(() => node.InnerText, (str) => { }));
-                    Child = component;
+
                 }
+                else
+                    Child = XMLParser.ParseElement(element);
             }
         }
 
         static XMLComponent()
         {
-            List<string> componentNames = new();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
@@ -58,13 +51,17 @@ namespace StatimUI
                 foreach (string name in names)
                 {
                     string? extension = Path.GetExtension(name);
-                    if (extension != null && extension == Statim.FileExtension)
-                    {
-                        componentNames.Add(name);
-                    }
+                    if (extension == null || extension != Statim.FileExtension)
+                        continue;
+
+                    Stream? stream = assembly.GetManifestResourceStream(name);
+                    if (stream == null)
+                        continue;
+
+                    var parts = name.Split('.');
+                    XMLComponentByName.Add(parts[parts.Length - 2], stream);
                 }
             }
-            Names = componentNames.AsReadOnly();
         }
     }
 }

@@ -11,7 +11,6 @@ namespace StatimUI
     {
         public Component Root { get; set; }
 
-
         public void Update()
         {
             Root.Update();
