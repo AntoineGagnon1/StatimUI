@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StatimUI
+namespace StatimUI.Components
 {
     [Component("text")]
     public class TextComponent : Component
     {
-        public Property<string> Content;
+        public Property<string> Content { get; set; }
 
         public override bool HasChanged()
         {
@@ -18,9 +18,7 @@ namespace StatimUI
 
         override public void Update()
         {
-            string temp = Content;
-            if (ImGuiNET.ImGui.InputText("Hello", ref temp, 100))
-                Content.Value = temp;
+            ImGuiNET.ImGui.Text(Content);
 
             Content.HasChanged = false;
         }

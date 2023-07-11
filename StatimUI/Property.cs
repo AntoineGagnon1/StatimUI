@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
-    public struct Property<T>
+    public class Property<T>
     {
         private Func<T> getter;
         private Action<T> setter;
