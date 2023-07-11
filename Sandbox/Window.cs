@@ -19,6 +19,7 @@ namespace Sandbox
         ImGuiController _controller;
 
         StatimUI.Window window = new();
+        string test = "123";
 
         public Window() : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(1600, 900), APIVersion = new Version(3, 3) })
         { }
@@ -30,6 +31,8 @@ namespace Sandbox
             Title += ": OpenGL Version: " + GL.GetString(StringName.Version);
 
             _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
+
+            (window.Root as TextComponent).Content = new Property<string>(() => test, (str) => test = str);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -56,7 +59,6 @@ namespace Sandbox
             if (ImGui.Begin("fwfwafawfwafafaw"))
             {
                 window.Update();
-                (window.Root as TextComponent).Content = "123";
             }
             ImGui.End();
 

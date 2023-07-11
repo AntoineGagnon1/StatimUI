@@ -14,7 +14,7 @@ namespace StatimUI
 
         public void Update()
         {
-            Root.Render();
+            Root.Update();
         }
 
         static Window()

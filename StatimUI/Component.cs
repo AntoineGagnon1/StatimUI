@@ -18,8 +18,8 @@ namespace StatimUI
 
         public PointF Position { get; set; }
 
-        abstract public void Render();
+        abstract public void Update();
 
-        virtual public bool HasChanged { get; protected set; }
+        abstract public bool HasChanged();
     }
 }

@@ -6,27 +6,23 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
+    [Component("text")]
     public class TextComponent : Component
     {
-        private string _content = "";
-        public string Content 
+        public Property<string> Content;
+
+        public override bool HasChanged()
         {
-            get => _content;
-            set
-            {
-                if (_content != value)
-                {
-                    _content = value;
-                    HasChanged = true;
-                }
-            }
+            return Content.HasChanged;
         }
 
-        override public void Render()
+        override public void Update()
         {
-            ImGuiNET.ImGui.Text(Content);
-            
-            HasChanged = false;
+            string temp = Content;
+            if (ImGuiNET.ImGui.InputText("Hello", ref temp, 100))
+                Content.Value = temp;
+
+            Content.HasChanged = false;
         }
     }
 }
