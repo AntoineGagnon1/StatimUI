@@ -13,7 +13,7 @@ namespace StatimUI
 
         public void Update()
         {
-            Root.Render();
+            Root.Update();
         }
 
     }
