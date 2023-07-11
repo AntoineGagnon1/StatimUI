@@ -9,29 +9,12 @@ namespace StatimUI
 {
     public class Window
     {
-        public Component Root { get; set; } = new TextComponent();
+        public Component Root { get; set; }
 
 
         public void Update()
         {
             Root.Update();
-        }
-
-        static Window()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                var names = assembly.GetManifestResourceNames();
-                foreach (string name in names)
-                {
-                    string? extension = Path.GetExtension(name);
-                    if (extension != null && extension == Statim.FileExtension)
-                    {
-                        
-                    }
-                }
-            }
         }
     }
 }
