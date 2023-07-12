@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,24 +25,36 @@ namespace StatimUI
         public bool HasChanged { get; protected set; }
 
         private Dictionary<string, Property> namedProperties = new();
-        public virtual void SetProperty(string name, object value)
-        {
-            if (namedProperties.TryGetValue(name, out var property))
-            {
-                property.SetValue(value);
-            }
-        }
 
-        public virtual void InitProperty(string name, Property customProperty)
+        public virtual void InitVariableProperty(string name, object value)
         {
             var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
 
-            if (property == null)
+            if (property is null)
                 return;
 
-            property.SetValue(this, customProperty);
+            var type = typeof(VariableProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            var variableProperty = Activator.CreateInstance(type) as Property;
+            if (variableProperty == null)
+                throw new Exception("Todo");
 
-            namedProperties.Add(name, customProperty);
+            variableProperty.SetValue(value);
+            property.SetValue(this, variableProperty);
+        }
+
+        public void InitBindedProperty(string name, Func<object> getter, Action<object> setter)
+        {
+            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+
+            if (property is null)
+                return;
+
+            var type = typeof(BindedProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            var bindedConstructor = type
+                .GetConstructor(new[] { typeof(Func<object>), typeof(Action<object>) })
+                .Invoke(new object[] { getter, setter });
+
+            property.SetValue(this, bindedConstructor);
         }
 
         protected void OnValueChanged<T>(T value)

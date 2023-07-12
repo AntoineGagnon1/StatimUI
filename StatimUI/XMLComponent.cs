@@ -98,7 +98,7 @@ namespace StatimUI
 
                 if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
                 {
-                    scriptContent = $"namespace StatimUIXmlComponents {{ public class {name} {{\n" + scriptContent + "}}";
+                    scriptContent = $"namespace StatimUIXmlComponents {{ public partial class {name} {{\n" + scriptContent + "}}";
                     trees.Add(CSharpSyntaxTree.ParseText(scriptContent)); // TODO : catch compilation errors
                 }
 
@@ -113,14 +113,14 @@ namespace StatimUI
                 .Emit(dllStream, pdbStream);
             // TODO : check res for errors
             var assembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
-
+            tempAssembly = assembly;
             // Create all the XmlClassTemplates
             foreach((string name, string? content) in components)
             {
                 XMLComponentByName.Add(name, new XmlClassTemplate(assembly.GetType("StatimUIXmlComponents." + name), content));
             }
         }
-
+        public static Assembly tempAssembly;
         private static IEnumerable<(string, Stream)> GetXmlComponents()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();

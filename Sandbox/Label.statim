@@ -1,6 +1,11 @@
 ﻿<script>
-public string text;
+	public string text = "123";
+
+	public string Test()
+	{
+		return text;
+	}
 </script>
 
-<text>{text}</text>
+<text>{1234}</text>
 

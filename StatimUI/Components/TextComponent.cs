@@ -9,11 +9,11 @@ namespace StatimUI.Components
     [Component("text")]
     public class TextComponent : Component
     {
-        public Property<string> Content { get; set; }
+        public Property<int> Content { get; set; }
 
         override public void Update()
         {
-            ImGuiNET.ImGui.Text(Content);
+            ImGuiNET.ImGui.Text(Content.Value.ToString());
         }
     }
 }

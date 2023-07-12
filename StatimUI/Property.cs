@@ -10,7 +10,7 @@ namespace StatimUI
     public abstract class Property
     {
         public abstract void SetValue(object value);
-        public abstract object GetValue(object value);
+        public abstract object GetValue();
     }
 
     public abstract class Property<T> : Property
@@ -29,12 +29,12 @@ namespace StatimUI
         public override void SetValue(object value)
         {
             // TODO: WILL CRASH
-            Value = (T)value;
+            Value = (T)Convert.ChangeType(value, typeof(T));
         }
 
-        public override object GetValue(object value)
+        public override object GetValue()
         {
-            return value;
+            return Value;
         }
     }
 
@@ -75,6 +75,12 @@ namespace StatimUI
         {
             this.getter = getter;
             ValueChanged += setter;
+        }
+
+        public BindedProperty(Func<object> getter, Action<object> setter)
+        {
+            this.getter = () => (T)Convert.ChangeType(getter(), typeof(T));
+            ValueChanged += value => setter(value);
         }
 
         public override T Value

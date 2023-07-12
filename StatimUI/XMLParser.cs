@@ -1,7 +1,11 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Formats.Asn1;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -38,12 +42,25 @@ namespace StatimUI
 
             foreach (XAttribute attribute in element.Attributes())
             {
-                //var type = typeof(Property<>).MakeGenericType(GetTypeOfString(attribute.Value));
-                result.InitProperty("Content", new VariableProperty<string>(attribute.Value));
+                InitAttribute(result,  attribute.Name.LocalName, attribute.Value);
             }
-            
-            result.InitProperty("Content", new VariableProperty<string>(element.Value));
+            InitAttribute(result, "Content", element.Value);
             return result;
         }
+
+        private static void InitAttribute(Component component, string name, string value)
+        {
+            if (IsBinding(value))
+            {
+                // TODO: THIS
+                component.InitBindedProperty("Content", () => "123", val => { });
+            }
+            else
+            {
+                component.InitVariableProperty(name, value);
+            }
+        }
+
+        private static bool IsBinding(string value) => value.StartsWith('{') && value.EndsWith('}');
     }
 }
