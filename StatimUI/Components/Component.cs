@@ -11,17 +11,17 @@ namespace StatimUI
 {
     public abstract class Component
     {
-        public float Width { get; set; }
+        public Property<float> Width { get; set; }
         public bool IsWidthFixed { get; set; }
 
-        public float Height { get; set; }
+        public Property<float> Height { get; set; }
         public bool IsHeightFixed { get; set; }
 
-        public PointF Position { get; set; }
+        public Property<PointF> Position { get; set; }
 
         abstract public void Update();
 
-        abstract public bool HasChanged();
+        public bool HasChanged { get; protected set; }
 
         private Dictionary<string, Property> namedProperties = new();
         public virtual void SetProperty(string name, object value)
@@ -44,8 +44,14 @@ namespace StatimUI
             namedProperties.Add(name, customProperty);
         }
 
+        protected void OnValueChanged<T>(T value)
+        {
+            HasChanged = true;
+        }
+
         public Component()
         {
+            Width.ValueChanged += OnValueChanged;
         }
 
         public static Dictionary<string, Type> ComponentByName { get; private set; } = new();
