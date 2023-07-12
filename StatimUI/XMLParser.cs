@@ -26,13 +26,11 @@ namespace StatimUI
             Component? result = null;
             if (Component.ComponentByName.TryGetValue(element.Name.LocalName, out var componentType))
             {
-                var component = Activator.CreateInstance(componentType) as Component;
-                if (component != null)
-                    result = component;
+                result = Activator.CreateInstance(componentType) as Component;
             }
             else
             {
-                // TODO : Xml components
+                result = XMLComponent.Create(element.Name.LocalName);
             }
 
             if (result == null)

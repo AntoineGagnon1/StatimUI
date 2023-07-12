@@ -42,21 +42,29 @@ namespace StatimUI
         public static Dictionary<string, XmlClassTemplate> XMLComponentByName { get; } = new();
 
         private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment };
-        public XMLComponent(string name)
+        public static XMLComponent? Create(string name)
         {
-            var template = XMLComponentByName[name];
-            
-            // Create the class instance
-            if(template.ClassType is not null)
+            if (XMLComponentByName.TryGetValue(name, out var template))
             {
-                ClassInstance = Activator.CreateInstance(template.ClassType);
-            }
+                XMLComponent c = new XMLComponent();
 
-            // Load the child
-            // TODO : Cache this
-            if(template.XmlContent is not null)
+                // Create the class instance
+                if (template.ClassType is not null)
+                {
+                    c.ClassInstance = Activator.CreateInstance(template.ClassType);
+                }
+
+                // Load the child
+                // TODO : Cache this
+                if (template.XmlContent is not null)
+                {
+                    c.Child = XMLParser.ParseElement(XElement.Parse(template.XmlContent));
+                }
+                return c;
+            }
+            else
             {
-                Child = XMLParser.ParseElement(XElement.Parse(template.XmlContent));
+                return null;
             }
         }
 

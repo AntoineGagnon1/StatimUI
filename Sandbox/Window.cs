@@ -31,7 +31,7 @@ namespace Sandbox
 
             _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
-            window.Root = new XMLComponent("Label");
+            window.Root = XMLComponent.Create("Window");
         }
 
         protected override void OnResize(ResizeEventArgs e)
