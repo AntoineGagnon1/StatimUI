@@ -51,7 +51,7 @@ namespace StatimUI
 
         public Component()
         {
-            Width.ValueChanged += OnValueChanged;
+            //Width.ValueChanged += OnValueChanged;
         }
 
         public static Dictionary<string, Type> ComponentByName { get; private set; } = new();

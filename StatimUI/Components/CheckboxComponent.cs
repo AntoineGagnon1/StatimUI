@@ -11,18 +11,11 @@ namespace StatimUI.Components
     {
         public Property<bool> Content;
 
-        public override bool HasChanged()
-        {
-            return Content.HasChanged;
-        }
-
         override public void Update()
         {
             bool temp = Content;
             if (ImGuiNET.ImGui.Checkbox($"##{this.GetHashCode()}", ref temp))
                 Content.Value = temp;
-
-            Content.HasChanged = false;
         }
     }
 }

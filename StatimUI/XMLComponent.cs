@@ -41,11 +41,6 @@ namespace StatimUI
 
         public static Dictionary<string, XmlClassTemplate> XMLComponentByName { get; } = new();
 
-        public override bool HasChanged()
-        {
-            throw new NotImplementedException();
-        }
-
         private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment };
         public XMLComponent(string name)
         {

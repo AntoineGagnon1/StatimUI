@@ -38,7 +38,7 @@ namespace StatimUI
         }
     }
 
-    public abstract class VariableProperty<T> : Property<T>
+    public class VariableProperty<T> : Property<T>
     {
 
         public VariableProperty(T value)
@@ -67,7 +67,7 @@ namespace StatimUI
         }
     }
 
-    public abstract class BindedProperty<T> : Property<T>
+    public class BindedProperty<T> : Property<T>
     {
         private Func<T> getter;
 

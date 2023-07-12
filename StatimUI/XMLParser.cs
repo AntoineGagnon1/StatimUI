@@ -40,11 +40,11 @@ namespace StatimUI
 
             foreach (XAttribute attribute in element.Attributes())
             {
-                var type = typeof(Property<>).MakeGenericType(GetTypeOfString(attribute.Value));
-                result.InitProperty("Content", new Property<string>(() => attribute.Value, val => { }));
+                //var type = typeof(Property<>).MakeGenericType(GetTypeOfString(attribute.Value));
+                result.InitProperty("Content", new VariableProperty<string>(attribute.Value));
             }
             
-            result.InitProperty("Content", new Property<string>(() => element.Value, val => { }));
+            result.InitProperty("Content", new VariableProperty<string>(element.Value));
             return result;
         }
     }

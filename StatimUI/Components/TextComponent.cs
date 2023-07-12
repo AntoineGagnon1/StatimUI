@@ -11,16 +11,9 @@ namespace StatimUI.Components
     {
         public Property<string> Content { get; set; }
 
-        public override bool HasChanged()
-        {
-            return Content.HasChanged;
-        }
-
         override public void Update()
         {
             ImGuiNET.ImGui.Text(Content);
-
-            Content.HasChanged = false;
         }
     }
 }
