@@ -13,34 +13,18 @@ namespace StatimUI
         public abstract object GetValue(object value);
     }
 
-    public class Property<T> : Property
+    public abstract class Property<T> : Property
     {
-        private Func<T> getter;
-        private Action<T> setter;
+        public event Action<T>? ValueChanged;
 
-        public Property(Func<T> getter, Action<T> setter) 
+        protected void OnValueChanged(T value)
         {
-            this.getter = getter;
-            this.setter = setter;
-            HasChanged = false;
+            ValueChanged?.Invoke(value);
         }
 
-        public T Value 
-        { 
-            get => getter();
-            set 
-            {
-                if(Value is null || !Value.Equals(value))
-                {
-                    HasChanged = true;
-                    setter(value);
-                }
-            } 
-        }
+        public abstract T Value { get; set; }
 
         public static implicit operator T(Property<T> p) => p.Value;
-
-        public bool HasChanged { get; internal set; }
 
         public override void SetValue(object value)
         {
@@ -51,6 +35,58 @@ namespace StatimUI
         public override object GetValue(object value)
         {
             return value;
+        }
+    }
+
+    public abstract class VariableProperty<T> : Property<T>
+    {
+
+        public VariableProperty(T value)
+        {
+            _value = value;
+        }
+
+        public VariableProperty()
+        {
+            // TODO: Could crash if class
+            _value = default(T);
+        }
+
+        T _value;
+        public override T Value
+        {
+            get => _value;
+            set
+            {
+                if (_value is null || !_value.Equals(value))
+                {
+                    _value = value;
+                    OnValueChanged(value);
+                }
+            }
+        }
+    }
+
+    public abstract class BindedProperty<T> : Property<T>
+    {
+        private Func<T> getter;
+
+        public BindedProperty(Func<T> getter, Action<T> setter)
+        {
+            this.getter = getter;
+            ValueChanged += setter;
+        }
+
+        public override T Value
+        {
+            get => getter();
+            set
+            {
+                if (Value is null || !Value.Equals(value))
+                {
+                    OnValueChanged(value);
+                }
+            }
         }
     }
 }
