@@ -23,12 +23,12 @@ namespace StatimUI
 
         abstract public bool HasChanged();
 
-        private Dictionary<string, Action<object>> propertySetters = new();
+        private Dictionary<string, Property> namedProperties = new();
         public virtual void SetProperty(string name, object value)
         {
-            if (propertySetters.TryGetValue(name, out var setter))
+            if (namedProperties.TryGetValue(name, out var property))
             {
-                setter.Invoke(value);
+                property.SetValue(value);
             }
         }
 
@@ -41,7 +41,7 @@ namespace StatimUI
 
             property.SetValue(this, customProperty);
 
-            propertySetters.Add(name, value => customProperty.SetValue(value));
+            namedProperties.Add(name, customProperty);
         }
 
         public Component()

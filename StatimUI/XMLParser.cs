@@ -21,7 +21,7 @@ namespace StatimUI
             }
         }
 
-        private static Component ParseElement(XElement element)
+        public static Component ParseElement(XElement element)
         {
             Component? result = null;
             if (Component.ComponentByName.TryGetValue(element.Name.LocalName, out var componentType))

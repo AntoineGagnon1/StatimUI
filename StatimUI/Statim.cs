@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
-    public class Statim
+    public static class Statim
     {
         public const string FileExtension = ".statim";
     }

@@ -29,16 +29,28 @@ namespace StatimUI
         public XMLComponent(string name)
         {
             var fragments = XMLParser.ParseFragment(XmlReader.Create(XMLComponentByName[name], xmlSettings));
+            // wrapping everything in a root element because XML can only have one root.
             XElement root = new XElement("root", fragments);
 
+            bool rootFound = false;
+            bool scriptFound = false;
             foreach (XElement element in root.Elements())
             {
                 if (element.Name == "script")
                 {
+                    if (scriptFound)
+                        throw new Exception("A component cannot have more than one script tag.");
 
+                    scriptFound = true;
                 }
                 else
+                {
+                    if (rootFound)
+                        throw new Exception("A component cannot have more than one root.");
+
                     Child = XMLParser.ParseElement(element);
+                    rootFound = true;
+                }
             }
         }
 
