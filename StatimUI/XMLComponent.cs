@@ -1,6 +1,13 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization.Json;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -8,17 +15,31 @@ using System.Xml.Linq;
 
 namespace StatimUI
 {
+    public class XmlClassTemplate
+    {
+        public Type? ClassType { get; private set; }
+        public string? XmlContent { get; private set; }
+
+        public XmlClassTemplate(Type? classType, string? xmlContent)
+        {
+            ClassType = classType;
+            XmlContent = xmlContent;
+        }
+    }
+
 
     public class XMLComponent : Component
     {
-        public Component Child { get; private set; }
+        public Component? Child { get; private set; }
+
+        public object? ClassInstance { get; private set; }
 
         public override void Update()
         {
             Child?.Update();
         }
 
-        public static Dictionary<string, Stream> XMLComponentByName { get; } = new();
+        public static Dictionary<string, XmlClassTemplate> XMLComponentByName { get; } = new();
 
         public override bool HasChanged()
         {
@@ -28,33 +49,76 @@ namespace StatimUI
         private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment };
         public XMLComponent(string name)
         {
-            var fragments = XMLParser.ParseFragment(XmlReader.Create(XMLComponentByName[name], xmlSettings));
-            // wrapping everything in a root element because XML can only have one root.
-            XElement root = new XElement("root", fragments);
-
-            bool rootFound = false;
-            bool scriptFound = false;
-            foreach (XElement element in root.Elements())
+            var template = XMLComponentByName[name];
+            
+            // Create the class instance
+            if(template.ClassType is not null)
             {
-                if (element.Name == "script")
-                {
-                    if (scriptFound)
-                        throw new Exception("A component cannot have more than one script tag.");
+                ClassInstance = Activator.CreateInstance(template.ClassType);
+            }
 
-                    scriptFound = true;
-                }
-                else
-                {
-                    if (rootFound)
-                        throw new Exception("A component cannot have more than one root.");
-
-                    Child = XMLParser.ParseElement(element);
-                    rootFound = true;
-                }
+            // Load the child
+            // TODO : Cache this
+            if(template.XmlContent is not null)
+            {
+                Child = XMLParser.ParseElement(XElement.Parse(template.XmlContent));
             }
         }
 
         static XMLComponent()
+        {
+            List<(string name, string? xmlContent)> components = new();
+            List<SyntaxTree> trees = new();
+
+            // Parse the xml data for each component type
+            foreach ((string name, Stream stream) in GetXmlComponents())
+            {
+                var fragments = XMLParser.ParseFragment(XmlReader.Create(stream, xmlSettings));
+
+                string? scriptContent = null;
+                string? xmlContent = null;
+                foreach(var fragment in fragments)
+                {
+                    try
+                    {
+                        var reader = XElement.Parse(fragment.ToString());
+
+                        if (reader.Name == "script")
+                            scriptContent = String.Concat(reader.Nodes()); // Get the inner text
+                        else if (xmlContent == null)
+                            xmlContent = fragment.ToString(); // Get the inner text
+                        else
+                        { } // TODO : log error + abort this class ?    
+                    }
+                    catch (Exception) { }
+                }
+
+                if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
+                {
+                    scriptContent = $"namespace StatimUIXmlComponents {{ public class {name} {{\n" + scriptContent + "}}";
+                    trees.Add(CSharpSyntaxTree.ParseText(scriptContent)); // TODO : catch compilation errors
+                }
+
+                components.Add((name, xmlContent));
+            }
+
+            using MemoryStream dllStream = new MemoryStream();
+            using MemoryStream pdbStream = new MemoryStream();
+            var res = CSharpCompilation.Create("StatimUIXmlComponents", options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                .AddSyntaxTrees(trees.ToArray())
+                .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location)) // add system dll
+                .Emit(dllStream, pdbStream);
+            // TODO : check res for errors
+            var assembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
+
+            // Create all the XmlClassTemplates
+            foreach((string name, string? content) in components)
+            {
+                XMLComponentByName.Add(name, new XmlClassTemplate(assembly.GetType("StatimUIXmlComponents." + name), content));
+            }
+        }
+
+        private static IEnumerable<(string, Stream)> GetXmlComponents()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
@@ -71,7 +135,7 @@ namespace StatimUI
                         continue;
 
                     var parts = name.Split('.');
-                    XMLComponentByName.Add(parts[parts.Length - 2], stream);
+                    yield return (parts[parts.Length - 2], stream);
                 }
             }
         }

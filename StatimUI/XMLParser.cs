@@ -32,18 +32,18 @@ namespace StatimUI
             }
             else
             {
-
+                // TODO : Xml components
             }
 
             if (result == null)
-                throw new Exception("TODO");
+                throw new Exception("TODO - Element not found");
 
             foreach (XAttribute attribute in element.Attributes())
             {
                 //var type = typeof(Property<>).MakeGenericType(GetTypeOfString(attribute.Value));
                 result.SetProperty(attribute.Name.LocalName, attribute.Value);
             }
-            //
+            
             result.InitProperty("Content", new Property<string>(() => element.Value, val => { }));
             return result;
         }
