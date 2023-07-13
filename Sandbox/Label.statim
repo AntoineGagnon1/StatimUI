@@ -7,5 +7,5 @@
 	}
 </script>
 
-<text>{1234}</text>
+<text Content="{text}"/>
 

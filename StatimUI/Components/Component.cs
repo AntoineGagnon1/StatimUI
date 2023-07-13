@@ -52,7 +52,7 @@ namespace StatimUI
             var type = typeof(BindedProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
             var bindedConstructor = type
                 .GetConstructor(new[] { typeof(Func<object>), typeof(Action<object>) })
-                .Invoke(new object[] { getter, setter });
+                !.Invoke(new object[] { getter, setter });
 
             property.SetValue(this, bindedConstructor);
         }

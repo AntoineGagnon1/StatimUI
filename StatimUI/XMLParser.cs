@@ -25,7 +25,7 @@ namespace StatimUI
             }
         }
 
-        public static Component ParseElement(XElement element)
+        public static Component ParseElement(XMLComponent self, XElement element)
         {
             Component? result = null;
             if (Component.ComponentByName.TryGetValue(element.Name.LocalName, out var componentType))
@@ -42,18 +42,22 @@ namespace StatimUI
 
             foreach (XAttribute attribute in element.Attributes())
             {
-                InitAttribute(result,  attribute.Name.LocalName, attribute.Value);
+                InitAttribute(self, result,  attribute.Name.LocalName, attribute.Value);
             }
-            InitAttribute(result, "Content", element.Value);
+            
+            if(!string.IsNullOrEmpty(element.Value))
+            {
+                InitAttribute(self, result, "Content", element.Value);
+            }
             return result;
         }
 
-        private static void InitAttribute(Component component, string name, string value)
+        private static void InitAttribute(XMLComponent self, Component component, string name, string value)
         {
             if (IsBinding(value))
             {
-                // TODO: THIS
-                component.InitBindedProperty("Content", () => "123", val => { });
+                self.GetBinding(name, out var get, out var set);
+                component.InitBindedProperty(name, (Func<object>)get, (Action<object>)set);
             }
             else
             {
@@ -61,6 +65,7 @@ namespace StatimUI
             }
         }
 
-        private static bool IsBinding(string value) => value.StartsWith('{') && value.EndsWith('}');
+        public static bool IsBinding(string value) => value.StartsWith('{') && value.EndsWith('}');
+        public static string GetBindingContent(string value) => value.Substring(1, value.Length - 2);
     }
 }
