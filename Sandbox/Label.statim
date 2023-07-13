@@ -1,11 +1,7 @@
 ﻿<script>
-	public string text = "123";
+	public string text = "allo";
 
-	public string Test()
-	{
-		return text;
-	}
 </script>
 
-<text Content="{text}"/>
+<text Content="{bind text}"/>
 

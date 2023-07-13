@@ -42,19 +42,35 @@ namespace StatimUI
             property.SetValue(this, variableProperty);
         }
 
-        public void InitBindedProperty(string name, Func<object> getter, Action<object> setter)
+        public void InitOneWayProperty(string name, Func<object> getter)
         {
             var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
 
             if (property is null)
                 return;
 
-            var type = typeof(BindedProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
-            var bindedConstructor = type
+            var type = typeof(OneWayProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            object value = type
+                    .GetConstructor(new[] { typeof(Func<object>) })
+                    !.Invoke(new object[] { getter });
+
+            property.SetValue(this, value);
+
+        }
+
+        public void InitTwoWayProperty(string name, Func<object> getter, Action<object> setter)
+        {
+            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+
+            if (property is null)
+                return;
+
+            var type = typeof(TwoWayProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            object value = type
                 .GetConstructor(new[] { typeof(Func<object>), typeof(Action<object>) })
                 !.Invoke(new object[] { getter, setter });
 
-            property.SetValue(this, bindedConstructor);
+            property.SetValue(this, value);
         }
 
         protected void OnValueChanged<T>(T value)

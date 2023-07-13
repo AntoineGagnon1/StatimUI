@@ -67,17 +67,17 @@ namespace StatimUI
         }
     }
 
-    public class BindedProperty<T> : Property<T>
+    public class TwoWayProperty<T> : Property<T>
     {
         private Func<T> getter;
 
-        public BindedProperty(Func<T> getter, Action<T> setter)
+        public TwoWayProperty(Func<T> getter, Action<T> setter)
         {
             this.getter = getter;
             ValueChanged += setter;
         }
 
-        public BindedProperty(Func<object> getter, Action<object> setter)
+        public TwoWayProperty(Func<object> getter, Action<object> setter)
         {
             this.getter = () => (T)Convert.ChangeType(getter(), typeof(T));
             ValueChanged += value => setter(value);
@@ -90,6 +90,46 @@ namespace StatimUI
             {
                 if (Value is null || !Value.Equals(value))
                 {
+                    OnValueChanged(value);
+                }
+            }
+        }
+    }
+
+    public class OneWayProperty<T> : Property<T>
+    {
+        private T lastGetterValue;
+        private Func<T> getter;
+
+        public OneWayProperty(Func<T> getter)
+        {
+            this.getter = getter;
+        }
+
+        public OneWayProperty(Func<object> getter)
+        {
+            this.getter = () => (T)Convert.ChangeType(getter(), typeof(T));
+        }
+
+        private T _value;
+
+        public override T Value
+        {
+            get
+            {
+                var getterValue = getter();
+                if (!getterValue.Equals(lastGetterValue))
+                {
+                    lastGetterValue = getterValue;
+                    _value = getterValue;
+                }
+                return _value;
+            }
+            set
+            {
+                if (_value is null || !_value.Equals(value))
+                {
+                    _value = value;
                     OnValueChanged(value);
                 }
             }

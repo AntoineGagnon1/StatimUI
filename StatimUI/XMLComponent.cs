@@ -1,7 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -36,7 +38,7 @@ namespace StatimUI
 
         public object? ClassInstance { get; private set; }
 
-        private Dictionary<string, (object get, object set)> Bindings = new();
+        private Dictionary<string, (object get, object? set)> Bindings = new();
 
         public override void Update()
         {
@@ -45,7 +47,7 @@ namespace StatimUI
 
         public void GetBinding(string name, out object? getter, out object? setter)
         {
-            if (Bindings.TryGetValue(name, out (object get, object set) binding))
+            if (Bindings.TryGetValue(name, out var binding))
             {
                 getter = binding.get;
                 setter = binding.set;
@@ -67,20 +69,13 @@ namespace StatimUI
                 // Get the bindings
                 foreach(string binding in template.Bindings)
                 {
-                    MethodInfo? get = template.ClassType.GetMethod(BindingGetterName(binding));
-                    MethodInfo? set = template.ClassType.GetMethod(BindingSetterName(binding));
+                    var get = template.ClassType.GetMethod(BindingGetterName(binding))?.CreateDelegate(typeof(Func<object>), ClassInstance);
+                    var set = template.ClassType.GetMethod(BindingSetterName(binding))?.CreateDelegate(typeof(Action<object>), ClassInstance);
 
-                    if (get is not null && set is not null)
-                    {
-                        Bindings.Add(binding, (
-                           (Func<object>)(() => get.Invoke(ClassInstance, null)), 
-                           (Action<object>)((object value) => set.Invoke(ClassInstance, new object[]{ value })
-                        )));
-                    }
-                    else
-                    {
-                        // TODO : error something
-                    }
+                    if (get == null)
+                        throw new Exception("Getter is null");
+
+                    Bindings.Add(binding, (get, set));
                 }
             }
 
@@ -140,30 +135,41 @@ namespace StatimUI
                 List<string> bindings = new();
                 if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
                 {
-                    StringBuilder script = new StringBuilder();
-                    script.Append($"namespace StatimUIXmlComponents {{\n public class {name} {{\n");
-                    script.Append(scriptContent); // Add the content of the <script> tag
+                    var scriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(name, scriptContent));
+                    trees.Add(scriptTree);
 
                     // Generate the binding functions
                     if (!string.IsNullOrWhiteSpace(xmlContent))
                     {
                         var element = XElement.Parse(xmlContent);
+                        StringBuilder tagsCode = new();
                         foreach (var attr in element.Attributes())
                         {
-                            if(XMLParser.IsBinding(attr.Value))
-                            {
-                                bindings.Add(attr.Name.LocalName);
+                            bindings.Add(attr.Name.LocalName);
 
-                                // TODO : change string to the actual type :
-                                script.Append($"public string {BindingGetterName(attr.Name.LocalName)}() => {XMLParser.GetBindingContent(attr.Value)};\n");
-                                script.Append($"public void {BindingSetterName(attr.Name.LocalName)}(string __value) => {XMLParser.GetBindingContent(attr.Value)} = __value;\n");
+                            if (XMLParser.IsTwoWay(attr.Value))
+                            {
+                                string variableName = XMLParser.GetTwoWayVariableName(attr.Value);
+                                var variableType = scriptTree.FindVariableType(variableName);
+                                tagsCode.Append($"public object {BindingGetterName(attr.Name.LocalName)}() => {variableName};\n");
+                                tagsCode.Append(@$"public void {BindingSetterName(attr.Name.LocalName)}(object __value)
+                                {{
+                                    {variableName} = ({variableType})System.Convert.ChangeType(__value, typeof({variableType}));
+                                }}");
                             }
+                            else
+                            {
+                                tagsCode.Append($"public object {BindingGetterName(attr.Name.LocalName)}() => {XMLParser.GetOneWayContent(attr.Value)};\n");
+                            }
+                        }
+
+                        if (bindings.Count > 0)
+                        {
+                            var tagsTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(name, tagsCode.ToString()));
+                            trees.Add(tagsTree);
                         }
                     }
 
-                    script.Append("\n}\n}"); // Close the class and the namespace
-                    Console.Write(script.ToString());
-                    trees.Add(CSharpSyntaxTree.ParseText(script.ToString())); // TODO : catch compilation errors
                 }
 
                 components.Add((name, xmlContent, bindings));
@@ -171,10 +177,19 @@ namespace StatimUI
 
             using MemoryStream dllStream = new MemoryStream();
             using MemoryStream pdbStream = new MemoryStream();
+            Stopwatch watch = Stopwatch.StartNew();
             var res = CSharpCompilation.Create("StatimUIXmlComponents", options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .AddSyntaxTrees(trees.ToArray())
                 .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location)) // add system dll
                 .Emit(dllStream, pdbStream);
+            watch.Stop();
+            Console.WriteLine(watch.ElapsedMilliseconds);
+
+            foreach (var error in res.Diagnostics)
+            {
+                Console.WriteLine(error);
+            }
+
             // TODO : check res for errors
             var assembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
             

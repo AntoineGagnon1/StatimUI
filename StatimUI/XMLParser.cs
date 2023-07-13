@@ -7,6 +7,7 @@ using System.Formats.Asn1;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -54,10 +55,18 @@ namespace StatimUI
 
         private static void InitAttribute(XMLComponent self, Component component, string name, string value)
         {
-            if (IsBinding(value))
+            if (IsOneWay(value))
             {
-                self.GetBinding(name, out var get, out var set);
-                component.InitBindedProperty(name, (Func<object>)get, (Action<object>)set);
+                if (IsTwoWay(value))
+                {
+                    self.GetBinding(name, out var get, out var set);
+                    component.InitTwoWayProperty(name, (Func<object>)get, (Action<object>)set);
+                }
+                else
+                {
+                    self.GetBinding(name, out var get, out var set);
+                    component.InitOneWayProperty(name, (Func<object>)get);
+                }
             }
             else
             {
@@ -65,7 +74,15 @@ namespace StatimUI
             }
         }
 
-        public static bool IsBinding(string value) => value.StartsWith('{') && value.EndsWith('}');
-        public static string GetBindingContent(string value) => value.Substring(1, value.Length - 2);
+        public static bool IsOneWay(string value) => value.StartsWith('{') && value.EndsWith('}');
+        public static bool IsTwoWay(string value) => Regex.IsMatch(value, "{\\s*bind\\s+\\S+\\s*}");
+        public static string GetOneWayContent(string value) => value.Substring(1, value.Length - 2);
+
+        private static readonly int bindStartIndex = "{bind".Length;
+        public static string GetTwoWayVariableName(string value)
+        {
+            string noSpace = value.Replace(" ", "");
+            return noSpace.Substring(bindStartIndex, noSpace.Length - bindStartIndex - 1);
+        }
     }
 }
