@@ -32,6 +32,8 @@ namespace StatimUI
 
         public override void InitBindingProperty(string name, Binding binding)
         {
+            base.InitBindingProperty(name, binding);
+
             if (ClassInstance == null)
                 return;
 
@@ -40,6 +42,8 @@ namespace StatimUI
 
         public override void InitVariableProperty(string name, object value)
         {
+            base.InitVariableProperty(name, value);
+
             if (ClassInstance == null)
                 return;
 
