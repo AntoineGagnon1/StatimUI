@@ -3,8 +3,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -17,68 +19,54 @@ using System.Xml.Linq;
 
 namespace StatimUI
 {
-    public class XmlClassTemplate
-    {
-        public Type? ClassType { get; private set; }
-        public string? XmlContent { get; private set; }
-        public List<string> Bindings { get; private set; }
-
-        public XmlClassTemplate(Type? classType, string? xmlContent, List<string> bindings)
-        {
-            ClassType = classType;
-            XmlContent = xmlContent;
-            Bindings = bindings;
-        }
-    }
-
-
     public class XMLComponent : Component
     {
         public Component? Child { get; private set; }
-
         public object? ClassInstance { get; private set; }
-
-        private Dictionary<string, (object get, object? set)> Bindings = new();
+        public ReadOnlyDictionary<string, Binding> Bindings { get; private set; }
 
         public override void Update()
         {
             Child?.Update();
         }
 
-        public void GetBinding(string name, out object? getter, out object? setter)
+        public override void InitBindingProperty(string name, Binding binding)
         {
-            if (Bindings.TryGetValue(name, out var binding))
-            {
-                getter = binding.get;
-                setter = binding.set;
-            }
-            else
-            {
-                getter = null;
-                setter = null;
-            }
+            if (ClassInstance == null)
+                return;
+
+            InitBindingProperty(ClassInstance, name, binding);
+        }
+
+        public override void InitVariableProperty(string name, object value)
+        {
+            if (ClassInstance == null)
+                return;
+
+            InitVariableProperty(ClassInstance, name, value);
         }
 
         private XMLComponent(XmlClassTemplate template)
         {
             // Create the class instance
+            var bindings = new Dictionary<string , Binding>();
             if (template.ClassType is not null)
             {
                 ClassInstance = Activator.CreateInstance(template.ClassType);
                 
                 // Get the bindings
-                foreach(string binding in template.Bindings)
+                foreach(string bindingName in template.Bindings)
                 {
-                    var get = template.ClassType.GetMethod(BindingGetterName(binding))?.CreateDelegate(typeof(Func<object>), ClassInstance);
-                    var set = template.ClassType.GetMethod(BindingSetterName(binding))?.CreateDelegate(typeof(Action<object>), ClassInstance);
+                    var get = template.ClassType.GetMethod(BindingGetterName(bindingName))?.CreateDelegate<Func<object>>(ClassInstance);
+                    var set = template.ClassType.GetMethod(BindingSetterName(bindingName))?.CreateDelegate<Action<object>>(ClassInstance);
 
                     if (get == null)
                         throw new Exception("Getter is null");
 
-                    Bindings.Add(binding, (get, set));
+                    bindings.Add(bindingName, new Binding(get, set));
                 }
             }
-
+            Bindings = new ReadOnlyDictionary<string, Binding>(bindings);
 
             // Load the child
             // TODO : Cache this
@@ -91,28 +79,24 @@ namespace StatimUI
         public static XMLComponent? Create(string name)
         {
             if (XMLComponentByName.TryGetValue(name, out var template))
-            {
                 return new XMLComponent(template);
-            }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public static Dictionary<string, XmlClassTemplate> XMLComponentByName { get; } = new();
 
-        private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment };
 
+        private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment };
         static XMLComponent()
         {
             List<(string name, string? xmlContent, List<string> bindings)> components = new();
             List<SyntaxTree> trees = new();
 
             // Parse the xml data for each component type
-            foreach ((string name, Stream stream) in GetXmlComponents())
+            foreach (var component in GetXmlComponents())
             {
-                var fragments = XMLParser.ParseFragment(XmlReader.Create(stream, xmlSettings));
+                var fragments = XMLParser.ParseFragment(XmlReader.Create(component.Stream, xmlSettings));
 
                 string? scriptContent = null;
                 string? xmlContent = null;
@@ -123,19 +107,21 @@ namespace StatimUI
                         var reader = XElement.Parse(fragment.ToString());
 
                         if (reader.Name == "script")
-                            scriptContent = String.Concat(reader.Nodes()); // Get the inner text
+                            scriptContent = WebUtility.HtmlDecode(String.Concat(reader.Nodes())); // Get the inner text
                         else if (xmlContent == null)
                             xmlContent = fragment.ToString(); // Get the inner text
                         else
                         { } // TODO : log error + abort this class ?    
                     }
-                    catch (Exception) { }
+                    catch (Exception e)
+                    {
+                    }
                 }
-
+                Console.WriteLine(scriptContent);
                 List<string> bindings = new();
                 if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
                 {
-                    var scriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(name, scriptContent));
+                    var scriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
                     trees.Add(scriptTree);
 
                     // Generate the binding functions
@@ -150,12 +136,13 @@ namespace StatimUI
                             if (XMLParser.IsTwoWay(attr.Value))
                             {
                                 string variableName = XMLParser.GetTwoWayVariableName(attr.Value);
+                                // TODO: get type of attribute since the variable's type isn't always gonna be in the tree ( ex: layer.name ) the layer is in the tree but not the name
                                 var variableType = scriptTree.FindVariableType(variableName);
                                 tagsCode.Append($"public object {BindingGetterName(attr.Name.LocalName)}() => {variableName};\n");
-                                tagsCode.Append(@$"public void {BindingSetterName(attr.Name.LocalName)}(object __value)
-                                {{
-                                    {variableName} = ({variableType})System.Convert.ChangeType(__value, typeof({variableType}));
-                                }}");
+                                tagsCode.Append($"public void {BindingSetterName(attr.Name.LocalName)}(object __value)" +
+                                "{" +
+                                    $"{variableName} = ({variableType})System.Convert.ChangeType(__value, typeof({variableType}));" +
+                                "}");
                             }
                             else
                             {
@@ -165,14 +152,14 @@ namespace StatimUI
 
                         if (bindings.Count > 0)
                         {
-                            var tagsTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(name, tagsCode.ToString()));
+                            var tagsTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, tagsCode.ToString()));
                             trees.Add(tagsTree);
                         }
                     }
 
                 }
 
-                components.Add((name, xmlContent, bindings));
+                components.Add((component.Name, xmlContent, bindings));
             }
 
             using MemoryStream dllStream = new MemoryStream();
@@ -180,7 +167,10 @@ namespace StatimUI
             Stopwatch watch = Stopwatch.StartNew();
             var res = CSharpCompilation.Create("StatimUIXmlComponents", options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .AddSyntaxTrees(trees.ToArray())
-                .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location)) // add system dll
+                .AddReferences(
+                    MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Property).Assembly.Location)
+                ) // add system dll
                 .Emit(dllStream, pdbStream);
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
@@ -200,7 +190,7 @@ namespace StatimUI
             }
         }
 
-        private static IEnumerable<(string, Stream)> GetXmlComponents()
+        private static IEnumerable<(string Name, Stream Stream)> GetXmlComponents()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)

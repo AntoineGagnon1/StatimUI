@@ -1,7 +1,6 @@
 ﻿<script>
-	public string text = "allo";
-
+	public string Content = "aaa";
 </script>
 
-<text Content="{bind text}"/>
+<text Content="{bind Content}"/>
 

@@ -55,18 +55,9 @@ namespace StatimUI
 
         private static void InitAttribute(XMLComponent self, Component component, string name, string value)
         {
-            if (IsOneWay(value))
+            if (IsBinding(value))
             {
-                if (IsTwoWay(value))
-                {
-                    self.GetBinding(name, out var get, out var set);
-                    component.InitTwoWayProperty(name, (Func<object>)get, (Action<object>)set);
-                }
-                else
-                {
-                    self.GetBinding(name, out var get, out var set);
-                    component.InitOneWayProperty(name, (Func<object>)get);
-                }
+                component.InitBindingProperty(name, self.Bindings[name]);
             }
             else
             {
@@ -74,6 +65,7 @@ namespace StatimUI
             }
         }
 
+        public static bool IsBinding(string value) => IsOneWay(value);
         public static bool IsOneWay(string value) => value.StartsWith('{') && value.EndsWith('}');
         public static bool IsTwoWay(string value) => Regex.IsMatch(value, "{\\s*bind\\s+\\S+\\s*}");
         public static string GetOneWayContent(string value) => value.Substring(1, value.Length - 2);

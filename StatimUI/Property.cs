@@ -26,6 +26,22 @@ namespace StatimUI
 
         public static implicit operator T(Property<T> p) => p.Value;
 
+        public static Property<T> FromBinding(Binding binding)
+        {
+            if (binding.IsTwoWay)
+            {
+                return new TwoWayProperty<T>(
+                    () => (T)binding.Getter(),
+                    value => binding.Setter(value)
+                );
+            }
+            else
+            {
+                return new OneWayProperty<T>(() => (T)binding.Getter());
+            }
+        }
+
+
         public override void SetValue(object value)
         {
             // TODO: WILL CRASH
@@ -77,11 +93,6 @@ namespace StatimUI
             ValueChanged += setter;
         }
 
-        public TwoWayProperty(Func<object> getter, Action<object> setter)
-        {
-            this.getter = () => (T)Convert.ChangeType(getter(), typeof(T));
-            ValueChanged += value => setter(value);
-        }
 
         public override T Value
         {
@@ -103,12 +114,9 @@ namespace StatimUI
 
         public OneWayProperty(Func<T> getter)
         {
+            _value = getter();
+            lastGetterValue = _value;
             this.getter = getter;
-        }
-
-        public OneWayProperty(Func<object> getter)
-        {
-            this.getter = () => (T)Convert.ChangeType(getter(), typeof(T));
         }
 
         private T _value;

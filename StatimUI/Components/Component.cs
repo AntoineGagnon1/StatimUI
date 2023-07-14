@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace StatimUI
 {
@@ -26,9 +27,9 @@ namespace StatimUI
 
         private Dictionary<string, Property> namedProperties = new();
 
-        public virtual void InitVariableProperty(string name, object value)
+        protected static void InitVariableProperty(object instance, string name, object value)
         {
-            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
 
             if (property is null)
                 return;
@@ -39,39 +40,32 @@ namespace StatimUI
                 throw new Exception("Todo");
 
             variableProperty.SetValue(value);
-            property.SetValue(this, variableProperty);
+            property.SetValue(instance, variableProperty);
+        }
+        public virtual void InitVariableProperty(string name, object value)
+        {
+            InitVariableProperty(this, name, value);
         }
 
-        public void InitOneWayProperty(string name, Func<object> getter)
+        protected static void InitBindingProperty(object instance, string name, Binding binding)
         {
-            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
 
             if (property is null)
                 return;
 
-            var type = typeof(OneWayProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
-            object value = type
-                    .GetConstructor(new[] { typeof(Func<object>) })
-                    !.Invoke(new object[] { getter });
+            var type = typeof(Property<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            var value = type
+                .GetMethod("FromBinding", BindingFlags.Static | BindingFlags.Public)
+                ?.Invoke(null, new object[] { binding });
 
-            property.SetValue(this, value);
-
+            property.SetValue(instance, value);
         }
-
-        public void InitTwoWayProperty(string name, Func<object> getter, Action<object> setter)
+        public virtual void InitBindingProperty(string name, Binding binding)
         {
-            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
-
-            if (property is null)
-                return;
-
-            var type = typeof(TwoWayProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
-            object value = type
-                .GetConstructor(new[] { typeof(Func<object>), typeof(Action<object>) })
-                !.Invoke(new object[] { getter, setter });
-
-            property.SetValue(this, value);
+            InitBindingProperty(this, name, binding);
         }
+
 
         protected void OnValueChanged<T>(T value)
         {
