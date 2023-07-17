@@ -4,7 +4,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
@@ -94,77 +96,19 @@ namespace StatimUI
         private static readonly XmlReaderSettings xmlSettings = new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment };
         static XMLComponent()
         {
-            List<(string name, string? xmlContent, List<string> bindings)> components = new();
+            Dictionary<string, ComponentData> components = GetComponentsData();
             List<SyntaxTree> trees = new();
 
-            // Parse the xml data for each component type
-            foreach (var component in GetXmlComponents())
+            foreach (var component in components)
             {
-                var fragments = XMLParser.ParseFragment(XmlReader.Create(component.Stream, xmlSettings));
+                if (component.Value.ScriptTree != null)
+                    trees.Add(component.Value.ScriptTree);
 
-                string? scriptContent = null;
-                string? xmlContent = null;
-                foreach(var fragment in fragments)
-                {
-                    try
-                    {
-                        var reader = XElement.Parse(fragment.ToString());
-
-                        if (reader.Name == "script")
-                            scriptContent = WebUtility.HtmlDecode(String.Concat(reader.Nodes())); // Get the inner text
-                        else if (xmlContent == null)
-                            xmlContent = fragment.ToString(); // Get the inner text
-                        else
-                        { } // TODO : log error + abort this class ?    
-                    }
-                    catch (Exception e)
-                    {
-                    }
-                }
-                Console.WriteLine(scriptContent);
-                List<string> bindings = new();
-                if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
-                {
-                    var scriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
-                    trees.Add(scriptTree);
-
-                    // Generate the binding functions
-                    if (!string.IsNullOrWhiteSpace(xmlContent))
-                    {
-                        var element = XElement.Parse(xmlContent);
-                        StringBuilder tagsCode = new();
-                        foreach (var attr in element.Attributes())
-                        {
-                            bindings.Add(attr.Name.LocalName);
-
-                            if (XMLParser.IsTwoWay(attr.Value))
-                            {
-                                string variableName = XMLParser.GetTwoWayVariableName(attr.Value);
-                                // TODO: get type of attribute since the variable's type isn't always gonna be in the tree ( ex: layer.name ) the layer is in the tree but not the name
-                                var variableType = scriptTree.FindVariableType(variableName);
-                                tagsCode.Append($"public object {BindingGetterName(attr.Name.LocalName)}() => {variableName};\n");
-                                tagsCode.Append($"public void {BindingSetterName(attr.Name.LocalName)}(object __value)" +
-                                "{" +
-                                    $"{variableName} = ({variableType})System.Convert.ChangeType(__value, typeof({variableType}));" +
-                                "}");
-                            }
-                            else
-                            {
-                                tagsCode.Append($"public object {BindingGetterName(attr.Name.LocalName)}() => {XMLParser.GetOneWayContent(attr.Value)};\n");
-                            }
-                        }
-
-                        if (bindings.Count > 0)
-                        {
-                            var tagsTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, tagsCode.ToString()));
-                            trees.Add(tagsTree);
-                        }
-                    }
-
-                }
-
-                components.Add((component.Name, xmlContent, bindings));
+                var tagsTree = GetBindings(component.Key, component.Value, components);
+                if (tagsTree != null)
+                    trees.Add(tagsTree);
             }
+
 
             using MemoryStream dllStream = new MemoryStream();
             using MemoryStream pdbStream = new MemoryStream();
@@ -188,10 +132,88 @@ namespace StatimUI
             var assembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
             
             // Create all the XmlClassTemplates
-            foreach((string name, string? content, var bindings) in components)
+            foreach(var component in components)
             {
-                XMLComponentByName.Add(name, new XmlClassTemplate(assembly.GetType("StatimUIXmlComponents." + name), content, bindings));
+                XMLComponentByName.Add(component.Key, new XmlClassTemplate(assembly.GetType("StatimUIXmlComponents." + component.Key), component.Value?.XmlContent, component.Value.Bindings));
             }
+        }
+
+        private static SyntaxTree? GetBindings(string name, ComponentData data, Dictionary<string, ComponentData> components)
+        {
+            if (data.XmlElement != null)
+            {
+                StringBuilder tagsCode = new();
+                foreach (var attr in data.XmlElement.Attributes())
+                {
+                    data.Bindings.Add(attr.Name.LocalName);
+
+                    if (XMLParser.IsTwoWay(attr.Value))
+                    {
+                        string variableName = XMLParser.GetTwoWayVariableName(attr.Value);
+                        string? childName = data.XmlElement.Name.LocalName;
+                        string? variableType = null;
+                        if (components.TryGetValue(childName, out var value))
+                            variableType = value.ScriptTree!.FindVariableType(variableName);
+                        else
+                            variableType = ComponentByName[childName].FindVariableType(variableName);
+
+                        if (variableType == null)
+                            throw new Exception("Couldn't find variable type");
+
+                        tagsCode.Append($"public object {BindingGetterName(attr.Name.LocalName)}() => {variableName};\n");
+                        tagsCode.Append($"public void {BindingSetterName(attr.Name.LocalName)}(object __value)" +
+                        "{" +
+                            $"{variableName} = ({variableType})System.Convert.ChangeType(__value, typeof({variableType}));" +
+                        "}");
+                    }
+                    else
+                    {
+                        tagsCode.Append($"public object {BindingGetterName(attr.Name.LocalName)}() => {XMLParser.GetOneWayContent(attr.Value)};\n");
+                    }
+                }
+
+                if (data.Bindings.Count > 0)
+                {
+                    var tagsTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(name, tagsCode.ToString()));
+                    return tagsTree;
+                }
+            }
+            return null;
+        }
+
+        private static Dictionary<string, ComponentData> GetComponentsData()
+        {
+            Dictionary<string, ComponentData> result = new();
+            // Parse the xml data for each component type
+            foreach (var component in GetXmlComponents())
+            {
+                ComponentData data = new();
+                var fragments = XMLParser.ParseFragment(XmlReader.Create(component.Stream, xmlSettings));
+                var root = new XElement("root", fragments);
+
+                foreach (var element in root.Elements())
+                {
+                    try
+                    {
+                        if (element.Name == "script")
+                        {
+                            var scriptContent = element.Value;
+                            if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
+                                data.ScriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
+                        }
+                        else if (data.XmlElement == null)
+                        {
+                            data.XmlElement = element;
+                            data.XmlContent = element.ToString();
+                        }
+                        else
+                        { } // TODO : log error + abort this class ?    
+                    } catch (Exception e) { }
+                }
+
+                result.Add(component.Name, data);
+            }
+            return result;
         }
 
         private static IEnumerable<(string Name, Stream Stream)> GetXmlComponents()
@@ -218,5 +240,13 @@ namespace StatimUI
 
         private static string BindingGetterName(string attributeName) => $"__{attributeName}Get";
         private static string BindingSetterName(string attributeName) => $"__{attributeName}Set";
+    }
+
+    public class ComponentData
+    {
+        public SyntaxTree? ScriptTree { get; set; }
+        public string? XmlContent { get; set; }
+        public XElement? XmlElement { get; set; }
+        public List<string> Bindings { get; set; } = new();
     }
 }
