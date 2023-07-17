@@ -9,7 +9,7 @@ namespace StatimUI.Components
     [Component("text")]
     public class TextComponent : Component
     {
-        public Property<string> Content { get; set; }
+        public Property<string> Content;
 
         override public void Update()
         {

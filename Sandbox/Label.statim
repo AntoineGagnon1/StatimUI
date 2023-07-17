@@ -1,6 +1,7 @@
 ﻿<script>
-	public StatimUI.Property&lt;string&gt; Content { get; set; } = new StatimUI.VariableProperty&lt;string&gt;(&quot;bbb&quot;);
+	public string Content, AAA = "a";
+	int allo = 123;
 </script>
 
-<text Content="{bind Content.Value}"/>
+<text Content="{bind Content}"></text>
 

@@ -199,7 +199,12 @@ namespace StatimUI
                         {
                             var scriptContent = element.Value;
                             if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
-                                data.ScriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
+                            {
+                                var tree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
+                                var visiter = new PropertySyntaxRewriter();
+                                var newRoot = visiter.Visit(tree.GetRoot());
+                                var newTree = CSharpSyntaxTree.Create(newRoot as CSharpSyntaxNode);
+                            }
                         }
                         else if (data.XmlElement == null)
                         {
@@ -242,7 +247,7 @@ namespace StatimUI
         private static string BindingSetterName(string attributeName) => $"__{attributeName}Set";
     }
 
-    public class ComponentData
+    public record ComponentData
     {
         public SyntaxTree? ScriptTree { get; set; }
         public string? XmlContent { get; set; }

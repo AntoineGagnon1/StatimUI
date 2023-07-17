@@ -30,17 +30,24 @@ namespace StatimUI
         protected static void InitVariableProperty(object instance, string name, object value)
         {
             var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var field = instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
-            if (property is null)
+            // TODO: might wanna throw
+            if (property == null && field == null)
                 return;
 
-            var type = typeof(VariableProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            Type genericType = property?.PropertyType?.GenericTypeArguments[0] ?? field!.FieldType.GenericTypeArguments[0];
+
+            var type = typeof(VariableProperty<>).MakeGenericType(genericType);
             var variableProperty = Activator.CreateInstance(type) as Property;
             if (variableProperty == null)
                 throw new Exception("Todo");
 
             variableProperty.SetValue(value);
-            property.SetValue(instance, variableProperty);
+            if (property != null)
+                property.SetValue(instance, variableProperty);
+            else if (field != null)
+                field.SetValue(instance, variableProperty);
         }
         public virtual void InitVariableProperty(string name, object value)
         {
@@ -50,16 +57,23 @@ namespace StatimUI
         protected static void InitBindingProperty(object instance, string name, Binding binding)
         {
             var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var field = instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
-            if (property is null)
+            // TODO: might wanna throw
+            if (property == null && field == null)
                 return;
 
-            var type = typeof(Property<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            Type genericType = property?.PropertyType?.GenericTypeArguments[0] ?? field!.FieldType.GenericTypeArguments[0];
+
+            var type = typeof(Property<>).MakeGenericType(genericType);
             var value = type
                 .GetMethod("FromBinding", BindingFlags.Static | BindingFlags.Public)
                 ?.Invoke(null, new object[] { binding });
 
-            property.SetValue(instance, value);
+            if (property != null)
+                property.SetValue(instance, value);
+            else if (field != null)
+                field.SetValue(instance, value);
         }
         public virtual void InitBindingProperty(string name, Binding binding)
         {

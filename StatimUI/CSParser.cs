@@ -41,7 +41,7 @@ namespace StatimUI
         {
             foreach (var field in type.GetFields())
             {
-                if (field.Name == variableName && field.FieldType == typeof(Property<>))
+                if (field.Name == variableName)
                     return field.FieldType.GenericTypeArguments[0].FullName;
             }
 
