@@ -191,25 +191,30 @@ namespace StatimUI
             //    var fragments = XMLParser.ParseFragment(XmlReader.Create(component.Stream, xmlSettings));
             //    var root = new XElement("root", fragments);
 
-            //    foreach (var element in root.Elements())
-            //    {
-            //        try
-            //        {
-            //            if (element.Name == "script")
-            //            {
-            //                var scriptContent = element.Value;
-            //                if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
-            //                    data.ScriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
-            //            }
-            //            else if (data.XmlElement == null)
-            //            {
-            //                data.XmlElement = element;
-            //                data.XmlContent = element.ToString();
-            //            }
-            //            else
-            //            { } // TODO : log error + abort this class ?    
-            //        } catch (Exception e) { }
-            //    }
+                foreach (var element in root.Elements())
+                {
+                    try
+                    {
+                        if (element.Name == "script")
+                        {
+                            var scriptContent = element.Value;
+                            if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
+                            {
+                                var tree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
+                                var visiter = new PropertySyntaxRewriter();
+                                var newRoot = visiter.Visit(tree.GetRoot());
+                                var newTree = CSharpSyntaxTree.Create(newRoot as CSharpSyntaxNode);
+                            }
+                        }
+                        else if (data.XmlElement == null)
+                        {
+                            data.XmlElement = element;
+                            data.XmlContent = element.ToString();
+                        }
+                        else
+                        { } // TODO : log error + abort this class ?    
+                    } catch (Exception e) { }
+                }
 
             //    result.Add(component.Name, data);
             //}
@@ -220,7 +225,7 @@ namespace StatimUI
         private static string BindingSetterName(string attributeName) => $"__{attributeName}Set";
     }
 
-    public class ComponentData
+    public record ComponentData
     {
         public SyntaxTree? ScriptTree { get; set; }
         public string? XmlContent { get; set; }
