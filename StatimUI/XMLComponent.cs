@@ -185,57 +185,35 @@ namespace StatimUI
         {
             Dictionary<string, ComponentData> result = new();
             // Parse the xml data for each component type
-            foreach (var component in GetXmlComponents())
-            {
-                ComponentData data = new();
-                var fragments = XMLParser.ParseFragment(XmlReader.Create(component.Stream, xmlSettings));
-                var root = new XElement("root", fragments);
+            //foreach (var component in GetXmlComponents())
+            //{
+            //    ComponentData data = new();
+            //    var fragments = XMLParser.ParseFragment(XmlReader.Create(component.Stream, xmlSettings));
+            //    var root = new XElement("root", fragments);
 
-                foreach (var element in root.Elements())
-                {
-                    try
-                    {
-                        if (element.Name == "script")
-                        {
-                            var scriptContent = element.Value;
-                            if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
-                                data.ScriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
-                        }
-                        else if (data.XmlElement == null)
-                        {
-                            data.XmlElement = element;
-                            data.XmlContent = element.ToString();
-                        }
-                        else
-                        { } // TODO : log error + abort this class ?    
-                    } catch (Exception e) { }
-                }
+            //    foreach (var element in root.Elements())
+            //    {
+            //        try
+            //        {
+            //            if (element.Name == "script")
+            //            {
+            //                var scriptContent = element.Value;
+            //                if (scriptContent != null && !string.IsNullOrWhiteSpace(scriptContent))
+            //                    data.ScriptTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(component.Name, scriptContent));
+            //            }
+            //            else if (data.XmlElement == null)
+            //            {
+            //                data.XmlElement = element;
+            //                data.XmlContent = element.ToString();
+            //            }
+            //            else
+            //            { } // TODO : log error + abort this class ?    
+            //        } catch (Exception e) { }
+            //    }
 
-                result.Add(component.Name, data);
-            }
+            //    result.Add(component.Name, data);
+            //}
             return result;
-        }
-
-        private static IEnumerable<(string Name, Stream Stream)> GetXmlComponents()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                var names = assembly.GetManifestResourceNames();
-                foreach (string name in names)
-                {
-                    string? extension = Path.GetExtension(name);
-                    if (extension == null || extension != Statim.FileExtension)
-                        continue;
-
-                    Stream? stream = assembly.GetManifestResourceStream(name);
-                    if (stream == null)
-                        continue;
-
-                    var parts = name.Split('.');
-                    yield return (parts[parts.Length - 2], stream);
-                }
-            }
         }
 
         private static string BindingGetterName(string attributeName) => $"__{attributeName}Get";
