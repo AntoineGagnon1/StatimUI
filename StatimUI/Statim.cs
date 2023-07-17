@@ -41,6 +41,21 @@ namespace StatimUI
             Compile(trees);
         }
 
+        public static Component? CreateComponent(string name)
+        {
+            // TODO : Cache ?
+            foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var type = assembly.GetType(name);
+                if (type != null)
+                {
+                    return (Component)Activator.CreateInstance(type);
+                }
+            }
+
+            return null;
+        }
+
         private static void Compile(List<SyntaxTree> trees)
         {
             using MemoryStream dllStream = new MemoryStream();
@@ -50,9 +65,11 @@ namespace StatimUI
                 .AddSyntaxTrees(trees)
                 .AddReferences(
                     MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(Property).Assembly.Location)
-                ) // add system dll
-                .Emit(dllStream, pdbStream);
+                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Property).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)
+                ).AddReferences(GetGlobalReferences()).Emit(dllStream, pdbStream);
+
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
 
@@ -63,6 +80,26 @@ namespace StatimUI
 
             // TODO : check res for errors
             var assembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
+        }
+
+        private static IEnumerable<MetadataReference> GetGlobalReferences()
+        {
+            var returnList = new List<MetadataReference>();
+
+            //The location of the .NET assemblies
+            var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+
+            /* 
+                * Adding some necessary .NET assemblies
+                * These assemblies couldn't be loaded correctly via the same construction as above,
+                * in specific the System.Runtime.
+                */
+            returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")));
+            returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")));
+            returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
+            returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
+
+            return returnList;
         }
     }
 }

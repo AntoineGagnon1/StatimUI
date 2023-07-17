@@ -41,7 +41,7 @@ namespace StatimUI
             if (!node.Modifiers.ToString().Contains("public"))
                 return node;
 
-            TypeSyntax variablePropertyType = SyntaxFactory.IdentifierName($"VariableProperty<{node.Declaration.Type}>");
+            TypeSyntax variablePropertyType = SyntaxFactory.IdentifierName($"ValueProperty<{node.Declaration.Type}>");
             var variables = new List<VariableDeclaratorSyntax>();
 
             foreach (var variable in node.Declaration.Variables)

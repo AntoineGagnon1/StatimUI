@@ -3,5 +3,5 @@
 	int allo = 123;
 </script>
 
-<text Content="{bind Content}"></text>
+<TextComponent Content="{bind Content}"></TextComponent>
 

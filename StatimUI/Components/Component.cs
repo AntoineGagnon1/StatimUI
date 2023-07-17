@@ -29,8 +29,8 @@ namespace StatimUI
 
         public void InitValueProperty(string name, object value)
         {
-            var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
-            var field = instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
+            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
             // TODO: might wanna throw
             if (property == null && field == null)
@@ -38,26 +38,22 @@ namespace StatimUI
 
             Type genericType = property?.PropertyType?.GenericTypeArguments[0] ?? field!.FieldType.GenericTypeArguments[0];
 
-            var type = typeof(VariableProperty<>).MakeGenericType(genericType);
+            var type = typeof(ValueProperty<>).MakeGenericType(genericType);
             var variableProperty = Activator.CreateInstance(type) as Property;
             if (variableProperty == null)
                 throw new Exception("Todo");
 
             variableProperty.SetValue(value);
             if (property != null)
-                property.SetValue(instance, variableProperty);
+                property.SetValue(this, variableProperty);
             else if (field != null)
-                field.SetValue(instance, variableProperty);
-        }
-        public virtual void InitVariableProperty(string name, object value)
-        {
-            InitVariableProperty(this, name, value);
+                field.SetValue(this, variableProperty);
         }
 
         public void InitBindingProperty(string name, Binding binding)
         {
-            var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
-            var field = instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
+            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
             // TODO: might wanna throw
             if (property == null && field == null)
@@ -71,13 +67,9 @@ namespace StatimUI
                 ?.Invoke(null, new object[] { binding });
 
             if (property != null)
-                property.SetValue(instance, value);
+                property.SetValue(this, value);
             else if (field != null)
-                field.SetValue(instance, value);
-        }
-        public virtual void InitBindingProperty(string name, Binding binding)
-        {
-            InitBindingProperty(this, name, binding);
+                field.SetValue(this, value);
         }
 
 

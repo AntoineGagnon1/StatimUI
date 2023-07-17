@@ -20,7 +20,10 @@ namespace StatimUI
         {
             var preParse = XMLPreParse(stream);
 
-            return CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
+            var tree = CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
+            var visiter = new PropertySyntaxRewriter();
+            var newRoot = visiter.Visit(tree.GetRoot());
+            return CSharpSyntaxTree.Create(newRoot as CSharpSyntaxNode);
         }
 
         private record struct PreParseResult(string Script, string Child) { }
@@ -86,6 +89,7 @@ namespace StatimUI
             }
 
             return @$"
+            using System;
             using StatimUI;
             using StatimUIXmlComponents;
             namespace StatimUIXmlComponents
