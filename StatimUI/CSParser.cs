@@ -24,14 +24,14 @@ namespace StatimUI
                 foreach (var variable in field.Declaration.Variables)
                 {
                     if (variable.Identifier.Text == variableName && field.Declaration.Type is GenericNameSyntax genericType)
-                        return field.Declaration.Type.ToString();
+                        return genericType.ToString();
                 }
             }
 
             foreach (var property in properties)
             {
-                if (property.Identifier.Text == variableName)
-                    return property.Type.ToString();
+                if (property.Identifier.Text == variableName && property.Type is GenericNameSyntax genericType)
+                    return genericType.ToString();
             }
 
             return null;

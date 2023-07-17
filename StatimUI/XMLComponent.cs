@@ -153,9 +153,9 @@ namespace StatimUI
                         string? childName = data.XmlElement.Name.LocalName;
                         string? variableType = null;
                         if (components.TryGetValue(childName, out var value))
-                            variableType = value.ScriptTree!.FindVariableType(variableName);
+                            variableType = value.ScriptTree!.FindVariableType(attr.Name.LocalName);
                         else
-                            variableType = ComponentByName[childName].FindVariableType(variableName);
+                            variableType = ComponentByName[childName].FindVariableType(attr.Name.LocalName);
 
                         if (variableType == null)
                             throw new Exception("Couldn't find variable type");
