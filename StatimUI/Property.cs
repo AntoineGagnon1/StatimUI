@@ -54,15 +54,15 @@ namespace StatimUI
         }
     }
 
-    public class VariableProperty<T> : Property<T>
+    public class ValueProperty<T> : Property<T>
     {
 
-        public VariableProperty(T value)
+        public ValueProperty(T value)
         {
             _value = value;
         }
 
-        public VariableProperty()
+        public ValueProperty()
         {
             // TODO: Could crash if class
             _value = default(T);

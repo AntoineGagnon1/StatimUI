@@ -61,7 +61,7 @@ namespace StatimUI
             }
             else
             {
-                component.InitVariableProperty(name, value);
+                component.InitValueProperty(name, value);
             }
         }
 

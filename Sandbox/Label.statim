@@ -1,5 +1,5 @@
 ﻿<script>
-	public StatimUI.Property&lt;string&gt; Content { get; set; } = new StatimUI.VariableProperty&lt;string&gt;(&quot;bbb&quot;);
+	public StatimUI.Property<string> Content { get; set; } = new StatimUI.VariableProperty<string>("bbb");
 </script>
 
 <text Content="{bind Content.Value}"/>

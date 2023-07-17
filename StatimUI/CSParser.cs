@@ -53,17 +53,5 @@ namespace StatimUI
 
             return null;
         }
-
-        public static string CreateClassString(string name, string content)
-        {
-            return @$"
-            namespace StatimUIXmlComponents
-            {{ 
-                public partial class {name}
-                {{
-                    {content}
-                }}
-            }}";
-        }
     }
 }

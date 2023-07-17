@@ -27,29 +27,25 @@ namespace StatimUI
 
         private Dictionary<string, Property> namedProperties = new();
 
-        protected static void InitVariableProperty(object instance, string name, object value)
+        public void InitValueProperty(string name, object value)
         {
-            var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
 
             if (property is null)
                 return;
 
-            var type = typeof(VariableProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
+            var type = typeof(ValueProperty<>).MakeGenericType(property.PropertyType.GenericTypeArguments[0]);
             var variableProperty = Activator.CreateInstance(type) as Property;
             if (variableProperty == null)
                 throw new Exception("Todo");
 
             variableProperty.SetValue(value);
-            property.SetValue(instance, variableProperty);
-        }
-        public virtual void InitVariableProperty(string name, object value)
-        {
-            InitVariableProperty(this, name, value);
+            property.SetValue(this, variableProperty);
         }
 
-        protected static void InitBindingProperty(object instance, string name, Binding binding)
+        public void InitBindingProperty(string name, Binding binding)
         {
-            var property = instance.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
 
             if (property is null)
                 return;
@@ -59,11 +55,7 @@ namespace StatimUI
                 .GetMethod("FromBinding", BindingFlags.Static | BindingFlags.Public)
                 ?.Invoke(null, new object[] { binding });
 
-            property.SetValue(instance, value);
-        }
-        public virtual void InitBindingProperty(string name, Binding binding)
-        {
-            InitBindingProperty(this, name, binding);
+            property.SetValue(this, value);
         }
 
 

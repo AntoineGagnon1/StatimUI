@@ -32,25 +32,25 @@ namespace StatimUI
             Child?.Update();
         }
 
-        public override void InitBindingProperty(string name, Binding binding)
-        {
-            base.InitBindingProperty(name, binding);
+        //public override void InitBindingProperty(string name, Binding binding)
+        //{
+        //    base.InitBindingProperty(name, binding);
 
-            if (ClassInstance == null)
-                return;
+        //    if (ClassInstance == null)
+        //        return;
 
-            InitBindingProperty(ClassInstance, name, binding);
-        }
+        //    InitBindingProperty(ClassInstance, name, binding);
+        //}
 
-        public override void InitVariableProperty(string name, object value)
-        {
-            base.InitVariableProperty(name, value);
+        //public override void InitVariableProperty(string name, object value)
+        //{
+        //    base.InitVariableProperty(name, value);
 
-            if (ClassInstance == null)
-                return;
+        //    if (ClassInstance == null)
+        //        return;
 
-            InitVariableProperty(ClassInstance, name, value);
-        }
+        //    InitVariableProperty(ClassInstance, name, value);
+        //}
 
         private XMLComponent(XmlClassTemplate template)
         {
@@ -174,8 +174,8 @@ namespace StatimUI
 
                 if (data.Bindings.Count > 0)
                 {
-                    var tagsTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(name, tagsCode.ToString()));
-                    return tagsTree;
+                    //var tagsTree = CSharpSyntaxTree.ParseText(CSParser.CreateClassString(name, tagsCode.ToString()));
+                    //return tagsTree;
                 }
             }
             return null;
