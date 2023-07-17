@@ -52,7 +52,7 @@ namespace StatimUI
             }
             return result;
         }
-
+        
         private static void InitAttribute(XMLComponent self, Component component, string name, string value)
         {
             if (IsBinding(value))
