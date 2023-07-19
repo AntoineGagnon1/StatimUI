@@ -11,6 +11,7 @@ namespace StatimUI
 {
     internal class PropertySyntaxRewriter : CSharpSyntaxRewriter
     {
+        public HashSet<string> PropertyNames = new();
         /*public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
             if (!node.Modifiers.ToString().Contains("public"))
@@ -37,15 +38,16 @@ namespace StatimUI
 
         public override SyntaxNode? VisitFieldDeclaration(FieldDeclarationSyntax node)
         {
-            // TODO: this is a hack
-            if (!node.Modifiers.ToString().Contains("public"))
+            if (!node.Modifiers.Any(modif => modif.Text == "public"))
                 return node;
 
-            TypeSyntax variablePropertyType = SyntaxFactory.IdentifierName($"ValueProperty<{node.Declaration.Type}>");
+            TypeSyntax variablePropertyType = SyntaxFactory.IdentifierName($"StatimUI.ValueProperty<{node.Declaration.Type}>");
             var variables = new List<VariableDeclaratorSyntax>();
 
             foreach (var variable in node.Declaration.Variables)
             {
+                PropertyNames.Add(variable.Identifier.Text);
+
                 if (variable.Initializer != null)
                 {
                     var arguments = new List<ArgumentSyntax>()
@@ -64,7 +66,12 @@ namespace StatimUI
             }
 
             var variablesSeparated = SyntaxFactory.SeparatedList(variables);
-            return node.WithDeclaration(node.Declaration.WithType(SyntaxFactory.IdentifierName($"Property<{node.Declaration.Type}>")).WithVariables(variablesSeparated));
+            return node.WithDeclaration(node.Declaration.WithType(SyntaxFactory.IdentifierName($"StatimUI.Property<{node.Declaration.Type}>")).WithVariables(variablesSeparated));
+        }
+
+        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            return base.VisitIdentifierName(node);
         }
     }
 }

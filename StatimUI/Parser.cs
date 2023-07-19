@@ -21,8 +21,11 @@ namespace StatimUI
             var preParse = XMLPreParse(stream);
 
             var tree = CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
-            var visiter = new PropertySyntaxRewriter();
-            var newRoot = visiter.Visit(tree.GetRoot());
+            var root = tree.GetRoot();
+            var propertyRewriter = new PropertySyntaxRewriter();
+            var newRoot = propertyRewriter.Visit(tree.GetRoot());
+            var dotValueRewriter = new DotValueSyntaxRewriter(propertyRewriter.PropertyNames);
+            newRoot = dotValueRewriter.Visit(newRoot);
             return CSharpSyntaxTree.Create(newRoot as CSharpSyntaxNode);
         }
 
@@ -80,11 +83,11 @@ namespace StatimUI
                 foreach ((string Name, string Value, BindingType Type) in childInfo?.Bindings)
                 {
                     if (Type == BindingType.Value)
-                        constructorContent.AppendLine($"Child.InitValueProperty({Name}, {Value});");
+                        constructorContent.AppendLine($"Child.InitValueProperty(\"{Name}\", {Value});");
                     else if (Type == BindingType.OneWay)
-                        constructorContent.AppendLine($"Child.InitBindingProperty({Name}, new Binding(() => {Value}));");
+                        constructorContent.AppendLine($"Child.InitBindingProperty(\"{Name}\", new Binding(() => {Value}));");
                     else
-                        constructorContent.AppendLine($"Child.InitBindingProperty({Name}, new Binding(() => {Value}, (dynamic value) => {{{Name} = {Value};}}));");
+                        constructorContent.AppendLine($"Child.InitBindingProperty(\"{Name}\", new Binding(() => {Value}, (dynamic value) => {{{Name} = value;}}));");
                 }
             }
 

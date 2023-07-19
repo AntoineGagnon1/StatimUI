@@ -19,6 +19,8 @@ namespace StatimUI
 
         public static void LoadEmbedded()
         {
+            string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            Console.WriteLine(assemblyFolder);
             List<SyntaxTree> trees = new List<SyntaxTree>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
@@ -66,7 +68,7 @@ namespace StatimUI
                 .AddReferences(
                     MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(Property).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Statim).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)
                 ).AddReferences(GetGlobalReferences()).Emit(dllStream, pdbStream);
 
