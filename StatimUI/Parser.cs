@@ -11,6 +11,8 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Data;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StatimUI.Components;
 
 namespace StatimUI
 {
@@ -21,14 +23,67 @@ namespace StatimUI
             var preParse = XMLPreParse(stream);
 
             var tree = CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
-            var root = tree.GetRoot();
-            var propertyRewriter = new PropertySyntaxRewriter();
-            var newRoot = propertyRewriter.Visit(tree.GetRoot());
-            var dotValueRewriter = new DotValueSyntaxRewriter(propertyRewriter.PropertyNames);
-            newRoot = dotValueRewriter.Visit(newRoot);
-            return CSharpSyntaxTree.Create(newRoot as CSharpSyntaxNode);
+            return AddProperties(tree);
         }
 
+        private static SyntaxTree AddProperties(SyntaxTree tree)
+        {
+            var root = tree.GetRoot();
+            var classRoot = root
+                .ChildNodes().OfType<NamespaceDeclarationSyntax>().Single()
+                .ChildNodes().OfType<ClassDeclarationSyntax>().Single();
+
+            HashSet<string> propertyNames = new();
+            SyntaxNode newClassRoot = classRoot.ReplaceNodes(classRoot.ChildNodes(), (node, n2) =>
+            {
+                if (node is FieldDeclarationSyntax field)
+                {
+                    var oldNode = node;
+                    if (!field.Modifiers.Any(modif => modif.Text == "public"))
+                        return node;
+
+                    TypeSyntax variablePropertyType = CreateGenericType("ValueProperty", field.Declaration.Type.ToString());
+                    var variables = new List<VariableDeclaratorSyntax>();
+
+                    foreach (var variable in field.Declaration.Variables)
+                    {
+                        propertyNames.Add(variable.Identifier.Text);
+
+                        if (variable.Initializer != null)
+                        {
+                            var arguments = new List<ArgumentSyntax>()
+                            {
+                                SyntaxFactory.Argument(variable.Initializer.Value)
+                            };
+
+                            var argumentsSeparated = SyntaxFactory.SeparatedList(arguments);
+                            var objectCreationExpression = SyntaxFactory.ObjectCreationExpression(variablePropertyType, SyntaxFactory.ArgumentList(argumentsSeparated), null);
+                            var equalsValueClause = SyntaxFactory.EqualsValueClause(objectCreationExpression);
+
+                            variables.Add(variable.WithInitializer(equalsValueClause).NormalizeWhitespace());
+                        }
+                        else
+                            variables.Add(variable);
+                    }
+
+                    var variablesSeparated = SyntaxFactory.SeparatedList(variables);
+                    var newNode = field.WithDeclaration(
+                        field.Declaration.WithType(
+                            CreateGenericType("Property", field.Declaration.Type.ToString())
+                        ).WithVariables(variablesSeparated));
+                    return newNode;
+                }
+
+                return node;
+            });
+            var dotValueRewriter = new DotValueSyntaxRewriter(propertyNames);
+            newClassRoot = dotValueRewriter.Visit(newClassRoot);
+
+            return CSharpSyntaxTree.Create(root.ReplaceNode(classRoot, newClassRoot) as CSharpSyntaxNode);
+        }
+
+        private static GenericNameSyntax CreateGenericType(string name, string genericType)
+            => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { SyntaxFactory.IdentifierName(genericType) })));
         private record struct PreParseResult(string Script, string Child) { }
         private static PreParseResult XMLPreParse(Stream stream)
         {
@@ -71,30 +126,22 @@ namespace StatimUI
 
         private static string CreateClassString(string name, string content, string childXML)
         {
-            ChildInfo? childInfo = ParseChildXML(childXML);
-
             StringBuilder constructorContent = new();
-
-            if (childInfo != null)
+            if (!string.IsNullOrWhiteSpace(childXML))
             {
-                constructorContent.AppendLine($"Child = new {childInfo?.Name}();");
+                XElement element = XElement.Parse(childXML);
 
-                // Bindings
-                foreach ((string Name, string Value, BindingType Type) in childInfo?.Bindings)
-                {
-                    if (Type == BindingType.Value)
-                        constructorContent.AppendLine($"Child.InitValueProperty(\"{Name}\", {Value});");
-                    else if (Type == BindingType.OneWay)
-                        constructorContent.AppendLine($"Child.InitBindingProperty(\"{Name}\", new Binding(() => {Value}));");
-                    else
-                        constructorContent.AppendLine($"Child.InitBindingProperty(\"{Name}\", new Binding(() => {Value}, (dynamic value) => {{{Name} = value;}}));");
-                }
+                InitComponent(constructorContent, element, "__child");
+
+                constructorContent.AppendLine("Child = __child;");
             }
 
             return @$"
+            using System.Linq;
             using System;
             using StatimUI;
-            using StatimUIXmlComponents;
+            using StatimUI.Components;
+
             namespace StatimUIXmlComponents
             {{ 
 
@@ -114,6 +161,60 @@ namespace StatimUI
             }}";
         }
 
+        private static void InitComponent(StringBuilder content, XElement element, string variableName)
+        {
+            content.AppendLine($"var {variableName} = new {GetComponentName(element.Name.LocalName)}();");
+
+            // Bindings
+            foreach (var attribute in element.Attributes())
+            {
+                InitProperty(content, variableName, attribute.Name.LocalName, attribute.Value);
+            }
+
+            if (element.HasElements)
+            {
+                int i = 0;
+                List<string> childNames = new();
+                foreach (var child in element.Elements())
+                {
+                    var childName = $"{variableName}_{i}";
+                    childNames.Add(childName);
+                    InitComponent(content, child, $"{variableName}_{i}");
+                    i++;
+                }
+                content.AppendLine($"{variableName}.InitValueProperty(\"Content\", new Component[] {{ {string.Join(',', childNames)} }});");
+            }
+            else if (!string.IsNullOrWhiteSpace(element.Value))
+            {
+                InitProperty(content, variableName, "Content", element.Value);
+            }
+        }
+
+        private static void InitProperty(StringBuilder content, string variableName, string name, string value)
+        {
+            var bindingValue = GetBindingContent(value);
+            if (IsTwoWayBinding(value))
+            {
+                content.AppendLine($"{variableName}.InitBindingProperty(\"{name}\", new Binding(() => {bindingValue}, (dynamic value) => {{{name} = value;}}));");
+            }
+            else if (IsBinding(value))
+            {
+                content.AppendLine($"{variableName}.InitBindingProperty(\"{name}\", new Binding(() => {bindingValue}));");
+            }
+            else
+            {
+                content.AppendLine($"{variableName}.InitValueProperty(\"{name}\", \"{bindingValue}\");");
+            }
+        }
+
+        private static string GetComponentName(string typeName)
+        {
+            if (Component.ComponentByName.TryGetValue(typeName, out var type))
+                return type.Name;
+
+            return typeName;
+        }
+
         private enum BindingType { OneWay, TwoWay, Value }
         private record struct ChildInfo(string Name, List<(string Name, string Value, BindingType Type)> Bindings) { }
         private static ChildInfo? ParseChildXML(string xml)
@@ -122,6 +223,14 @@ namespace StatimUI
                 return null;
 
             var node = XElement.Parse(xml);
+
+            if (node.HasElements)
+            {
+                foreach (var element in node.Elements())
+                {
+
+                }
+            }
 
             List<(string, string, BindingType)> bindings = new();
             foreach (var attr in node.Attributes())

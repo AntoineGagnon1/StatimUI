@@ -10,12 +10,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.IO;
+using StatimUI.Components;
 
 namespace StatimUI
 {
     public static class Statim
     {
         public const string FileExtension = ".statim";
+
+        public static Assembly xmlAssembly;
 
         public static void LoadEmbedded()
         {
@@ -40,26 +43,27 @@ namespace StatimUI
                 }
             }
 
+            foreach (var tree in trees)
+                Console.WriteLine(tree);
             Compile(trees);
         }
 
         public static Component? CreateComponent(string name)
         {
-            // TODO : Cache ?
-            foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            if (!Component.ComponentByName.TryGetValue(name, out var type))
             {
-                var type = assembly.GetType(name);
-                if (type != null)
-                {
-                    return (Component)Activator.CreateInstance(type);
-                }
+                type = xmlAssembly.GetType("StatimUIXmlComponents." + name);
             }
 
-            return null;
+            if (type == null)
+                return null;
+            else
+                return (Component)Activator.CreateInstance(type);
         }
 
         private static void Compile(List<SyntaxTree> trees)
         {
+            Console.WriteLine(MetadataReference.CreateFromFile(typeof(Statim).Assembly.Location));
             using MemoryStream dllStream = new MemoryStream();
             using MemoryStream pdbStream = new MemoryStream();
             Stopwatch watch = Stopwatch.StartNew();
@@ -67,8 +71,9 @@ namespace StatimUI
                 .AddSyntaxTrees(trees)
                 .AddReferences(
                     MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    //MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(Statim).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)
                 ).AddReferences(GetGlobalReferences()).Emit(dllStream, pdbStream);
 
@@ -81,7 +86,7 @@ namespace StatimUI
             }
 
             // TODO : check res for errors
-            var assembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
+            xmlAssembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
         }
 
         private static IEnumerable<MetadataReference> GetGlobalReferences()

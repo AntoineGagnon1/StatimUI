@@ -1,7 +1,6 @@
 ﻿<script>
-	public string Content, AAA = "a";
-	int allo = 123;
+	public string Text = "aaaa";
 </script>
 
-<TextComponent Content="{bind Content}"></TextComponent>
+<text>{Text}</text>
 

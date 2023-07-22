@@ -17,7 +17,8 @@ namespace StatimUI
         [MemberNotNullWhen(returnValue: true, nameof(Setter))]
         public bool IsTwoWay => Setter != null;
 
-        public Binding(Func<object> get, Action<object>? set)
+
+        public Binding(Func<object> get, Action<object>? set = null)
         {
             Getter = get;
             Setter = set;

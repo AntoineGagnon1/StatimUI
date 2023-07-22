@@ -1,5 +1,12 @@
 ﻿<script>
+	
 </script>
 
-<Label></Label>
+<vertical>
+	<vertical>
+		<Label Text="a"/>
+		<Label Text="b"/>
+	</vertical>
+	<Label/>
+</vertical>
 

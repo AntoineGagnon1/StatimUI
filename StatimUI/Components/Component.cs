@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using StatimUI.Components;
 
 namespace StatimUI
 {
@@ -25,10 +26,9 @@ namespace StatimUI
 
         public bool HasChanged { get; protected set; }
 
-        private Dictionary<string, Property> namedProperties = new();
-
         public void InitValueProperty(string name, object value)
         {
+            var a = GetType();
             var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
             var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
@@ -76,11 +76,6 @@ namespace StatimUI
         protected void OnValueChanged<T>(T value)
         {
             HasChanged = true;
-        }
-
-        public Component()
-        {
-            //Width.ValueChanged += OnValueChanged;
         }
 
         public static Dictionary<string, Type> ComponentByName { get; private set; } = new();

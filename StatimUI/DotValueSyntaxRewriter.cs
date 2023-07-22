@@ -12,26 +12,48 @@ namespace StatimUI
     internal class DotValueSyntaxRewriter : CSharpSyntaxRewriter
     {
         public HashSet<string> PropertyNames;
-        private Property<string> Property;
 
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
         {
             if (!PropertyNames.Contains(node.Identifier.Text) || node.Parent == null)
                 return node;
-            var a = new String(String.Empty);
-            Type type = node.Parent.GetType();
 
-            if (IsForbiddenParent(type))
+            if (HasForbiddenParent(node))
                 return node;
 
             return SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node, SyntaxFactory.IdentifierName("Value"));
         }
 
-        private static bool IsForbiddenParent(Type type)
+        private static bool HasForbiddenParent(IdentifierNameSyntax node)
         {
-            return type.IsSubclassOf(typeof(TypeSyntax)) || type.IsSubclassOf(typeof(BaseTypeSyntax)) ||
-                   type.IsSubclassOf(typeof(BaseTypeDeclarationSyntax)) || type == typeof(TypeOfExpressionSyntax) ||
-                   type == typeof(MethodDeclarationSyntax) || type == typeof(ObjectCreationExpressionSyntax);
+            var parent = node.Parent;
+            Type type = parent.GetType();
+
+            if (parent is MemberAccessExpressionSyntax memberAccess)
+            {
+                return !IsFirstInMemberAccess(memberAccess, node);
+            }
+            else
+            {
+                return type.IsSubclassOf(typeof(TypeSyntax)) || type.IsSubclassOf(typeof(BaseTypeSyntax)) ||
+                       type.IsSubclassOf(typeof(BaseTypeDeclarationSyntax)) || type == typeof(TypeOfExpressionSyntax) ||
+                       type == typeof(MethodDeclarationSyntax) || type == typeof(ObjectCreationExpressionSyntax);
+
+            }
+        }
+
+        private static bool IsFirstInMemberAccess(MemberAccessExpressionSyntax parent, SyntaxNode node)
+        {
+            var children = parent.ChildNodes().ToList();
+            if (node == children[0])
+            {
+                if (parent.Parent is MemberAccessExpressionSyntax memberAccess)
+                    return IsFirstInMemberAccess(memberAccess, parent);
+
+                return true;
+            }
+
+            return false;
         }
 
         public DotValueSyntaxRewriter(HashSet<string> propertyNames)
