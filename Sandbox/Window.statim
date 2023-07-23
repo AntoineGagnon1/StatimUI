@@ -1,12 +1,8 @@
 ﻿<script>
-	
+	string b = "fiawjfaiowf";
 </script>
 
 <vertical>
-	<vertical>
-		<Label Text="a"/>
-		<Label Text="b"/>
-	</vertical>
-	<Label/>
+	<Label />
+	<Label a="{b}"/>
 </vertical>
-

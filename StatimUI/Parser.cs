@@ -42,7 +42,7 @@ namespace StatimUI
                     if (!field.Modifiers.Any(modif => modif.Text == "public"))
                         return node;
 
-                    TypeSyntax variablePropertyType = CreateGenericType("ValueProperty", field.Declaration.Type.ToString());
+                    TypeSyntax variablePropertyType = CreateGenericType("ValueProperty", field.Declaration.Type);
                     var variables = new List<VariableDeclaratorSyntax>();
 
                     foreach (var variable in field.Declaration.Variables)
@@ -69,7 +69,7 @@ namespace StatimUI
                     var variablesSeparated = SyntaxFactory.SeparatedList(variables);
                     var newNode = field.WithDeclaration(
                         field.Declaration.WithType(
-                            CreateGenericType("Property", field.Declaration.Type.ToString())
+                            CreateGenericType("Property", field.Declaration.Type)
                         ).WithVariables(variablesSeparated));
                     return newNode;
                 }
@@ -82,8 +82,8 @@ namespace StatimUI
             return CSharpSyntaxTree.Create(root.ReplaceNode(classRoot, newClassRoot) as CSharpSyntaxNode);
         }
 
-        private static GenericNameSyntax CreateGenericType(string name, string genericType)
-            => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { SyntaxFactory.IdentifierName(genericType) })));
+        private static GenericNameSyntax CreateGenericType(string name, TypeSyntax genericType)
+            => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { genericType })));
         private record struct PreParseResult(string Script, string Child) { }
         private static PreParseResult XMLPreParse(Stream stream)
         {

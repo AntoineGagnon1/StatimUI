@@ -1,6 +1,6 @@
 ﻿<script>
-	public string Text = "aaaa";
+	public string a = "default";
 </script>
 
-<text>{Text}</text>
+<text>{a}</text>
 
