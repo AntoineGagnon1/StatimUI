@@ -137,6 +137,8 @@ namespace StatimUI
             }
 
             return @$"
+            using System.Collections.Generic;
+            using System.Collections;
             using System.Linq;
             using System;
             using StatimUI;
@@ -151,7 +153,7 @@ namespace StatimUI
 
                     public override void Update() => Child?.Update();
                     
-                    public {name}()
+                    public {name}(List<Component> slots)
                     {{
                         {constructorContent}
                     }}
@@ -163,18 +165,10 @@ namespace StatimUI
 
         private static void InitComponent(StringBuilder content, XElement element, string variableName)
         {
-            content.AppendLine($"var {variableName} = new {GetComponentName(element.Name.LocalName)}();");
-
-            // Bindings
-            foreach (var attribute in element.Attributes())
-            {
-                InitProperty(content, variableName, attribute.Name.LocalName, attribute.Value);
-            }
-
+            List<string> childNames = new();
             if (element.HasElements)
             {
                 int i = 0;
-                List<string> childNames = new();
                 foreach (var child in element.Elements())
                 {
                     var childName = $"{variableName}_{i}";
@@ -182,12 +176,17 @@ namespace StatimUI
                     InitComponent(content, child, $"{variableName}_{i}");
                     i++;
                 }
-                content.AppendLine($"{variableName}.InitValueProperty(\"Content\", new Component[] {{ {string.Join(',', childNames)} }});");
             }
-            else if (!string.IsNullOrWhiteSpace(element.Value))
+
+            var slots = $"new List<Component>() {{ {string.Join(',', childNames)} }}";
+            content.AppendLine($"Component {variableName} = new {GetComponentName(element.Name.LocalName)}({slots});");
+
+            // Bindings
+            foreach (var attribute in element.Attributes())
             {
-                InitProperty(content, variableName, "Content", element.Value);
+                InitProperty(content, variableName, attribute.Name.LocalName, attribute.Value);
             }
+
         }
 
         private static void InitProperty(StringBuilder content, string variableName, string name, string value)

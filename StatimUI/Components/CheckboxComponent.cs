@@ -9,7 +9,10 @@ namespace StatimUI.Components
     [Component("checkbox")]
     public class CheckboxComponent : Component
     {
-        public Property<bool> Content;
+        public Property<bool> Content = new ValueProperty<bool>(false);
+
+        public CheckboxComponent(List<Component> slots)
+        { }
 
         override public void Update()
         {

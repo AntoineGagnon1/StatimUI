@@ -14,6 +14,8 @@ namespace StatimUI
 {
     public abstract class Component
     {
+        public List<Component> Children = new List<Component>();
+
         public Property<float> Width { get; set; }
         public bool IsWidthFixed { get; set; }
 

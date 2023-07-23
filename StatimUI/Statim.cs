@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.IO;
 using StatimUI.Components;
+using System.Collections;
 
 namespace StatimUI
 {
@@ -58,7 +59,7 @@ namespace StatimUI
             if (type == null)
                 return null;
             else
-                return (Component)Activator.CreateInstance(type);
+                return type.GetConstructor(new[] { typeof(List<Component>) })?.Invoke(new[] { new List<Component>() }) as Component;
         }
 
         private static void Compile(List<SyntaxTree> trees)
@@ -71,12 +72,12 @@ namespace StatimUI
                 .AddSyntaxTrees(trees)
                 .AddReferences(
                     MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
-                    //MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(List<>).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(IList).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(Statim).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)
                 ).AddReferences(GetGlobalReferences()).Emit(dllStream, pdbStream);
-
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds);
 
@@ -105,6 +106,7 @@ namespace StatimUI
             returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")));
             returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")));
             returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
+            returnList.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Collections.dll")));
 
             return returnList;
         }

@@ -10,6 +10,11 @@ namespace StatimUI.Components
     public class TextInputComponent : Component
     {
         public Property<string> Content;
+        
+        public TextInputComponent(List<Component> components)
+        {
+
+        }
 
         override public void Update()
         {

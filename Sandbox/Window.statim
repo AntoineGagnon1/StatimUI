@@ -5,4 +5,5 @@
 <vertical>
 	<Label />
 	<Label a="{b}"/>
+	<checkbox/>
 </vertical>

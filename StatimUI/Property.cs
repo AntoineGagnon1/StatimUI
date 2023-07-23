@@ -35,10 +35,8 @@ namespace StatimUI
                     value => binding.Setter(value)
                 );
             }
-            else
-            {
-                return new OneWayProperty<T>(() => (T)binding.Getter());
-            }
+
+            return new OneWayProperty<T>(() => (T)binding.Getter());
         }
 
 

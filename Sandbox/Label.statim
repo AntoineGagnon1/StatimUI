@@ -2,5 +2,5 @@
 	public string a = "default";
 </script>
 
-<text>{a}</text>
+<text Content="{a}"></text>
 

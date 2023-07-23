@@ -11,6 +11,11 @@ namespace StatimUI.Components
     {
         public Property<string> Content;
 
+        public TextComponent(List<Component> slots)
+        {
+
+        }
+
         override public void Update()
         {
             if ((new Random()).NextDouble() > 0.995d)

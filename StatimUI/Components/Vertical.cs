@@ -10,13 +10,16 @@ namespace StatimUI.Components
     [Component("vertical")]
     public class Vertical : Component
     {
-        public Property<Component[]> Content;
+        public Vertical(List<Component> slots)
+        {
+            Children = slots;
+        }
 
         public override void Update()
         {
-            foreach (var component in Content.Value)
+            foreach (var child in Children)
             {
-                component.Update();
+                child.Update();
                 ImGui.NewLine();
             }
         }
