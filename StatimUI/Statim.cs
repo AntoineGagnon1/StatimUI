@@ -23,8 +23,7 @@ namespace StatimUI
 
         public static void LoadEmbedded()
         {
-            string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Console.WriteLine(assemblyFolder);
+            string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
             List<SyntaxTree> trees = new List<SyntaxTree>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
@@ -90,7 +89,6 @@ namespace StatimUI
                 Console.WriteLine(error);
             }
 
-            // TODO : check res for errors
             xmlAssembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
         }
 

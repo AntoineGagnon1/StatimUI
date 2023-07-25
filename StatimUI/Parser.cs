@@ -73,7 +73,7 @@ namespace StatimUI
             var dotValueRewriter = new DotValueSyntaxRewriter(propertyNames);
             newClassRoot = dotValueRewriter.Visit(newClassRoot);
 
-            return CSharpSyntaxTree.Create(root.ReplaceNode(classRoot, newClassRoot) as CSharpSyntaxNode);
+            return CSharpSyntaxTree.Create((CSharpSyntaxNode)root.ReplaceNode(classRoot, newClassRoot));
         }
         private static GenericNameSyntax CreateGenericType(string name, TypeSyntax genericType)
             => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { genericType })));
@@ -197,7 +197,7 @@ namespace StatimUIXmlComponents
 
             content.AppendLine($"ForEach {variableName} = new {GetComponentName(element.Name.LocalName)}();");
 
-            var itemName = GetBindingContent(element.Attribute("item").Value);
+            var itemName = GetBindingContent(element.Attribute("item")!.Value);
             foreachContent.AppendLineNoIndent($"Func<object, List<Component>> {variableName}_foreach = ({itemName}) => {{");
             foreachContent.Indent();
 
@@ -225,7 +225,7 @@ namespace StatimUIXmlComponents
             foreachContent.AppendLine("};");
 
             var inAttribute = element.Attribute("in");
-            InitProperty(content, variableName, inAttribute.Name.LocalName, inAttribute.Value);
+            InitProperty(content, variableName, inAttribute!.Name.LocalName, inAttribute.Value);
 
             foreachContent.AppendLine($"{variableName}.Start(new List<Component> {{ }});");
             foreachContent.AppendLine($"{variableName}.ComponentsCreator = {variableName}_foreach;");

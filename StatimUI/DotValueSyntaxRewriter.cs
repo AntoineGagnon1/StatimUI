@@ -27,7 +27,7 @@ namespace StatimUI
         private static bool HasForbiddenParent(IdentifierNameSyntax node)
         {
             var parent = node.Parent;
-            Type type = parent.GetType();
+            Type type = parent!.GetType();
 
             if (parent is MemberAccessExpressionSyntax memberAccess)
             {

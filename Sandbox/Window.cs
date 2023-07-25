@@ -55,20 +55,16 @@ namespace Sandbox
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
 
+            var watch = Stopwatch.StartNew();
             if (ImGui.Begin("fwfwafawfwafafaw"))
             {
-                var watch = Stopwatch.StartNew();
-                //window.Update();
-                foreach (var item in items)
-                {
-                    ImGui.Text(item);
-                }
-                watch.Stop();
-                Console.WriteLine(watch.ElapsedTicks);
+                window.Update();
             }
             ImGui.End();
 
             _controller.Render();
+            Console.WriteLine(watch.ElapsedTicks);
+            watch.Stop();
 
             ImGuiController.CheckGLError("End of frame");
 

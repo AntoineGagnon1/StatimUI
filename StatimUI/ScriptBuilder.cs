@@ -18,6 +18,7 @@ namespace StatimUI
 
         [Conditional("DEBUG")]
         public void Indent(int num = 1) => appendWidth += num;
+
         [Conditional("DEBUG")]
         public void Unindent(int num = 1) => appendWidth -= num;
 

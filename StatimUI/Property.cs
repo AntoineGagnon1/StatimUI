@@ -32,7 +32,7 @@ namespace StatimUI
             {
                 return new TwoWayProperty<T>(
                     () => (T)binding.Getter(),
-                    value => binding.Setter(value)
+                    value => binding.Setter(value!)
                 );
             }
 
@@ -42,13 +42,13 @@ namespace StatimUI
 
         public override void SetValue(object value)
         {
-            // TODO: WILL CRASH
             Value = (T)Convert.ChangeType(value, typeof(T));
         }
 
         public override object GetValue()
         {
-            return Value;
+            // will crash
+            return Value!;
         }
     }
 
@@ -62,8 +62,7 @@ namespace StatimUI
 
         public ValueProperty()
         {
-            // TODO: Could crash if class
-            _value = default(T);
+            _value = default!;
         }
 
         T _value;
@@ -97,7 +96,8 @@ namespace StatimUI
             get => getter();
             set
             {
-                if (Value is null || !Value.Equals(value))
+                var oldValue = Value;
+                if (oldValue is null || !oldValue.Equals(value))
                 {
                     OnValueChanged(value);
                 }
@@ -124,7 +124,7 @@ namespace StatimUI
             get
             {
                 var getterValue = getter();
-                if (!getterValue.Equals(lastGetterValue))
+                if (getterValue is not null && !getterValue.Equals(lastGetterValue))
                 {
                     lastGetterValue = getterValue;
                     _value = getterValue;

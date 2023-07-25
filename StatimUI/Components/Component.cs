@@ -38,7 +38,6 @@ namespace StatimUI
             var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
             var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
-            // TODO: might wanna throw
             if (property == null && field == null)
                 return;
 
@@ -47,7 +46,7 @@ namespace StatimUI
             var type = typeof(ValueProperty<>).MakeGenericType(genericType);
             var variableProperty = Activator.CreateInstance(type) as Property;
             if (variableProperty == null)
-                throw new Exception("Todo");
+                throw new TypeLoadException($"Could not create an instance of the type {type}");
 
             variableProperty.SetValue(value);
             if (property != null)
@@ -61,7 +60,6 @@ namespace StatimUI
             var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
             var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
-            // TODO: might wanna throw
             if (property == null && field == null)
                 return;
 
