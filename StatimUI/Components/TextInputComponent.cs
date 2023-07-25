@@ -10,10 +10,9 @@ namespace StatimUI.Components
     public class TextInputComponent : Component
     {
         public Property<string> Content;
-        
-        public TextInputComponent(List<Component> components)
-        {
 
+        public override void Start(IList<Component> slots)
+        {
         }
 
         override public void Update()

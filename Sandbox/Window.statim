@@ -1,9 +1,9 @@
 ﻿<script>
-	string b = "fiawjfaiowf";
+	List<string> items = new List<string> { "1", "2", "3", "4" };
 </script>
 
 <vertical>
-	<Label />
-	<Label a="{b}"/>
-	<checkbox/>
+	<foreach item="{item}" in="{items}">
+		<text Content="{item}"></text>
+	</foreach>
 </vertical>

@@ -11,16 +11,16 @@ namespace StatimUI.Components
     {
         public Property<string> Content;
 
-        public TextComponent(List<Component> slots)
+        public override void Start(IList<Component> slots)
         {
-
+            Console.WriteLine(Parent != null);
         }
 
         override public void Update()
         {
-            if ((new Random()).NextDouble() > 0.995d)
-                Content.Value += "a";
-            ImGuiNET.ImGui.Text(Content.Value.ToString());
+            //if ((new Random()).NextDouble() > 0.995d)
+            //    Content.Value += "a";
+            ImGuiNET.ImGui.Text(Content.Value);
         }
     }
 }

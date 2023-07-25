@@ -11,47 +11,45 @@ namespace StatimUI
     internal class ScriptBuilder
     {
         private StringBuilder builder = new StringBuilder();
-#if DEBUG
-        private int appendWidth = 0;
-#endif
+
+        private static int appendWidth = 0;
         public int Capacity => builder.Capacity;
         public int Length => builder.Length;
 
         [Conditional("DEBUG")]
         public void Indent(int num = 1) => appendWidth += num;
         [Conditional("DEBUG")]
-        public void Undent(int num = 1) => appendWidth -= num;
+        public void Unindent(int num = 1) => appendWidth -= num;
 
         [Conditional("DEBUG")]
-        private void AddIndend(ref string? str)
+        private void AddIndent(ref string? str)
         {
             if (str is null)
                 return;
 
-            string indentStr = new string('\t', appendWidth);
-            str = str.Replace("\n", "\n" + indentStr);
+            string indentStr = new string(' ', appendWidth * 4);
+            str = indentStr + str;
         }
 
 
         public void Append(string? str)
         {
-            AddIndend(ref str);
+            AddIndent(ref str);
             builder.Append(str);
         }
 
-        public void AppendLine(string? str)
+        public void AppendLine(string? str = "")
         {
-            str += "\n";
-            AddIndend(ref str);
-            builder.Append(str);
+            AddIndent(ref str);
+            builder.AppendLine(str);
         }
 
-        public void AppendLine()
+        public void AppendLineNoIndent(string? str)
         {
-            string? str = "\n";
-            AddIndend(ref str);
-            builder.Append(str);
+            builder.AppendLine(str);
         }
+
+
 
         public void Clear() => builder.Clear();
 

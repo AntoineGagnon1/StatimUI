@@ -1,6 +1,11 @@
 ﻿<script>
 	public string a = "default";
+	public int b;
 </script>
 
-<text Content="{a}"></text>
+<vertical>
+	<vertical>	
+		<text Content="{a}"></text>
+	</vertical>
+</vertical>
 

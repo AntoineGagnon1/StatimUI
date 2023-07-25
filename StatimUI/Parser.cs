@@ -23,6 +23,7 @@ namespace StatimUI
             var preParse = XMLPreParse(stream);
 
             var tree = CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
+
             return AddProperties(tree);
         }
 
@@ -49,21 +50,14 @@ namespace StatimUI
                     {
                         propertyNames.Add(variable.Identifier.Text);
 
+                        var arguments = new List<ArgumentSyntax>();
                         if (variable.Initializer != null)
-                        {
-                            var arguments = new List<ArgumentSyntax>()
-                            {
-                                SyntaxFactory.Argument(variable.Initializer.Value)
-                            };
+                            arguments.Add(SyntaxFactory.Argument(variable.Initializer.Value));
+                        var argumentsSeparated = SyntaxFactory.SeparatedList(arguments);
+                        var objectCreationExpression = SyntaxFactory.ObjectCreationExpression(variablePropertyType, SyntaxFactory.ArgumentList(argumentsSeparated), null);
+                        var equalsValueClause = SyntaxFactory.EqualsValueClause(objectCreationExpression);
 
-                            var argumentsSeparated = SyntaxFactory.SeparatedList(arguments);
-                            var objectCreationExpression = SyntaxFactory.ObjectCreationExpression(variablePropertyType, SyntaxFactory.ArgumentList(argumentsSeparated), null);
-                            var equalsValueClause = SyntaxFactory.EqualsValueClause(objectCreationExpression);
-
-                            variables.Add(variable.WithInitializer(equalsValueClause).NormalizeWhitespace());
-                        }
-                        else
-                            variables.Add(variable);
+                        variables.Add(variable.WithInitializer(equalsValueClause).NormalizeWhitespace());
                     }
 
                     var variablesSeparated = SyntaxFactory.SeparatedList(variables);
@@ -81,9 +75,9 @@ namespace StatimUI
 
             return CSharpSyntaxTree.Create(root.ReplaceNode(classRoot, newClassRoot) as CSharpSyntaxNode);
         }
-
         private static GenericNameSyntax CreateGenericType(string name, TypeSyntax genericType)
             => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { genericType })));
+
         private record struct PreParseResult(string Script, string Child) { }
         private static PreParseResult XMLPreParse(Stream stream)
         {
@@ -126,45 +120,55 @@ namespace StatimUI
 
         private static string CreateClassString(string name, string content, string childXML)
         {
-            StringBuilder constructorContent = new();
+            ScriptBuilder startContent = new();
             if (!string.IsNullOrWhiteSpace(childXML))
             {
                 XElement element = XElement.Parse(childXML);
 
-                InitComponent(constructorContent, element, "__child");
+                startContent.Indent(3);
 
-                constructorContent.AppendLine("Child = __child;");
+                var startMethods = new List<string>();
+                InitComponent(startContent, startMethods, element, "__child", "this");
+                AddStartMethods(startContent, startMethods);
+
+                startContent.AppendLine("Children.Add(__child);");
+
+                startContent.Unindent(3);
             }
 
             return @$"
-            using System.Collections.Generic;
-            using System.Collections;
-            using System.Linq;
-            using System;
-            using StatimUI;
-            using StatimUI.Components;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System;
+using StatimUI;
+using StatimUI.Components;
 
-            namespace StatimUIXmlComponents
-            {{ 
+namespace StatimUIXmlComponents
+{{ 
 
-                public class {name} : Component
-                {{
-                    public Component? Child {{ get; private set; }}
+    public class {name} : Component
+    {{
+        public override void Update() => Children[0].Update();
+        
+        public override void Start(IList<Component> slots)
+        {{
+{startContent}
+        }}
 
-                    public override void Update() => Child?.Update();
-                    
-                    public {name}(List<Component> slots)
-                    {{
-                        {constructorContent}
-                    }}
-
-                    {content}
-                }}
-            }}";
+{content}
+    }}
+}}";
         }
 
-        private static void InitComponent(StringBuilder content, XElement element, string variableName)
+        private static void InitComponent(ScriptBuilder content, List<string> startMethods, XElement element, string variableName, string parentName)
         {
+            if (element.Name.LocalName == "foreach")
+            {
+                InitForeach(content, startMethods, element, variableName, parentName);
+                return;
+            }
+
             List<string> childNames = new();
             if (element.HasElements)
             {
@@ -173,23 +177,62 @@ namespace StatimUI
                 {
                     var childName = $"{variableName}_{i}";
                     childNames.Add(childName);
-                    InitComponent(content, child, $"{variableName}_{i}");
+                    InitComponent(content, startMethods, child, $"{variableName}_{i}", variableName);
                     i++;
                 }
             }
 
-            var slots = $"new List<Component>() {{ {string.Join(',', childNames)} }}";
-            content.AppendLine($"Component {variableName} = new {GetComponentName(element.Name.LocalName)}({slots});");
+            content.AppendLine($"Component {variableName} = new {GetComponentName(element.Name.LocalName)}();");
 
-            // Bindings
             foreach (var attribute in element.Attributes())
-            {
                 InitProperty(content, variableName, attribute.Name.LocalName, attribute.Value);
-            }
 
+            startMethods.Add($"{variableName}.Start(new List<Component> {{ {string.Join(',', childNames)} }});");
         }
 
-        private static void InitProperty(StringBuilder content, string variableName, string name, string value)
+        private static void InitForeach(ScriptBuilder content, List<string> startMethods, XElement element, string variableName, string parentName)
+        {
+            var foreachContent = new ScriptBuilder();
+            var foreachStartMethods = new List<string>();
+
+            content.AppendLine($"ForEach {variableName} = new {GetComponentName(element.Name.LocalName)}();");
+
+            var itemName = GetBindingContent(element.Attribute("item").Value);
+            foreachContent.AppendLineNoIndent($"Func<object, List<Component>> {variableName}_foreach = ({itemName}) => {{");
+            foreachContent.Indent();
+
+
+            List<string> childNames = new();
+            if (element.HasElements)
+            {
+                int i = 0;
+                foreach (var child in element.Elements())
+                {
+                    var childName = $"{variableName}_{i}";
+                    childNames.Add(childName);
+                    InitComponent(foreachContent, foreachStartMethods, child, $"{variableName}_{i}", variableName);
+                    i++;
+                }
+            }
+
+            foreach (var childName in childNames)
+                foreachContent.AppendLine($"{childName}.Parent = {parentName};");
+
+            AddStartMethods(foreachContent, foreachStartMethods);
+
+            foreachContent.AppendLine($"return new List<Component> {{ {string.Join(',', childNames)} }};");
+            foreachContent.Unindent();
+            foreachContent.AppendLine("};");
+
+            var inAttribute = element.Attribute("in");
+            InitProperty(content, variableName, inAttribute.Name.LocalName, inAttribute.Value);
+
+            foreachContent.AppendLine($"{variableName}.Start(new List<Component> {{ }});");
+            foreachContent.AppendLine($"{variableName}.ComponentsCreator = {variableName}_foreach;");
+            startMethods.Add(foreachContent.ToString());
+        }
+
+        private static void InitProperty(ScriptBuilder content, string variableName, string name, string value)
         {
             var bindingValue = GetBindingContent(value);
             if (IsTwoWayBinding(value))
@@ -209,36 +252,17 @@ namespace StatimUI
         private static string GetComponentName(string typeName)
         {
             if (Component.ComponentByName.TryGetValue(typeName, out var type))
+            {
                 return type.Name;
+            }
 
             return typeName;
         }
 
-        private enum BindingType { OneWay, TwoWay, Value }
-        private record struct ChildInfo(string Name, List<(string Name, string Value, BindingType Type)> Bindings) { }
-        private static ChildInfo? ParseChildXML(string xml)
+        private static void AddStartMethods(ScriptBuilder content, List<string> startMethods)
         {
-            if (string.IsNullOrWhiteSpace(xml))
-                return null;
-
-            var node = XElement.Parse(xml);
-
-            if (node.HasElements)
-            {
-                foreach (var element in node.Elements())
-                {
-
-                }
-            }
-
-            List<(string, string, BindingType)> bindings = new();
-            foreach (var attr in node.Attributes())
-            {
-                var type = IsBinding(attr.Value) ? IsTwoWayBinding(attr.Value) ? BindingType.TwoWay : BindingType.OneWay : BindingType.Value;
-                bindings.Add((attr.Name.LocalName, GetBindingContent(attr.Value), type));
-            }
-
-            return new ChildInfo(node.Name.LocalName, bindings);
+            for (int i = startMethods.Count - 1; i >= 0; i--)
+                content.AppendLine(startMethods[i]);
         }
 
         private static bool IsBinding(string value) => value.StartsWith('{') && value.EndsWith('}');

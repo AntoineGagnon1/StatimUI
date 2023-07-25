@@ -59,7 +59,11 @@ namespace StatimUI
             if (type == null)
                 return null;
             else
-                return type.GetConstructor(new[] { typeof(List<Component>) })?.Invoke(new[] { new List<Component>() }) as Component;
+            {
+                var instance = Activator.CreateInstance(type) as Component;
+                instance?.Start(new List<Component>());
+                return instance;
+            }
         }
 
         private static void Compile(List<SyntaxTree> trees)

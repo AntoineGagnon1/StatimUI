@@ -11,8 +11,9 @@ namespace StatimUI.Components
     {
         public Property<bool> Content = new ValueProperty<bool>(false);
 
-        public CheckboxComponent(List<Component> slots)
-        { }
+        public override void Start(IList<Component> slots)
+        {
+        }
 
         override public void Update()
         {

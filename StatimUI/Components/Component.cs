@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.Common;
 using System.Drawing;
 using System.Linq;
@@ -14,7 +15,9 @@ namespace StatimUI
 {
     public abstract class Component
     {
-        public List<Component> Children = new List<Component>();
+        public ChildList Children { get; } = new();
+
+        public Component? Parent { get; set; }
 
         public Property<float> Width { get; set; }
         public bool IsWidthFixed { get; set; }
@@ -24,13 +27,14 @@ namespace StatimUI
 
         public Property<PointF> Position { get; set; }
 
+        public abstract void Start(IList<Component> slots);
+
         abstract public void Update();
 
         public bool HasChanged { get; protected set; }
 
         public void InitValueProperty(string name, object value)
         {
-            var a = GetType();
             var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
             var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
@@ -74,6 +78,11 @@ namespace StatimUI
                 field.SetValue(this, value);
         }
 
+
+        public Component()
+        {
+            Children.OnChildAdded += (sender, child) => { child.Parent = this; };
+        }
 
         protected void OnValueChanged<T>(T value)
         {
