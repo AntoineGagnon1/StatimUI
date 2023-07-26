@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -15,6 +16,8 @@ namespace StatimUI
 {
     public abstract class Component
     {
+        public bool Visible { get; set; } = true;
+
         public ChildList Children { get; } = new();
 
         public Component? Parent { get; set; }
@@ -76,6 +79,12 @@ namespace StatimUI
                 field.SetValue(this, value);
         }
 
+        [MemberNotNull(nameof(Parent))]
+        protected void AssertParent()
+        {
+            if (Parent == null)
+                throw new NullReferenceException($"A {GetType().Name} component has to have a parent component.");
+        }
 
         public Component()
         {

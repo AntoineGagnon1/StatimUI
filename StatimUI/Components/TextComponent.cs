@@ -18,7 +18,7 @@ namespace StatimUI.Components
 
         override public void Update()
         {
-            //if ((new Random()).NextDouble() > 0.995d)
+            //if ((new Random()).NextDouble() > 0.9995d)
             //    Content.Value += "a";
             ImGuiNET.ImGui.Text(Content.Value);
         }

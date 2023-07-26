@@ -20,7 +20,9 @@ namespace StatimUI.Components
         {
             for (int i = 0; i < Children.Count; i++)
             {
-                Children[i].Update();
+                var child = Children[i];
+                if (child.Visible)
+                    child.Update();
             }
         }
     }

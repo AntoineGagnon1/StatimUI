@@ -9,17 +9,27 @@ namespace StatimUI.Components
     [Component("checkbox")]
     public class CheckboxComponent : Component
     {
-        public Property<bool> Content = new ValueProperty<bool>(false);
+        public Property<bool> value = new ValueProperty<bool>(false);
+
+        public event EventHandler<bool>? change;
 
         public override void Start(IList<Component> slots)
         {
         }
 
+        protected void OnChange(bool value)
+        {
+            change?.Invoke(this, value);
+        }
+
         override public void Update()
         {
-            bool temp = Content;
+            bool temp = value;
             if (ImGuiNET.ImGui.Checkbox($"##{this.GetHashCode()}", ref temp))
-                Content.Value = temp;
+            {
+                value.Value = temp;
+                OnChange(temp);
+            }
         }
     }
 }

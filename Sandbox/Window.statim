@@ -4,6 +4,9 @@
 
 <vertical>
 	<foreach item="{item}" in="{items}">
-		<text Content="{item}"></text>
+		<text Content="{item}"/>
 	</foreach>
+	<if cond="{items.Count > 6}">
+		<text Content="aa"/>
+	</if>
 </vertical>

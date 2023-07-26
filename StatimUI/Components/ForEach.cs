@@ -16,8 +16,7 @@ namespace StatimUI.Components
 
         public override void Start(IList<Component> slots)
         {
-            if (Parent == null)
-                throw new NullReferenceException("A foreach component has to have a parent component.");
+            AssertParent();
 
             StartIndex = Parent.Children.IndexOf(this) + 1;
         }
@@ -28,12 +27,10 @@ namespace StatimUI.Components
 
         public override void Update()
         {
-            if (Parent == null)
-                throw new NullReferenceException("A foreach component has to have a parent component.");
-
-            //var num = (new Random()).NextDouble();
-            //if (num > 0.9995f)
-            //    ((List<string>)@in.Value).Add(num.ToString());
+            AssertParent();
+            var num = (new Random()).NextDouble();
+            if (num > 0.9999f)
+                ((List<string>)@in.Value).Add(num.ToString());
 
             int i = 0;
             foreach (var newItem in @in.Value)
