@@ -177,7 +177,7 @@ namespace StatimUIXmlComponents
                 {
                     var childName = $"{variableName}_{i}";
                     childNames.Add(childName);
-                    InitComponent(content, startMethods, child, $"{variableName}_{i}", variableName);
+                    InitComponent(content, startMethods, child, childName, variableName);
                     i++;
                 }
             }

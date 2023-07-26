@@ -50,8 +50,6 @@ namespace StatimUI
             builder.AppendLine(str);
         }
 
-
-
         public void Clear() => builder.Clear();
 
         // Returns the new capacity
