@@ -20,17 +20,18 @@ namespace StatimUI.Components
             Parent.Children.AddRange(slots);
         }
 
-        public override void Update()
+        public override bool Update()
         {
             AssertParent();
             if (_slots == null)
-                return;
+                return false;
 
             var visible = cond.Value;
             foreach (var slot in _slots)
             {
                 Parent.Children.Single(component => component == slot).Visible = visible;
             }
+            return false;
         }
     }
 }

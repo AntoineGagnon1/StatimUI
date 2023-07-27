@@ -22,7 +22,7 @@ namespace StatimUI.Components
             change?.Invoke(this, value);
         }
 
-        override public void Update()
+        override public bool Update()
         {
             bool temp = value;
             if (ImGuiNET.ImGui.Checkbox($"##{this.GetHashCode()}", ref temp))
@@ -30,6 +30,8 @@ namespace StatimUI.Components
                 value.Value = temp;
                 OnChange(temp);
             }
+
+            return false;
         }
     }
 }

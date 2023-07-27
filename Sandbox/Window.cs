@@ -63,7 +63,7 @@ namespace Sandbox
             ImGui.End();
 
             _controller.Render();
-            Console.WriteLine(watch.ElapsedTicks);
+            //Console.WriteLine(watch.ElapsedTicks);
             watch.Stop();
 
             ImGuiController.CheckGLError("End of frame");

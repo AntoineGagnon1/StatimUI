@@ -15,11 +15,13 @@ namespace StatimUI.Components
         {
         }
 
-        override public void Update()
+        override public bool Update()
         {
             string temp = Content;
             if (ImGuiNET.ImGui.InputText($"##{this.GetHashCode()}", ref temp, 100))
                 Content.Value = temp;
+
+            return false;
         }
     }
 }

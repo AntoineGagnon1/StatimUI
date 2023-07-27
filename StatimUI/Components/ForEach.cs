@@ -27,11 +27,11 @@ namespace StatimUI.Components
         {
         }
 
-        public override void Update()
+        public override bool Update()
         {
             AssertParent();
             var num = (new Random()).NextDouble();
-            if (num > 0.9999f)
+            if (num > 0.9995f)
                 ((List<string>)@in.Value).Add(num.ToString());
 
             int i = 0;
@@ -66,7 +66,7 @@ namespace StatimUI.Components
             }
 
             Count = i;
-           
+            return false;
         }
     }
 }

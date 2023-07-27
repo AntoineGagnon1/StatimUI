@@ -14,6 +14,8 @@ using StatimUI.Components;
 
 namespace StatimUI
 {
+    public enum SizeUnit { Pixel, Percent, FixedPixel }
+
     public abstract class Component
     {
         public bool Visible { get; set; } = true;
@@ -22,20 +24,33 @@ namespace StatimUI
 
         public Component? Parent { get; set; }
 
-        public Property<float> Width { get; set; }
-        public bool IsWidthFixed { get; set; }
+        public Property<float> Width { get; set; } = new ValueProperty<float>(0);
+        public SizeUnit WidthUnit { get; set; } = SizeUnit.Pixel;
+        public float TotalPixelWidth => Width.Value;
 
-        public Property<float> Height { get; set; }
-        public bool IsHeightFixed { get; set; }
+        public Property<float> Height { get; set; } = new ValueProperty<float>(0);
+        public SizeUnit HeightUnit { get; set; } = SizeUnit.Pixel;
+        public float TotalPixelHeight => Height.Value;
 
-        public Property<PointF> Position { get; set; }
+        public Property<PointF> Position { get; set; } = new ValueProperty<PointF>(new PointF(0, 0));
+        public PointF InsideTopLeft => Position;
+
 
         public abstract void Start(IList<Component> slots);
 
-        abstract public void Update();
+        // Return true if the component changed the layout
+        abstract public bool Update();
 
-        public bool HasChanged { get; protected set; }
+        private float oldWidth = 0, oldHeight = 0;
 
+        protected bool HasSizeChanged()
+        {
+            bool changed = oldWidth != TotalPixelWidth || oldHeight != TotalPixelHeight;
+            oldWidth = TotalPixelWidth;
+            oldHeight = TotalPixelHeight;
+            return changed;
+        }
+        
         public void InitValueProperty(string name, object value)
         {
             var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
@@ -91,10 +106,6 @@ namespace StatimUI
             Children.OnChildAdded += (sender, child) => { child.Parent = this; };
         }
 
-        protected void OnValueChanged<T>(T value)
-        {
-            HasChanged = true;
-        }
 
         public static Dictionary<string, Type> ComponentByName { get; private set; } = new();
 

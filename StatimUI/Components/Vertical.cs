@@ -10,20 +10,44 @@ namespace StatimUI.Components
     [Component("vertical")]
     public class Vertical : Component
     {
+        private int lastChildrenCount = 0;
+
         public override void Start(IList<Component> slots)
         {
             Console.WriteLine(Parent != null);
             Children.AddRange(slots);
         }
 
-        public override void Update()
+        public override bool Update()
         {
+            bool updateLayout = false;
             for (int i = 0; i < Children.Count; i++)
             {
                 var child = Children[i];
-                if (child.Visible)
-                    child.Update();
+                if (child.Update())
+                    updateLayout = true;
             }
+
+            if (updateLayout || lastChildrenCount != Children.Count)
+            {
+                lastChildrenCount = Children.Count;
+                return UpdateLayout();
+            }
+            else
+                return false;
+        }
+
+        private bool UpdateLayout()
+        {
+            float currHeight = InsideTopLeft.Y;
+            foreach(var child in Children)
+            {
+                Height.Value = Math.Max(Height.Value, currHeight);
+                child.Position.Value = new (child.Position.Value.X, currHeight);
+                currHeight += child.TotalPixelHeight;
+            }
+
+            return HasSizeChanged();
         }
     }
 }

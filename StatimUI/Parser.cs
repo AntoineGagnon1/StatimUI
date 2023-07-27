@@ -149,7 +149,7 @@ namespace StatimUIXmlComponents
 
     public class {name} : Component
     {{
-        public override void Update() => Children[0].Update();
+        public override bool Update() => Children[0].Update();
         
         public override void Start(IList<Component> slots)
         {{
