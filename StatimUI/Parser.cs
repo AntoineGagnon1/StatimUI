@@ -13,6 +13,7 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using StatimUI.Components;
+using Microsoft.CodeAnalysis.Text;
 
 namespace StatimUI
 {
@@ -23,7 +24,6 @@ namespace StatimUI
             var preParse = XMLPreParse(stream);
 
             var tree = CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
-
             return AddProperties(tree);
         }
 

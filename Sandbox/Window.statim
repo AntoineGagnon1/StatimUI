@@ -4,9 +4,12 @@
 
 <vertical>
 	<foreach item="{item}" in="{items}">
-		<text Content="{item}"/>
+		<text Value="{item + &quot;bonjour&quot;}"/>
 	</foreach>
-	<if cond="{items.Count > 6}">
-		<text Content="aa"/>
+	
+	<if cond="{items.Count > 6}" >
+		<text Value="aa"/>
+
 	</if>
+ 
 </vertical>

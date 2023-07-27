@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
+    [DashCase]
     [Component("foreach")]
     public class ForEach : Component
     {
         public Func<object, List<Component>> ComponentsCreator;
-        public Property<IEnumerable<object>> @in;
+
+        public Property<IEnumerable<object>> In;
         public List<object> lastItems = new();
         public int StartIndex, Count;
 

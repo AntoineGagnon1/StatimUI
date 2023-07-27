@@ -5,7 +5,7 @@
 
 <vertical>
 	<vertical>	
-		<text Content="{a}"/>
+		<text Content="{50}"/>
 	</vertical>
 	
 </vertical>

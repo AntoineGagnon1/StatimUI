@@ -25,6 +25,7 @@ namespace StatimUI
         public abstract T Value { get; set; }
 
         public static implicit operator T(Property<T> p) => p.Value;
+        public static implicit operator Property<T>(T p) => new ValueProperty<T>(p);
 
         public static Property<T> FromBinding(Binding binding)
         {
