@@ -153,9 +153,9 @@ namespace StatimUIXmlComponents
         {{ 
             Children[0].Update(); 
             if(WidthUnit == AutoSizeUnit.Auto)
-                Width = Children[0].TotalPixelWidth;
+                Width = Children[0].TotalPixelWidth + Padding.Value.X + Padding.Value.Z;
             if(HeightUnit == AutoSizeUnit.Auto)
-                Height = Children[0].TotalPixelHeight;
+                Height = Children[0].TotalPixelHeight + Padding.Value.Y + Padding.Value.W;
             return HasSizeChanged();
         }}
 
