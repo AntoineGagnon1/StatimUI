@@ -3,7 +3,17 @@ using StatimUI;
 
 Statim.LoadEmbedded();
 
-Sandbox.Window window = new Sandbox.Window();
-StatimParser.Parse("<test hey=\"allo\">\r\n    <foreach {item} in {fucking_elements}>\r\n        hello\r\n    </foreach>\r\n</test>");
-window.Run();
+//Sandbox.Window window = new Sandbox.Window();
+StatimParser.Parse(@"
+<test hey=""allo"">
+    <foreach {item} in {items}>
+        <if {item ==""cool""}>
+            <text value={you are cool}/>
+        </if>
+        <if {item == ""not cool""}>
+            <text value={bind you.are.not.cool}/>
+        </if>
+    </foreach>
+</test>");
+//window.Run();
 //Component.Width = new Dimension(new Property<float>());

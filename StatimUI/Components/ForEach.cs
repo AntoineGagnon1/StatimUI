@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StatimUI.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
-    [DashCase]
+    [ToDashCase]
     [Component("foreach")]
     public class ForEach : Component
     {
         public Func<object, List<Component>> ComponentsCreator;
 
-        public Property<IEnumerable<object>> In;
+        public Property<IEnumerable<object>> @in;
         public List<object> lastItems = new();
         public int StartIndex, Count;
 

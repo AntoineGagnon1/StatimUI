@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,9 +12,9 @@ namespace StatimUI
     public static class StatimParser
     {
 
-        private static Match isChar(ReadOnlySpan<char> span, char c) => span[0] == c ? new Match(1) : Match.Emtpy;
+        private static Match isChar(TextSpan span, char c) => span[0] == c ? new Match(1) : Match.Emtpy;
 
-        private static Match IsIdentifier(ReadOnlySpan<char> t)
+        private static Match IsIdentifier(TextSpan t)
         {
             var c = t[0];
             if (!char.IsLetter(c) || c == '_')
@@ -28,7 +29,7 @@ namespace StatimUI
             return new Match(t.Length, t);
         }
 
-        private static int Escape(ReadOnlySpan<char> t, int i, char startingBrace)
+        private static int Escape(TextSpan t, int i, char startingBrace)
         {
             var c = t[i];
             if (c == startingBrace || c == '\\' || c == '0' || c == 'a' || c == 'b' || c == 'f' || c == 'n' || c == 'r' || c == 't' || c == 'v')
@@ -50,7 +51,7 @@ namespace StatimUI
             throw new Exception("Backslashes must be escaped");
         }
 
-        private static int HexLength(ReadOnlySpan<char> t, int i)
+        private static int HexLength(TextSpan t, int i)
         {
             for (int j = 1; j < t.Length; j++)
             {
@@ -62,7 +63,7 @@ namespace StatimUI
             return t.Length - 1;
         }
 
-        private static Match MatchString(ReadOnlySpan<char> t)
+        private static Match MatchString(TextSpan t)
         {
             char c = t[0];
             char startingBrace;
@@ -93,7 +94,7 @@ namespace StatimUI
             throw new Exception("String never ends. Missing " + startingBrace);
         }
 
-        private static Match MatchCurlyContent(ReadOnlySpan<char> t)
+        private static Match MatchCurlyContent(TextSpan t)
         {
             if (t[0] == '{')
             {
@@ -124,7 +125,7 @@ namespace StatimUI
             return Match.Emtpy;
         }
 
-        private static Match MatchOneWayBinding(ReadOnlySpan<char> t)
+        private static Match MatchOneWayBinding(TextSpan t)
         {
             var c = t[0];
             char startingBrace;
@@ -138,11 +139,10 @@ namespace StatimUI
             var match = MatchCurlyContent(t.Slice(1));
             if (t[match.Length + 1] == startingBrace)
                 return new Match(match.Length + 2, match.Content);
-
             return Match.Emtpy;
         }
 
-        private static Match MatchTwoWayBinding(ReadOnlySpan<char> t)
+        private static Match MatchTwoWayBinding(TextSpan t)
         {
             var match = MatchOneWayBinding(t);
             if (match.Length == 0)
@@ -164,29 +164,273 @@ namespace StatimUI
             TwoWayBinding,
             OneWayBinding,
             Identifier,
-            String
+            String,
+
+            Invalid
+        }
+
+        static List<TokenDefinition<TokenType>> tokens = new()
+        {
+            new (TokenType.OpenAngleBracket, t => isChar(t, '<')),
+            new (TokenType.ClosedAngleBracket, t => isChar(t, '>')),
+            new (TokenType.Slash, t => isChar(t, '/')),
+            new (TokenType.Equal, t => isChar(t, '=')),
+            new (TokenType.TwoWayBinding, MatchTwoWayBinding),
+            new (TokenType.OneWayBinding, MatchOneWayBinding),
+            new (TokenType.Identifier, IsIdentifier),
+            new (TokenType.String, MatchString),
+        };
+
+        public enum PropertyType
+        {
+            Value, OneWay, TwoWay
+        }
+
+        public class PropertySyntax
+        {
+            public string Name { get; }
+            public string Value { get; }
+            public PropertyType Type { get; }
+
+            public PropertySyntax(string value, PropertyType type, string name)
+            {
+                Value = value;
+                Type = type;
+                Name = name;
+            }
+        }
+
+        public class ComponentSyntax
+        {
+            public List<PropertySyntax> Properties { get; } = new();
+            public string Name { get; }
+            public List<ComponentSyntax> Slots { get; } = new();
+
+            public ComponentSyntax(string name, List<ComponentSyntax> slots)
+            {
+                Name = name;
+                Slots = slots;
+            }
+
+            public ComponentSyntax(string name, List<ComponentSyntax> slots, List<PropertySyntax> properties)
+            {
+                Name = name;
+                Slots = slots;
+                Properties = properties;
+            }
+        }
+
+        public class ForeachSyntax : ComponentSyntax
+        {
+            public string Item { get; }
+            public string Items { get; }
+
+            public ForeachSyntax(List<ComponentSyntax> slots, string item, string items) : base("foreach", slots)
+            {
+                Item  = item;
+                Items = items;
+            }
+        }
+
+        public class IfSyntax : ComponentSyntax
+        {
+            public string Condition { get; }
+
+            public IfSyntax(List<ComponentSyntax> slots, string condition) : base("if", slots)
+            {
+                Condition = condition;
+            }
+        }
+
+        private static PropertyType TokenToPropertyType(TokenType token)
+        {
+            if (token == TokenType.String)
+                return PropertyType.Value;
+            if (token == TokenType.OneWayBinding)
+                return PropertyType.OneWay;
+            if (token == TokenType.TwoWayBinding)
+                return PropertyType.TwoWay;
+
+            throw new Exception("Could not parse the property");
+        }
+
+        private static PropertySyntax? MatchProperty(Lexer<TokenType> lexer)
+        {
+            if (lexer.Current.Type == TokenType.Identifier)
+            {
+                var name = lexer.Current.Content;
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.Equal)
+                {
+                    lexer.MoveNext();
+                    var type = TokenToPropertyType(lexer.Current.Type);
+                    var content = lexer.Current.Content.ToString();
+                    lexer.MoveNext();
+                    return new PropertySyntax(content, type, name.ToString());
+                }
+
+                throw new Exception("A property name must be followed by an equal sign");
+            }
+
+            return null;
+        }
+
+        private static IfSyntax MatchIf(Lexer<TokenType> lexer)
+        {
+            if (lexer.Current.Type == TokenType.OneWayBinding)
+            {
+                var condition = lexer.Current.Content;
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+                {
+                    lexer.MoveNext();
+                    var children = MatchChildren(lexer);
+                    EnsureClosingTag(lexer);
+                    return new IfSyntax(children, condition);
+                }
+
+                if (lexer.Current.Type == TokenType.Slash)
+                    throw new Exception("An if componentcan't be self-closed");
+
+            }
+            throw new Exception("An if component must follow this syntax:\n<if {condition}>\n    [children here]\n</if>");
+        }
+
+        private static ForeachSyntax MatchForeach(Lexer<TokenType> lexer)
+        {
+            if (lexer.Current.Type == TokenType.OneWayBinding)
+            {
+                var item = lexer.Current.Content;
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.Identifier && lexer.Current.Content == "in")
+                {
+                    lexer.MoveNext();
+                    if (lexer.Current.Type == TokenType.OneWayBinding)
+                    {
+                        var items = lexer.Current.Content;
+                        lexer.MoveNext();
+                        if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+                        {
+                            lexer.MoveNext();
+                            var children = MatchChildren(lexer);
+                            EnsureClosingTag(lexer);
+                            return new ForeachSyntax(children, item, items);
+                        }
+
+                        if (lexer.Current.Type == TokenType.Slash)
+                            throw new Exception("A foreach component can't be self-closed");
+                    }
+                }
+            }
+            throw new Exception("A foreach component must follow this syntax:\n<foreach {itemName} in {listName}>\n    [children here]\n</foreach>");
+        }
+
+        private static void EnsureClosingTag(Lexer<TokenType> lexer)
+        {
+            if (lexer.Current.Type == TokenType.Slash)
+            {
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.Identifier)
+                {
+                    lexer.MoveNext();
+                    if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+                    {
+                        lexer.MoveNext();
+                        return;
+                    }
+                }
+            }
+            throw new Exception("An opened tag must be closed");
+        }
+
+        private static List<ComponentSyntax> MatchChildren(Lexer<TokenType> lexer)
+        {
+            var components = new List<ComponentSyntax>();
+            while (true)
+            {
+                var component = MatchComponent(lexer);
+                if (component == null)
+                    break;
+
+                components.Add(component);
+            }
+            return components;
+        }
+
+        private static ComponentSyntax? MatchComponent(Lexer<TokenType> lexer)
+        {
+            if (lexer.Current.Type == TokenType.OpenAngleBracket)
+            {
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.Identifier)
+                {
+                    var name = lexer.Current.Content;
+                    lexer.MoveNext();
+
+
+                    if (name == "foreach")
+                        return MatchForeach(lexer);
+
+                    if (name == "if")
+                        return MatchIf(lexer);
+
+                    var properties = new List<PropertySyntax>();
+                    while (true)
+                    {
+                        var property = MatchProperty(lexer);
+                        if (property == null)
+                            break;
+
+                        properties.Add(property);
+                    }
+
+                    if (lexer.Current.Type == TokenType.Slash)
+                    {
+                        lexer.MoveNext();
+                        if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+                        {
+                            lexer.MoveNext();
+                            return new ComponentSyntax(name.ToString(), new(), properties);
+                        }
+                        throw new Exception("A slash must be followed by a closing angle bracket to make a self closing tag");
+                    }
+
+                    if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+                    {
+                        lexer.MoveNext();
+                        var children = MatchChildren(lexer);
+
+                        EnsureClosingTag(lexer);
+
+                        return new ComponentSyntax(name.ToString(), children, properties);
+                    }
+
+                    if (lexer.Current.Type == TokenType.String || lexer.Current.Type == TokenType.OneWayBinding || lexer.Current.Type == TokenType.TwoWayBinding || lexer.Current.Type == TokenType.Equal)
+                        throw new Exception("Properties must have a name");
+
+                    throw new Exception("A component declaration can contain properties and must end by a closed angle bracket");
+                }
+
+                if (lexer.Current.Type == TokenType.Slash)
+                    return null; // closing tag
+
+                throw new Exception("An opened angle bracket must be followed by a name to define a component");
+            }
+            return null;
         }
 
         public static void Parse(string xml)
         {
-            var tokens = new List<TokenDefinition<TokenType>>
-            {
-                new (TokenType.OpenAngleBracket, t => isChar(t, '<')),
-                new (TokenType.ClosedAngleBracket, t => isChar(t, '>')),
-                new (TokenType.Slash, t => isChar(t, '/')),
-                new (TokenType.Equal, t => isChar(t, '=')),
-                new (TokenType.TwoWayBinding, MatchTwoWayBinding),
-                new (TokenType.OneWayBinding, MatchOneWayBinding),
-                new (TokenType.Identifier, IsIdentifier),
-                new (TokenType.String, MatchString),
-            };
-            var lexer = new Lexer<TokenType>(tokens, xml);
+            var lexer = new Lexer<TokenType>(tokens, xml, TokenType.Invalid);
+            ComponentSyntax root;
 
             var watch = Stopwatch.StartNew();
-            while (lexer.MoveNext())
+            //while (lexer.MoveNext())
             {
-                Console.WriteLine(lexer.Current.Type + " " + lexer.Current.Content.ToString());
+             //   Console.WriteLine(lexer.Current.Type + " " + lexer.Current.Content);
             }
+            lexer.MoveNext();
+            var result = MatchComponent(lexer);
             watch.Stop();
             Console.WriteLine(watch.ElapsedTicks / 10_000f);
         }
