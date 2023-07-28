@@ -26,17 +26,16 @@ namespace StatimUI.Components
         public override void Start(IList<Component> slots)
         {
             Console.WriteLine(Parent != null);
-            Width.Value = 50.0f;
-            Height.Value = 14.0f;
+            MinWidth.Value = new Dimension(10.0f, DimensionUnit.Pixel);
+            MinHeight.Value = new Dimension(14.0f, DimensionUnit.Pixel);
         }
         
         override public bool Update()
         {
-            if ((new Random()).NextDouble() > 0.9995d && CanSetHeight)
-                Height.Value += 2f;
+            if ((new Random()).NextDouble() > 0.9995d)
+                Height.Value.Scalar += 2f;
 
-            if (CanSetWidth)
-                Width = ImGuiNET.ImGui.CalcTextSize(Content.Value).X;
+            Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X;
 
             return HasSizeChanged();
         }

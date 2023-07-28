@@ -154,10 +154,8 @@ namespace StatimUIXmlComponents
         public override bool Update() 
         {{ 
             Children[0].Update(); 
-            if(WidthUnit == AutoSizeUnit.Auto)
-                Width = Children[0].TotalPixelWidth + Padding.Value.X + Padding.Value.Z;
-            if(HeightUnit == AutoSizeUnit.Auto)
-                Height = Children[0].TotalPixelHeight + Padding.Value.Y + Padding.Value.W;
+            Width.Value.Scalar = Children[0].TotalPixelWidth + Padding.Value.X + Padding.Value.Z;
+            Height.Value.Scalar = Children[0].TotalPixelHeight + Padding.Value.Y + Padding.Value.W;
             return HasSizeChanged();
         }}
 

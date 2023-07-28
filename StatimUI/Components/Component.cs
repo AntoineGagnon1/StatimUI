@@ -7,9 +7,6 @@ using System.Reflection;
 
 namespace StatimUI
 {
-    public enum SizeUnit { Pixel, Percent }
-    public enum AutoSizeUnit { Pixel, Percent, Auto } // Must match SizeUnit for everyting except Auto which is the same as Pixel, but the component may change the value
-
     public abstract class Component
     {
         public bool Visible { get; set; } = true;
@@ -20,28 +17,20 @@ namespace StatimUI
 
         #region Width
         // TODO : Discusting
-        public Property<float> Width { get; set; } = new ValueProperty<float>(0);
-        public AutoSizeUnit WidthUnit { get; set; } = AutoSizeUnit.Auto;
-        public Property<float> MinWidth { get; set; } = new ValueProperty<float>(float.MinValue);
-        public SizeUnit MinWidthUnit { get; set; } = SizeUnit.Pixel;
-        public Property<float> MaxWidth { get; set; } = new ValueProperty<float>(float.MaxValue);
-        public SizeUnit MaxWidthUnit { get; set; } = SizeUnit.Pixel;
-        public float PixelWidth => Math.Max(Math.Min(WidthUnit == AutoSizeUnit.Auto ? Width.Value : GetSizeAsPixels(Width.Value, (SizeUnit)WidthUnit), MaxWidth.Value), GetSizeAsPixels(MinWidth.Value, MinWidthUnit));
+        public Property<Dimension> Width { get; set; } = new ValueProperty<Dimension>(new Dimension(0, DimensionUnit.Auto));
+        public Property<Dimension> MinWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
+        public Property<Dimension> MaxWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
+        public float PixelWidth => Math.Max(Math.Min(Width.Value.GetPixelSize(Parent), MaxWidth.Value.GetPixelSize(Parent)), MinWidth.Value.GetPixelSize(Parent));
         public float TotalPixelWidth => PixelWidth;
-        public bool CanSetWidth => WidthUnit == AutoSizeUnit.Auto;
         #endregion // Width 
 
         #region Height
         // TODO : Discusting
-        public Property<float> Height { get; set; } = new ValueProperty<float>(0);
-        public AutoSizeUnit HeightUnit { get; set; } = AutoSizeUnit.Auto;
-        public Property<float> MinHeight { get; set; } = new ValueProperty<float>(float.MinValue);
-        public SizeUnit MinHeightUnit { get; set; } = SizeUnit.Pixel;
-        public Property<float> MaxHeight { get; set; } = new ValueProperty<float>(float.MaxValue);
-        public SizeUnit MaxHeightUnit { get; set; } = SizeUnit.Pixel;
-        public float PixelHeight => Math.Max(Math.Min(HeightUnit == AutoSizeUnit.Auto ? Height.Value : GetSizeAsPixels(Height.Value, (SizeUnit)HeightUnit), MaxHeight.Value), GetSizeAsPixels(MinHeight.Value, MinHeightUnit));
+        public Property<Dimension> Height { get; set; } = new ValueProperty<Dimension>(new Dimension(0, DimensionUnit.Auto));
+        public Property<Dimension> MinHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
+        public Property<Dimension> MaxHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
+        public float PixelHeight => Math.Max(Math.Min(Height.Value.GetPixelSize(Parent), MaxHeight.Value.GetPixelSize(Parent)), MinHeight.Value.GetPixelSize(Parent));
         public float TotalPixelHeight => PixelHeight;
-        public bool CanSetHeight => HeightUnit == AutoSizeUnit.Auto;
         #endregion // Height
 
         #region Position
@@ -125,16 +114,6 @@ namespace StatimUI
             Children.OnChildAdded += (sender, child) => { child.Parent = this; };
         }
 
-
-        private float GetSizeAsPixels(float value, SizeUnit unit)
-        {
-            switch (unit)
-            {
-                case SizeUnit.Pixel: return value;
-                case SizeUnit.Percent: return (value / 100f) * (Parent?.PixelWidth ?? 0.0f);
-            }
-            throw new InvalidDataException($"Invalid SizeUnit value : {unit}({(int)unit})");
-        }
 
         public static Dictionary<string, Type> ComponentByName { get; private set; } = new();
 

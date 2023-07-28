@@ -56,11 +56,10 @@ namespace StatimUI.Components
                 child.Position.Value = new (child.Position.Value.X, currHeight);
                 currHeight += child.TotalPixelHeight;
 
-                if (CanSetWidth)
-                    Width.Value = Math.Max(child.Width.Value + Padding.Value.X + Padding.Value.Z, Width.Value);
+                Width.Value.Scalar = Math.Max(child.Width.Value.Scalar + Padding.Value.X + Padding.Value.Z, Width.Value.Scalar);
             }
-            if(CanSetHeight)
-                Height.Value = currHeight + Padding.Value.Y + Padding.Value.W;
+
+            Height.Value.Scalar = currHeight + Padding.Value.Y + Padding.Value.W;
 
             return HasSizeChanged();
         }
