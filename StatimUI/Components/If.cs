@@ -10,7 +10,7 @@ namespace StatimUI.Components
     [Component("if")]
     public class If : Component
     {
-        public Property<bool> cond;
+        public Property<bool> Condition;
         private IList<Component>? _slots;
 
         public If()
@@ -37,7 +37,7 @@ namespace StatimUI.Components
             if (_slots == null)
                 return false;
 
-            var visible = cond.Value;
+            var visible = Condition.Value;
             foreach (var slot in _slots)
             {
                 Parent.Children.Single(component => component == slot).Visible = visible;

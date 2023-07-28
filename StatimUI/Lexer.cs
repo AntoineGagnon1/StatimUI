@@ -72,6 +72,7 @@ namespace StatimUI
         public string Text;
         public Token<T> Current;
         private T invalid;
+        private List<TokenDefinition<StatimParser.TokenType>> tokens;
 
         internal void MoveNext()
         {
@@ -82,7 +83,14 @@ namespace StatimUI
             }
 
             while (char.IsWhiteSpace(Text[pos]))
+            {
+                if (pos >= Text.Length - 1)
+                {
+                    Current = new Token<T>(invalid, string.Empty);
+                    return;
+                }
                 pos++;
+            }
 
             foreach (var tokenDefinition in TokenDefinitions)
             {
@@ -101,10 +109,9 @@ namespace StatimUI
             throw new Exception("No token found. The remainingText is: "  + Text.Substring(pos));
         }
 
-        public Lexer(List<TokenDefinition<T>> tokenDefinitions, string text, T invalidToken)
+        public Lexer(List<TokenDefinition<T>> tokenDefinitions, T invalidToken)
         {
             TokenDefinitions = tokenDefinitions;
-            Text = text;
             invalid = invalidToken;
         }
     }

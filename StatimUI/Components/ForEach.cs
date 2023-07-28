@@ -15,7 +15,7 @@ namespace StatimUI.Components
     {
         public Func<object, List<Component>> ComponentsCreator;
 
-        public Property<IEnumerable<object>> @In;
+        public Property<IEnumerable<object>> Items;
         public List<object> lastItems = new();
         public int StartIndex, Count;
 
@@ -36,10 +36,10 @@ namespace StatimUI.Components
             AssertParent();
             var num = (new Random()).NextDouble();
             if (num > 0.9995f)
-                ((List<string>)@In.Value).Add(num.ToString());
+                ((List<string>)Items.Value).Add(num.ToString());
 
             int i = 0;
-            foreach (var newItem in @In.Value)
+            foreach (var newItem in Items.Value)
             {
                 var lastItem = lastItems.ElementAtOrDefault(i);
                 if (!newItem.Equals(lastItem))

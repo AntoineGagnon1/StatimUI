@@ -39,7 +39,7 @@ namespace StatimUI
                     if (stream == null)
                         continue;
 
-                    trees.Add(Parser.Parse(name.Split('.')[^2], stream));
+                    trees.Add(CodeGenerator.Parse(name.Split('.')[^2], stream));
                 }
             }
 

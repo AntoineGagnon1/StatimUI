@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -181,66 +182,7 @@ namespace StatimUI
             new (TokenType.String, MatchString),
         };
 
-        public enum PropertyType
-        {
-            Value, OneWay, TwoWay
-        }
-
-        public class PropertySyntax
-        {
-            public string Name { get; }
-            public string Value { get; }
-            public PropertyType Type { get; }
-
-            public PropertySyntax(string value, PropertyType type, string name)
-            {
-                Value = value;
-                Type = type;
-                Name = name;
-            }
-        }
-
-        public class ComponentSyntax
-        {
-            public List<PropertySyntax> Properties { get; } = new();
-            public string Name { get; }
-            public List<ComponentSyntax> Slots { get; } = new();
-
-            public ComponentSyntax(string name, List<ComponentSyntax> slots)
-            {
-                Name = name;
-                Slots = slots;
-            }
-
-            public ComponentSyntax(string name, List<ComponentSyntax> slots, List<PropertySyntax> properties)
-            {
-                Name = name;
-                Slots = slots;
-                Properties = properties;
-            }
-        }
-
-        public class ForeachSyntax : ComponentSyntax
-        {
-            public string Item { get; }
-            public string Items { get; }
-
-            public ForeachSyntax(List<ComponentSyntax> slots, string item, string items) : base("foreach", slots)
-            {
-                Item  = item;
-                Items = items;
-            }
-        }
-
-        public class IfSyntax : ComponentSyntax
-        {
-            public string Condition { get; }
-
-            public IfSyntax(List<ComponentSyntax> slots, string condition) : base("if", slots)
-            {
-                Condition = condition;
-            }
-        }
+        static Lexer<TokenType> lexer = new (tokens, TokenType.Invalid);
 
         private static PropertyType TokenToPropertyType(TokenType token)
         {
@@ -275,7 +217,7 @@ namespace StatimUI
             return null;
         }
 
-        private static IfSyntax MatchIf(Lexer<TokenType> lexer)
+        private static ComponentSyntax MatchIf(Lexer<TokenType> lexer)
         {
             if (lexer.Current.Type == TokenType.OneWayBinding)
             {
@@ -286,7 +228,7 @@ namespace StatimUI
                     lexer.MoveNext();
                     var children = MatchChildren(lexer);
                     EnsureClosingTag(lexer);
-                    return new IfSyntax(children, condition);
+                    return new ComponentSyntax("if", children, new List<PropertySyntax> { new PropertySyntax(condition, PropertyType.OneWay, "Condition") });
                 }
 
                 if (lexer.Current.Type == TokenType.Slash)
@@ -296,7 +238,7 @@ namespace StatimUI
             throw new Exception("An if component must follow this syntax:\n<if {condition}>\n    [children here]\n</if>");
         }
 
-        private static ForeachSyntax MatchForeach(Lexer<TokenType> lexer)
+        private static ForEachSyntax MatchForEach(Lexer<TokenType> lexer)
         {
             if (lexer.Current.Type == TokenType.OneWayBinding)
             {
@@ -314,7 +256,7 @@ namespace StatimUI
                             lexer.MoveNext();
                             var children = MatchChildren(lexer);
                             EnsureClosingTag(lexer);
-                            return new ForeachSyntax(children, item, items);
+                            return new ForEachSyntax(children, item, items);
                         }
 
                         if (lexer.Current.Type == TokenType.Slash)
@@ -369,7 +311,7 @@ namespace StatimUI
 
 
                     if (name == "foreach")
-                        return MatchForeach(lexer);
+                        return MatchForEach(lexer);
 
                     if (name == "if")
                         return MatchIf(lexer);
@@ -419,20 +361,68 @@ namespace StatimUI
             return null;
         }
 
-        public static void Parse(string xml)
+        public static ComponentSyntax? Parse(string xml)
         {
-            var lexer = new Lexer<TokenType>(tokens, xml, TokenType.Invalid);
-            ComponentSyntax root;
+            lexer.Text = xml;
 
             var watch = Stopwatch.StartNew();
-            //while (lexer.MoveNext())
-            {
-             //   Console.WriteLine(lexer.Current.Type + " " + lexer.Current.Content);
-            }
             lexer.MoveNext();
             var result = MatchComponent(lexer);
             watch.Stop();
-            Console.WriteLine(watch.ElapsedTicks / 10_000f);
+            Console.WriteLine("parsing time: " + watch.ElapsedTicks / 10_000f);
+            return result;
+        }
+    }
+
+
+    public enum PropertyType
+    {
+        Value, OneWay, TwoWay
+    }
+
+    public class PropertySyntax
+    {
+        public string Name { get; }
+        public string Value { get; }
+        public PropertyType Type { get; }
+
+        public PropertySyntax(string value, PropertyType type, string name)
+        {
+            Value = value;
+            Type = type;
+            Name = name;
+        }
+    }
+
+    public class ComponentSyntax
+    {
+        public List<PropertySyntax> Properties { get; } = new();
+        public string Name { get; }
+        public List<ComponentSyntax> Slots { get; } = new();
+
+        public ComponentSyntax(string name, List<ComponentSyntax> slots)
+        {
+            Name = name;
+            Slots = slots;
+        }
+
+        public ComponentSyntax(string name, List<ComponentSyntax> slots, List<PropertySyntax> properties)
+        {
+            Name = name;
+            Slots = slots;
+            Properties = properties;
+        }
+    }
+
+    public class ForEachSyntax : ComponentSyntax
+    {
+        public string Item { get; }
+        public string Items { get; }
+
+        public ForEachSyntax(List<ComponentSyntax> slots, string item, string items) : base("foreach", slots)
+        {
+            Item = item;
+            Items = items;
         }
     }
 }
