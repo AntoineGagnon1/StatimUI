@@ -1,7 +1,9 @@
 ﻿using StatimUI.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,6 +28,7 @@ namespace StatimUI.Components
 
         public ForEach()
         {
+            Visible = false;
         }
 
         public override bool Update()
@@ -33,10 +36,10 @@ namespace StatimUI.Components
             AssertParent();
             var num = (new Random()).NextDouble();
             if (num > 0.9995f)
-                ((List<string>)@in.Value).Add(num.ToString());
+                ((List<string>)@In.Value).Add(num.ToString());
 
             int i = 0;
-            foreach (var newItem in @in.Value)
+            foreach (var newItem in @In.Value)
             {
                 var lastItem = lastItems.ElementAtOrDefault(i);
                 if (!newItem.Equals(lastItem))
@@ -68,6 +71,11 @@ namespace StatimUI.Components
 
             Count = i;
             return false;
+        }
+
+        public override void Render(Vector2 offset)
+        {
+            
         }
     }
 }

@@ -2,6 +2,7 @@
 using StatimUI;
 
 Statim.LoadEmbedded();
+StatimUI.Debug.DebugSettings.ShowLayout = true;
 
 //Sandbox.Window window = new Sandbox.Window();
 StatimParser.Parse(@"

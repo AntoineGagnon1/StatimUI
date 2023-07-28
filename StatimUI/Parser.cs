@@ -149,7 +149,17 @@ namespace StatimUIXmlComponents
 
     public class {name} : Component
     {{
-        public override bool Update() => Children[0].Update();
+        public override bool Update() 
+        {{ 
+            Children[0].Update(); 
+            if(WidthUnit == AutoSizeUnit.Auto)
+                Width = Children[0].TotalPixelWidth;
+            if(HeightUnit == AutoSizeUnit.Auto)
+                Height = Children[0].TotalPixelHeight;
+            return HasSizeChanged();
+        }}
+
+        public override void Render(System.Numerics.Vector2 offset) => Children[0].Render(offset + TopLeftPadding);
         
         public override void Start(IList<Component> slots)
         {{
@@ -224,7 +234,7 @@ namespace StatimUIXmlComponents
             foreachContent.Unindent();
             foreachContent.AppendLine("};");
 
-            var inAttribute = element.Attribute("in");
+            var inAttribute = element.Attribute("In");
             InitProperty(content, variableName, inAttribute!.Name.LocalName, inAttribute.Value);
 
             foreachContent.AppendLine($"{variableName}.Start(new List<Component> {{ }});");

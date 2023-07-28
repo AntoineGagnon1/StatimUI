@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using System.IO;
 using StatimUI.Components;
 using System.Collections;
+using System.Numerics;
 
 namespace StatimUI
 {
@@ -93,6 +94,7 @@ namespace StatimUI
             yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll"));
             yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll"));
             yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Collections.dll"));
+            yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Numerics.Vectors.dll"));
         }
     }
 }
