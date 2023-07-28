@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,55 +8,114 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
-    internal ref struct Lexer<T> where T : Enum
+    internal readonly struct TextSpan
+    {
+        public readonly string Text;
+        public readonly int Start;
+        public readonly int Length;
+
+        public char this[int i]
+        {
+            get => Text[i + Start];
+        }
+
+
+        public TextSpan Slice(int start, int length)
+        {
+            return new TextSpan(Text, Start + start, length);
+        }
+
+        public TextSpan Slice(int start)
+        {
+            return new TextSpan(Text, Start + start, Length - start);
+        }
+
+
+        public TextSpan(string text, int start)
+        {
+            Text = text;
+            Start = start;
+            Length = text.Length - Start;
+        }
+
+        public TextSpan(string text, int start, int length)
+        {
+            Text = text;
+            Start = start;
+            Length = length;
+        }
+
+        public override string ToString()
+        {
+            if (string.IsNullOrEmpty(Text))
+                return string.Empty;
+
+            return Text.Substring(Start, Length);
+        }
+
+        public bool StartsWith(string text)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (Text[Start + i] != text[i])
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+    internal class Lexer<T> where T : Enum
     {
         public List<TokenDefinition<T>> TokenDefinitions = new();
-        private ReadOnlySpan<char> remainingText;
+        private int pos;
+        public string Text;
         public Token<T> Current;
+        private T invalid;
 
-        internal bool MoveNext()
+        internal void MoveNext()
         {
-            if (remainingText.IsWhiteSpace())
-                return false;
+            if (pos >= Text.Length)
+            {
+                Current = new Token<T>(invalid, string.Empty);
+                return;
+            }
 
-            int i = 0;
-            while (char.IsWhiteSpace(remainingText[i]))
-                i++;
-
-            if (i > 0)
-                remainingText = remainingText.Slice(i);
+            while (char.IsWhiteSpace(Text[pos]))
+                pos++;
 
             foreach (var tokenDefinition in TokenDefinitions)
             {
-                var match = tokenDefinition.Matcher(remainingText);
+                var match = tokenDefinition.Matcher(new TextSpan(Text, pos));
                 if (match.Length > 0)
                 {
-                    Current = new Token<T>(tokenDefinition.TokenType, match.Content);
-                    
-                    remainingText = remainingText.Slice(match.Length);
+                    Current = new Token<T>(tokenDefinition.TokenType, match.Content.ToString());
 
-                    return true;
+                    pos += match.Length;
+
+                    return;
                 }
                 
             }
 
-            throw new Exception("No token found. The remainingText is: "  + remainingText.ToString());
+            throw new Exception("No token found. The remainingText is: "  + Text.Substring(pos));
         }
 
-        public Lexer(List<TokenDefinition<T>> tokenDefinitions, string text)
+        public Lexer(List<TokenDefinition<T>> tokenDefinitions, string text, T invalidToken)
         {
             TokenDefinitions = tokenDefinitions;
-            remainingText = text.AsSpan();
+            Text = text;
+            invalid = invalidToken;
         }
     }
 
-    internal delegate Match Matcher(ReadOnlySpan<char> text);
+    internal delegate Match Matcher(TextSpan text);
 
-    internal ref struct Match
+    internal struct Match
     {
-        public static Match Emtpy => new Match(0);
+        public static Match Emtpy => new Match();
 
-        internal ReadOnlySpan<char> Content = ReadOnlySpan<char>.Empty;
+        internal TextSpan Content = new (string.Empty, 0, 0);
         internal int Length;
 
         public Match(int length)
@@ -63,7 +123,7 @@ namespace StatimUI
             Length = length;
         }
 
-        public Match(int length, ReadOnlySpan<char> content)
+        public Match(int length, TextSpan content)
         {
             Length = length;
             Content = content;
@@ -82,12 +142,12 @@ namespace StatimUI
         }
     }
 
-    internal ref struct Token<T>
+    internal struct Token<T>
     {
         internal T Type { get; set; }
-        internal ReadOnlySpan<char> Content { get; set; }
+        internal string Content { get; set; }
 
-        internal Token(T type, ReadOnlySpan<char> content)
+        internal Token(T type, string content)
         {
             Type = type;
             Content = content;
