@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +12,16 @@ namespace StatimUI.Components
     {
         public Property<bool> cond;
         private IList<Component>? _slots;
+
+        public If()
+        {
+            Visible = false;
+        }
+
+        public override void Render(Vector2 offset)
+        {
+            
+        }
 
         public override void Start(IList<Component> slots)
         {

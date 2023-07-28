@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,10 +13,20 @@ namespace StatimUI.Components
     {
         private int lastChildrenCount = 0;
 
+        public override void Render(Vector2 offset)
+        {
+            foreach(var child in Children)
+            {
+                child.Render(offset + TopLeftPadding);
+            }
+        }
+
         public override void Start(IList<Component> slots)
         {
             Console.WriteLine(Parent != null);
             Children.AddRange(slots);
+
+            Padding = new ValueProperty<Vector4>(new Vector4(30, 30, 10, 10));
         }
 
         public override bool Update()
@@ -39,13 +50,17 @@ namespace StatimUI.Components
 
         private bool UpdateLayout()
         {
-            float currHeight = InsideTopLeft.Y;
+            float currHeight = 0.0f;
             foreach(var child in Children)
             {
-                Height.Value = Math.Max(Height.Value, currHeight);
                 child.Position.Value = new (child.Position.Value.X, currHeight);
                 currHeight += child.TotalPixelHeight;
+
+                if (CanSetWidth)
+                    Width.Value = Math.Max(child.Width.Value + Padding.Value.X + Padding.Value.Z, Width.Value);
             }
+            if(CanSetHeight)
+                Height.Value = currHeight + Padding.Value.Y + Padding.Value.W;
 
             return HasSizeChanged();
         }

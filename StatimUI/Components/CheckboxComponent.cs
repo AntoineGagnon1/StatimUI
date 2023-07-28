@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,14 +25,17 @@ namespace StatimUI.Components
 
         override public bool Update()
         {
+            return false;
+        }
+
+        public override void Render(Vector2 offset)
+        {
             bool temp = value;
             if (ImGuiNET.ImGui.Checkbox($"##{this.GetHashCode()}", ref temp))
             {
                 value.Value = temp;
                 OnChange(temp);
             }
-
-            return false;
         }
     }
 }

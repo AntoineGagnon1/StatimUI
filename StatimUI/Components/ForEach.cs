@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +26,7 @@ namespace StatimUI.Components
 
         public ForEach()
         {
+            Visible = false;
         }
 
         public override bool Update()
@@ -66,6 +69,11 @@ namespace StatimUI.Components
 
             Count = i;
             return false;
+        }
+
+        public override void Render(Vector2 offset)
+        {
+            
         }
     }
 }

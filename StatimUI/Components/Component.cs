@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Numerics;
 using System.Reflection;
 
 namespace StatimUI
@@ -44,9 +45,14 @@ namespace StatimUI
         #endregion // Height
 
         #region Position
-        public Property<PointF> Position { get; set; } = new ValueProperty<PointF>(new PointF(0, 0));
-        public PointF InsideTopLeft => Position;
+        public Property<Vector2> Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
+        public Vector2 InsideTopLeft => Position;
         #endregion // Position
+
+        // TODO : change to custom type with top/bottom/right/left
+        public Property<Vector4> Padding { get; set; } = new ValueProperty<Vector4>(Vector4.Zero);
+        public Vector2 TopLeftPadding => new Vector2(Padding.Value.X, Padding.Value.Y);
+        public Vector2 BottomRightPadding => new Vector2(Padding.Value.Z, Padding.Value.W);
 
         private float oldWidth = 0, oldHeight = 0; // Used by HasSizeChanged()
 
@@ -54,7 +60,7 @@ namespace StatimUI
 
         // Return true if the component changed the layout
         abstract public bool Update();
-
+        abstract public void Render(Vector2 offset);
 
         protected bool HasSizeChanged()
         {

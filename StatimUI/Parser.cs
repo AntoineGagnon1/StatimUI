@@ -158,6 +158,8 @@ namespace StatimUIXmlComponents
                 Height = Children[0].TotalPixelHeight;
             return HasSizeChanged();
         }}
+
+        public override void Render(System.Numerics.Vector2 offset) => Children[0].Render(offset + TopLeftPadding);
         
         public override void Start(IList<Component> slots)
         {{
