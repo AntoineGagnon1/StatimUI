@@ -20,7 +20,7 @@ namespace StatimUI.Components
 
         override public bool Update()
         {
-            if ((new Random()).NextDouble() > 0.9995d)
+            if ((new Random()).NextDouble() > 0.9995d && CanSetHeight)
                 Height.Value += 2f;
             //    Content.Value += "a";
             //Console.WriteLine(new System.Numerics.Vector2(Position.Value.X, Position.Value.Y).ToString());

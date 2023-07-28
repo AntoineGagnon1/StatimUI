@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
-    [DashCase]
     [Component("foreach")]
     public class ForEach : Component
     {
@@ -32,10 +31,10 @@ namespace StatimUI.Components
             AssertParent();
             var num = (new Random()).NextDouble();
             if (num > 0.9995f)
-                ((List<string>)@in.Value).Add(num.ToString());
+                ((List<string>)@In.Value).Add(num.ToString());
 
             int i = 0;
-            foreach (var newItem in @in.Value)
+            foreach (var newItem in @In.Value)
             {
                 var lastItem = lastItems.ElementAtOrDefault(i);
                 if (!newItem.Equals(lastItem))

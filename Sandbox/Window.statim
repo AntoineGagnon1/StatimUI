@@ -3,12 +3,12 @@
 </script>
 
 <vertical>
-	<foreach item="{item}" in="{items}">
-		<text Value="{item + &quot;bonjour&quot;}"/>
+	<foreach item="{item}" In="{items}">
+		<text Content="{item + &quot;bonjour&quot;}"/>
 	</foreach>
 	
 	<if cond="{items.Count > 6}" >
-		<text Value="aa"/>
+		<text Content="aa"/>
 
 	</if>
  
