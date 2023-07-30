@@ -1,0 +1,13 @@
+﻿; Registering the package
+[$RootKey$\InstalledProducts\StatimLanguagePackage]
+"Package"="{d6432c01-b826-4204-9774-52dc5274d01c}"
+[$RootKey$\BindingPaths\{d6432c01-b826-4204-9774-52dc5274d01c}]
+"$PackageFolder$"=""
+
+; Registering the TextMate grammar
+[$RootKey$\TextMate\Repositories]
+"StatimLanguage"="$PackageFolder$\Syntaxes"
+
+; Match file extensions with icons. See full icon list at https://glyphlist.azurewebsites.net/knownmonikers/
+[$RootKey$\ShellFileAssociations\.statim]
+"DefaultIconMoniker"="KnownMonikers.ConfigurationEditor"
