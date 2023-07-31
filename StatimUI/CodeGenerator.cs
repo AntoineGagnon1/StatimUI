@@ -14,16 +14,49 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using StatimUI.Components;
 using Microsoft.CodeAnalysis.Text;
+using System.Globalization;
 
 namespace StatimUI
 {
     internal static class CodeGenerator
     {
+        /*internal static List<SyntaxTree> ResolveUnknownTypes(List<SyntaxTree> trees, Dictionary<string, Dictionary<string, TypeSyntax>> componentTypes)
+        {
+            foreach (var tree in trees)
+            {
+                var root = tree.GetRoot();
+                var startRoot = root
+                    .ChildNodes().OfType<NamespaceDeclarationSyntax>().Single()
+                    .ChildNodes().OfType<ClassDeclarationSyntax>().Single()
+                    .ChildNodes().OfType<MethodDeclarationSyntax>().Single(method => method.Identifier.Text == "Start")
+                    .Body!;
+
+
+                foreach (var statement in startRoot.Statements)
+                {
+                    if (statement is ExpressionStatementSyntax expression)
+                    {
+                        var assigns = statement.ChildNodes().OfType<AssignmentExpressionSyntax>().ToList();
+                        if (assigns.Count != 1)
+                            continue;
+
+                        if (assigns[0].Left is MemberAccessExpressionSyntax access)
+                        {
+                            var type = componentTypes[access.Expression.ToString()][access.Name.ToString()];
+                            Console.WriteLine(type);
+                        }
+                    }
+                }
+            }
+            return new();
+        }*/
+
         internal static SyntaxTree Parse(string name, Stream stream)
         {
             var preParse = XMLPreParse(stream);
 
             var tree = CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
+
             return AddProperties(tree);
         }
 
@@ -154,8 +187,15 @@ namespace StatimUIXmlComponents
         public override bool Update() 
         {{ 
             Children[0].Update(); 
+<<<<<<< Updated upstream
             Width.Value.Scalar = Children[0].TotalPixelWidth + Padding.Value.X + Padding.Value.Z;
             Height.Value.Scalar = Children[0].TotalPixelHeight + Padding.Value.Y + Padding.Value.W;
+=======
+            if(WidthUnit == AutoSizeUnit.Auto)
+                Width.Value = Children[0].TotalPixelWidth + Padding.Value.X + Padding.Value.Z;
+            if(HeightUnit == AutoSizeUnit.Auto)
+                Height.Value = Children[0].TotalPixelHeight + Padding.Value.Y + Padding.Value.W;
+>>>>>>> Stashed changes
             return HasSizeChanged();
         }}
 
@@ -189,10 +229,13 @@ namespace StatimUIXmlComponents
                 i++;
             }
 
-            content.AppendLine($"Component {variableName} = new {GetComponentName(syntax.Name)}();");
+            var type = GetComponentName(syntax.Name);
+            content.AppendLine($"{type} {variableName} = new {type}();");
 
             foreach (var property in syntax.Properties)
+            {
                 InitProperty(content, variableName, property.Name, property.Value, property.Type);
+            }
 
             startMethods.Add($"{variableName}.Start(new List<Component> {{ {string.Join(',', childNames)} }});");
         }
@@ -238,15 +281,33 @@ namespace StatimUIXmlComponents
         {
             if (propertyType == PropertyType.TwoWay)
             {
-                content.AppendLine($"{variableName}.InitBindingProperty(\"{name}\", new Binding(() => {value}, (dynamic value) => {{{name} = value;}}));");
+                content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToTwoWayProperty(() => {value}, __value => {value} = __value);");
             }
             else if (propertyType == PropertyType.OneWay)
             {
-                content.AppendLine($"{variableName}.InitBindingProperty(\"{name}\", new Binding(() => {value}));");
+                content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToOneWayProperty(() => {value});");
             }
             else
             {
-                content.AppendLine($"{variableName}.InitValueProperty(\"{name}\", \"{value}\");");
+                /*if (name == "padding" || name == "margin")
+                {
+                    var numbers = value.Replace(" ", "").Split(',');
+                    string thickness;
+                    if (numbers.Length == 1)
+                        thickness = $"new Thickness({numbers[0]});";
+                    else if (numbers.Length == 4)
+                        thickness = $"new Thickness({numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]});";
+                    else
+                        throw new Exception("A padding or a margin declartion must either follow this syntax: \"n\" or this one: \"n, n, n, n\"");
+
+                    content.AppendLine($"{variableName}.{name} = {thickness}");
+                }
+                else*/
+                //{
+                // TODO: Enums
+                //  content.AppendLine($"{variableName}.{name} = new ValueProperty<__UNKNOWN_TYPE>(Convert.ChangeType({value}, typeof(__UNKNOWN_TYPE)));");
+                //}
+                throw new Exception("no value at the moment lol.");
             }
         }
 

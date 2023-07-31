@@ -13,6 +13,7 @@ using System.IO;
 using StatimUI.Components;
 using System.Collections;
 using System.Numerics;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace StatimUI
 {
@@ -32,14 +33,15 @@ namespace StatimUI
                 foreach (string name in names)
                 {
                     string? extension = Path.GetExtension(name);
-                    if (extension == null || extension != Statim.FileExtension)
+                    if (extension == null || extension != FileExtension)
                         continue;
 
                     Stream? stream = assembly.GetManifestResourceStream(name);
                     if (stream == null)
                         continue;
 
-                    trees.Add(CodeGenerator.Parse(name.Split('.')[^2], stream));
+                    var tree = CodeGenerator.Parse(name.Split('.')[^2], stream);
+                    trees.Add(tree);
                 }
             }
 

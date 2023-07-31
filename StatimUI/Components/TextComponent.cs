@@ -35,7 +35,12 @@ namespace StatimUI.Components
             if ((new Random()).NextDouble() > 0.9995d)
                 Height.Value.Scalar += 2f;
 
+<<<<<<< Updated upstream
             Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X;
+=======
+            if (CanSetWidth)
+                Width.Value = ImGuiNET.ImGui.CalcTextSize(Content.Value).X;
+>>>>>>> Stashed changes
 
             return HasSizeChanged();
         }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
-    public struct Binding
+    /*public struct Binding
     {
         public Func<object> Getter;
         public Action<object>? Setter;
@@ -23,5 +23,5 @@ namespace StatimUI
             Getter = get;
             Setter = set;
         }
-    }
+    }*/
 }

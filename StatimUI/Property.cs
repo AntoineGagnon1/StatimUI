@@ -24,22 +24,14 @@ namespace StatimUI
 
         public abstract T Value { get; set; }
 
-        public static implicit operator T(Property<T> p) => p.Value;
-        public static implicit operator Property<T>(T p) => new ValueProperty<T>(p);
+        public static implicit operator T(Property<T> property) => property.Value;
 
-        public static Property<T> FromBinding(Binding binding)
-        {
-            if (binding.IsTwoWay)
-            {
-                return new TwoWayProperty<T>(
-                    () => (T)binding.Getter(),
-                    value => binding.Setter(value!)
-                );
-            }
-
-            return new OneWayProperty<T>(() => (T)binding.Getter());
-        }
-
+        // These methods are used in the code gen to be able to type infer without finding the type in the syntax tree
+        // For exemple, the code will look like that: Property = Property.ToOneWayProperty(() => some_variable);
+        // instead of Property = new OneWayProperty<Unknown_Type_Here>(...)
+        public ValueProperty<T> ToValueProperty(T value) => new ValueProperty<T>(value);
+        public OneWayProperty<T> ToOneWayProperty(Func<T> getter) => new OneWayProperty<T>(getter);
+        public TwoWayProperty<T> ToTwoWayProperty(Func<T> getter, Action<T> setter) => new TwoWayProperty<T>(getter, setter);
 
         public override void SetValue(object value)
         {

@@ -35,7 +35,7 @@ namespace StatimUI
 
         #region Position
         public Property<Vector2> Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
-        public Vector2 InsideTopLeft => Position;
+        public Vector2 InsideTopLeft => Position.Value;
         #endregion // Position
 
         // TODO : change to custom type with top/bottom/right/left
@@ -58,49 +58,7 @@ namespace StatimUI
             oldHeight = TotalPixelHeight;
             return changed;
         }
-        
-        public void InitValueProperty(string name, object value)
-        {
-            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
-            var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
 
-            if (property == null && field == null)
-                return;
-
-            Type genericType = property?.PropertyType?.GenericTypeArguments[0] ?? field!.FieldType.GenericTypeArguments[0];
-
-            var type = typeof(ValueProperty<>).MakeGenericType(genericType);
-            var variableProperty = Activator.CreateInstance(type) as Property;
-            if (variableProperty == null)
-                throw new TypeLoadException($"Could not create an instance of the type {type}");
-
-            variableProperty.SetValue(value);
-            if (property != null)
-                property.SetValue(this, variableProperty);
-            else if (field != null)
-                field.SetValue(this, variableProperty);
-        }
-
-        public void InitBindingProperty(string name, Binding binding)
-        {
-            var property = GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
-            var field = GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public);
-
-            if (property == null && field == null)
-                return;
-
-            Type genericType = property?.PropertyType?.GenericTypeArguments[0] ?? field!.FieldType.GenericTypeArguments[0];
-
-            var type = typeof(Property<>).MakeGenericType(genericType);
-            var value = type
-                .GetMethod("FromBinding", BindingFlags.Static | BindingFlags.Public)
-                ?.Invoke(null, new object[] { binding });
-
-            if (property != null)
-                property.SetValue(this, value);
-            else if (field != null)
-                field.SetValue(this, value);
-        }
 
         [MemberNotNull(nameof(Parent))]
         protected void AssertParent()

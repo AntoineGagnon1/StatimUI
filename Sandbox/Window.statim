@@ -8,8 +8,13 @@
 	</foreach>
 	
 	<if {items.Count > 6} >
+<<<<<<< Updated upstream
 		<text Content="aa"/>
 		
+=======
+		<text Content={"aa"}/>
+
+>>>>>>> Stashed changes
 	</if>
  
 </vertical>
