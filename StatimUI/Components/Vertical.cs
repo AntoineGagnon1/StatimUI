@@ -26,7 +26,7 @@ namespace StatimUI.Components
             Console.WriteLine(Parent != null);
             Children.AddRange(slots);
 
-            Padding = new ValueProperty<Vector4>(new Vector4(30, 30, 10, 10));
+            Padding = new ValueProperty<Thickness>(new Thickness(30, 30, 10, 10));
         }
 
         public override bool Update()
@@ -56,10 +56,10 @@ namespace StatimUI.Components
                 child.Position.Value = new (child.Position.Value.X, currHeight);
                 currHeight += child.TotalPixelHeight;
 
-                Width.Value.Scalar = Math.Max(child.Width.Value.Scalar + Padding.Value.X + Padding.Value.Z, Width.Value.Scalar);
+                Width.Value.Scalar = Math.Max(child.Width.Value.Scalar + Padding.Value.Left + Padding.Value.Right, Width.Value.Scalar);
             }
 
-            Height.Value.Scalar = currHeight + Padding.Value.Y + Padding.Value.W;
+            Height.Value.Scalar = currHeight + Padding.Value.Top + Padding.Value.Bottom;
 
             return HasSizeChanged();
         }

@@ -12,7 +12,7 @@ namespace StatimUI.Components
     [Component("text")]
     public class TextComponent : Component
     {
-        public Property<string> Content;
+        public Property<string> Content = new ValueProperty<string>("");
 
         public override void Render(Vector2 offset)
         {
@@ -35,12 +35,11 @@ namespace StatimUI.Components
             if ((new Random()).NextDouble() > 0.9995d)
                 Height.Value.Scalar += 2f;
 
-<<<<<<< Updated upstream
+
             Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X;
-=======
-            if (CanSetWidth)
-                Width.Value = ImGuiNET.ImGui.CalcTextSize(Content.Value).X;
->>>>>>> Stashed changes
+
+            /*if (CanSetWidth)
+                Width.Value = ImGuiNET.ImGui.CalcTextSize(Content.Value).X;*/
 
             return HasSizeChanged();
         }

@@ -10,7 +10,7 @@ namespace StatimUI.Components
     [Component("if")]
     public class If : Component
     {
-        public Property<bool> Condition;
+        public Property<bool> Condition = new ValueProperty<bool>(false);
         private IList<Component>? _slots;
 
         public If()

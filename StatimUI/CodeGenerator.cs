@@ -187,15 +187,10 @@ namespace StatimUIXmlComponents
         public override bool Update() 
         {{ 
             Children[0].Update(); 
-<<<<<<< Updated upstream
-            Width.Value.Scalar = Children[0].TotalPixelWidth + Padding.Value.X + Padding.Value.Z;
-            Height.Value.Scalar = Children[0].TotalPixelHeight + Padding.Value.Y + Padding.Value.W;
-=======
-            if(WidthUnit == AutoSizeUnit.Auto)
-                Width.Value = Children[0].TotalPixelWidth + Padding.Value.X + Padding.Value.Z;
-            if(HeightUnit == AutoSizeUnit.Auto)
-                Height.Value = Children[0].TotalPixelHeight + Padding.Value.Y + Padding.Value.W;
->>>>>>> Stashed changes
+
+            Width.Value.Scalar = Children[0].TotalPixelWidth + Padding.Value.Left + Padding.Value.Right;
+            Height.Value.Scalar = Children[0].TotalPixelHeight + Padding.Value.Top + Padding.Value.Bottom;
+
             return HasSizeChanged();
         }}
 
@@ -289,25 +284,25 @@ namespace StatimUIXmlComponents
             }
             else
             {
-                /*if (name == "padding" || name == "margin")
+                // todo change to lowercase
+                if (name == "Padding" || name == "Margin")
                 {
                     var numbers = value.Replace(" ", "").Split(',');
                     string thickness;
                     if (numbers.Length == 1)
-                        thickness = $"new Thickness({numbers[0]});";
+                        thickness = $"new Thickness({numbers[0]})";
                     else if (numbers.Length == 4)
-                        thickness = $"new Thickness({numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]});";
+                        thickness = $"new Thickness({numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]})";
                     else
                         throw new Exception("A padding or a margin declartion must either follow this syntax: \"n\" or this one: \"n, n, n, n\"");
 
-                    content.AppendLine($"{variableName}.{name} = {thickness}");
+                    content.AppendLine($"{variableName}.{name}.Value = {thickness};");
                 }
-                else*/
-                //{
+                else
+                {
                 // TODO: Enums
-                //  content.AppendLine($"{variableName}.{name} = new ValueProperty<__UNKNOWN_TYPE>(Convert.ChangeType({value}, typeof(__UNKNOWN_TYPE)));");
-                //}
-                throw new Exception("no value at the moment lol.");
+                    content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToValueProperty(\"{value}\");");
+                }
             }
         }
 

@@ -11,6 +11,8 @@ namespace StatimUI
     /// </summary>
     public struct Thickness
     {
+        public static readonly Thickness Zero = new();
+
         public float Left { get; set; }
         public float Top { get; set; }
         public float Right { get; set; }

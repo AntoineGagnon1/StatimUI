@@ -10,7 +10,7 @@ namespace StatimUI.Components
     [Component("textInput")]
     public class TextInputComponent : Component
     {
-        public Property<string> Content;
+        public Property<string> Content = new ValueProperty<string>(string.Empty);
 
         public override void Render(Vector2 offset)
         {

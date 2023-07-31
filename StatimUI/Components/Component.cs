@@ -39,15 +39,19 @@ namespace StatimUI
         #endregion // Position
 
         // TODO : change to custom type with top/bottom/right/left
-        public Property<Vector4> Padding { get; set; } = new ValueProperty<Vector4>(Vector4.Zero);
-        public Vector2 TopLeftPadding => new Vector2(Padding.Value.X, Padding.Value.Y);
-        public Vector2 BottomRightPadding => new Vector2(Padding.Value.Z, Padding.Value.W);
+        public Property<Thickness> Padding { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
+        public Vector2 TopLeftPadding => new Vector2(Padding.Value.Left, Padding.Value.Top);
+        public Vector2 BottomRightPadding => new Vector2(Padding.Value.Right, Padding.Value.Bottom);
 
         private float oldWidth = 0, oldHeight = 0; // Used by HasSizeChanged()
 
         public abstract void Start(IList<Component> slots);
 
-        // Return true if the component changed the layout
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Whether the component has updated its layout</returns>
         abstract public bool Update();
         abstract public void Render(Vector2 offset);
 

@@ -29,7 +29,7 @@ namespace StatimUI
         // These methods are used in the code gen to be able to type infer without finding the type in the syntax tree
         // For exemple, the code will look like that: Property = Property.ToOneWayProperty(() => some_variable);
         // instead of Property = new OneWayProperty<Unknown_Type_Here>(...)
-        public ValueProperty<T> ToValueProperty(T value) => new ValueProperty<T>(value);
+        public ValueProperty<T> ToValueProperty(string input) => ValueProperty<T>.FromString(input);
         public OneWayProperty<T> ToOneWayProperty(Func<T> getter) => new OneWayProperty<T>(getter);
         public TwoWayProperty<T> ToTwoWayProperty(Func<T> getter, Action<T> setter) => new TwoWayProperty<T>(getter, setter);
 
@@ -47,6 +47,14 @@ namespace StatimUI
 
     public class ValueProperty<T> : Property<T>
     {
+        public static IStringConverter<T>? StringConverter;
+        public static ValueProperty<T> FromString(string input)
+        {
+            if (StringConverter != null)
+                return new ValueProperty<T>(StringConverter.ToValue(input));
+
+            return new ValueProperty<T>((T)Convert.ChangeType(input, typeof(T)));
+        }
 
         public ValueProperty(T value)
         {

@@ -2,19 +2,13 @@
 	List<string> items = new List<string> { "1", "2", "3", "4" };
 </script>
 
-<vertical>
+<vertical Padding="4">
 	<foreach {item} in {items}>
 		<text Content={item + "bonjour"}/>
 	</foreach>
 	
-	<if {items.Count > 6} >
-<<<<<<< Updated upstream
+	<if {items.Count > 6} >	
 		<text Content="aa"/>
-		
-=======
-		<text Content={"aa"}/>
-
->>>>>>> Stashed changes
 	</if>
  
 </vertical>

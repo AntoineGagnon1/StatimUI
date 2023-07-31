@@ -15,8 +15,8 @@ namespace StatimUI.Components
     {
         public Func<object, List<Component>> ComponentsCreator;
 
-        public Property<IEnumerable<object>> Items;
-        public List<object> lastItems = new();
+        public Property<IEnumerable<object>> Items = new ValueProperty<IEnumerable<object>>(new object[] {});
+        private List<object> lastItems = new();
         public int StartIndex, Count;
 
         public override void Start(IList<Component> slots)
