@@ -18,7 +18,7 @@ namespace StatimUI.Components
         {
             if (Visible)
             {
-                ImGuiNET.ImGui.SetCursorPos(offset + Position.Value);
+                ImGuiNET.ImGui.SetCursorPos(offset + DrawPosition);
                 ImGuiNET.ImGui.Text(Content.Value);
             }
         }
@@ -28,6 +28,7 @@ namespace StatimUI.Components
             Console.WriteLine(Parent != null);
             MinWidth.Value = new Dimension(10.0f, DimensionUnit.Pixel);
             MinHeight.Value = new Dimension(14.0f, DimensionUnit.Pixel);
+            Margin.Value = new Thickness(10, 0, 10, 10);
         }
         
         override public bool Update()
