@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatimUI", "StatimUI\StatimUI.csproj", "{69A8ACE0-F59F-4598-BE30-B8F3176B9932}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OldStatimUI", "OldStatimUI\OldStatimUI.csproj", "{69A8ACE0-F59F-4598-BE30-B8F3176B9932}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.csproj", "{B40D1B66-3A4A-4906-B066-F8B82C6FC88F}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -13,6 +13,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{9BF21280-4284-406B-A028-170B23F61951}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatimLanguage", "StatimLanguage\StatimLanguage.csproj", "{D6432C01-B826-4204-9774-52DC5274D01C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatimUI", "StatimUI\StatimUI.csproj", "{A17E5574-2279-4D49-B43B-A25F08EBDC8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,6 +76,22 @@ Global
 		{D6432C01-B826-4204-9774-52DC5274D01C}.Release|x64.Build.0 = Release|Any CPU
 		{D6432C01-B826-4204-9774-52DC5274D01C}.Release|x86.ActiveCfg = Release|x86
 		{D6432C01-B826-4204-9774-52DC5274D01C}.Release|x86.Build.0 = Release|x86
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|arm64.Build.0 = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|x64.Build.0 = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Debug|x86.Build.0 = Debug|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|arm64.ActiveCfg = Release|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|arm64.Build.0 = Release|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|x64.ActiveCfg = Release|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|x64.Build.0 = Release|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|x86.ActiveCfg = Release|Any CPU
+		{A17E5574-2279-4D49-B43B-A25F08EBDC8D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

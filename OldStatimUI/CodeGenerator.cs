@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using StatimUI.Components;
 using Microsoft.CodeAnalysis.Text;
 using System.Globalization;
-using System.IO;
 
 namespace StatimUI
 {
@@ -112,16 +111,7 @@ namespace StatimUI
         private static GenericNameSyntax CreateGenericType(string name, TypeSyntax genericType)
             => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { genericType })));
 
-        private struct PreParseResult
-        {
-            public string Script, Child;
-
-            public PreParseResult(string script, string child)
-            {
-                Script = script;
-                Child = child;
-            }
-        }
+        private record struct PreParseResult(string Script, string Child) { }
         private static PreParseResult XMLPreParse(Stream stream)
         {
             const string scriptStartTag = "<script>";
@@ -242,7 +232,7 @@ namespace StatimUIXmlComponents
                 InitProperty(content, variableName, property.Name, property.Value, property.Type);
             }
 
-            startMethods.Add($"{variableName}.Start(new List<Component> {{ {string.Join(",", childNames)} }});");
+            startMethods.Add($"{variableName}.Start(new List<Component> {{ {string.Join(',', childNames)} }});");
         }
 
         private static void InitForeach(ScriptBuilder content, List<string> startMethods, ForEachSyntax foreachSyntax, string variableName, string parentName)
@@ -271,7 +261,7 @@ namespace StatimUIXmlComponents
 
             AddStartMethods(foreachContent, foreachStartMethods);
 
-            foreachContent.AppendLine($"return new List<Component> {{ {string.Join(",", childNames)} }};");
+            foreachContent.AppendLine($"return new List<Component> {{ {string.Join(',', childNames)} }};");
             foreachContent.Unindent();
             foreachContent.AppendLine("};");
 
@@ -332,8 +322,8 @@ namespace StatimUIXmlComponents
                 content.AppendLine(startMethods[i]);
         }
 
-        private static bool IsBinding(string value) => value.StartsWith("{") && value.EndsWith("}");
-        private static bool IsTwoWayBinding(string value) => value.StartsWith("{bind ") && value.EndsWith("}");
+        private static bool IsBinding(string value) => value.StartsWith('{') && value.EndsWith('}');
+        private static bool IsTwoWayBinding(string value) => value.StartsWith("{bind ") && value.EndsWith('}');
         private static string GetBindingContent(string value)
         {
             if(IsBinding(value))

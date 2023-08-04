@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace StatimUI.Attributes
+﻿namespace StatimUI.Attributes
 {
     public class ToDashCaseAttribute : Attribute
     {

@@ -40,8 +40,7 @@ namespace StatimUI
                     if (stream == null)
                         continue;
 
-                    var parts = name.Split('.');
-                    var tree = CodeGenerator.Parse(parts[parts.Length - 2], stream);
+                    var tree = CodeGenerator.Parse(name.Split('.')[^2], stream);
                     trees.Add(tree);
                 }
             }
@@ -98,7 +97,6 @@ namespace StatimUI
             yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll"));
             yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Collections.dll"));
             yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Numerics.Vectors.dll"));
-            yield return MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "netstandard.dll"));
         }
     }
 }

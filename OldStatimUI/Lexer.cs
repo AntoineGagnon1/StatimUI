@@ -122,12 +122,11 @@ namespace StatimUI
     {
         public static Match Emtpy => new Match();
 
-        internal TextSpan Content;
+        internal TextSpan Content = new (string.Empty, 0, 0);
         internal int Length;
 
         public Match(int length)
         {
-            Content = new(string.Empty, 0, 0);
             Length = length;
         }
 
