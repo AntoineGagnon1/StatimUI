@@ -2,9 +2,9 @@
 	List<string> items = new List<string> { "1", "2", "3", "4" };
 </script>
 
-<vertical Padding="4">
+<vertical Padding="16, 12, 10, 5" Width="auto" Height="auto">
 	<foreach {item} in {items}>
-		<text Content={item + "bonjour"}/>
+		<text Content={item + "bonjourrrrrrrrrrrrbonjourrrrrrrrrrrrbonjourrrrrrrrrrrr"} Margin="0, 0, 0, 25"/>
 	</foreach>
 	
 	<if {items.Count > 6} >	

@@ -25,8 +25,6 @@ namespace StatimUI.Components
         {
             Console.WriteLine(Parent != null);
             Children.AddRange(slots);
-
-            Padding = new ValueProperty<Thickness>(new Thickness(30, 30, 10, 10));
         }
 
         public override bool Update()
@@ -59,7 +57,8 @@ namespace StatimUI.Components
                 Width.Value.Scalar = Math.Max(child.TotalPixelWidth + Padding.Value.Left + Padding.Value.Right, Width.Value.Scalar);
             }
 
-            Height.Value.Scalar = currHeight + Padding.Value.Top + Padding.Value.Bottom;
+            if (Height.Value.Unit == DimensionUnit.Auto)
+                Height.Value.Scalar = currHeight + Padding.Value.Top + Padding.Value.Bottom;
 
             return HasSizeChanged();
         }

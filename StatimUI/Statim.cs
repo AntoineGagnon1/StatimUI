@@ -41,7 +41,7 @@ namespace StatimUI
                         continue;
 
                     var parts = name.Split('.');
-                    var tree = CodeGenerator.Parse(parts[parts.Length - 2], stream);
+                    var tree = CodeGenerator.GenerateTree(parts[parts.Length - 2], stream);
                     trees.Add(tree);
                 }
             }
