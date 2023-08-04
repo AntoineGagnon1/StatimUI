@@ -21,6 +21,8 @@ namespace StatimUI
     {
         public const string FileExtension = ".statim";
 
+        private static Assembly xmlAssembly;
+
         public static void LoadEmbedded()
         {
             List<SyntaxTree> trees = new List<SyntaxTree>();
@@ -64,8 +66,6 @@ namespace StatimUI
             return instance;
         }
 
-
-        private static Assembly xmlAssembly;
         private static void Compile(List<SyntaxTree> trees)
         {
             using MemoryStream dllStream = new MemoryStream();
@@ -82,6 +82,7 @@ namespace StatimUI
 
             xmlAssembly = Assembly.Load(dllStream.ToArray(), pdbStream.ToArray());
         }
+
         private static IEnumerable<MetadataReference> GetGlobalReferences()
         {
             var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);

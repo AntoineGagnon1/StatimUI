@@ -1,7 +1,7 @@
 ﻿using Sandbox;
 using StatimUI;
 
-//Statim.LoadEmbedded();
+Statim.LoadEmbedded();
 StatimUI.Debug.DebugSettings.ShowLayout = true;
 
 Sandbox.Window window = new Sandbox.Window();

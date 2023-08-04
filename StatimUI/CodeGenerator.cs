@@ -18,7 +18,7 @@ using System.Globalization;
 
 namespace StatimUI
 {
-    public static class CodeGenerator
+    internal static class CodeGenerator
     {
         /*internal static List<SyntaxTree> ResolveUnknownTypes(List<SyntaxTree> trees, Dictionary<string, Dictionary<string, TypeSyntax>> componentTypes)
         {
@@ -51,7 +51,7 @@ namespace StatimUI
             return new();
         }*/
 
-        public static SyntaxTree Parse(string name, Stream stream)
+        internal static SyntaxTree Parse(string name, Stream stream)
         {
             var preParse = XMLPreParse(stream);
 

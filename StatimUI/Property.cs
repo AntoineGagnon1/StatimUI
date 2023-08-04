@@ -53,9 +53,6 @@ namespace StatimUI
             if (StringConverter != null)
                 return new ValueProperty<T>(StringConverter.ToValue(input));
 
-            if (typeof(T).IsEnum)
-                return new ValueProperty<T>((T)Enum.Parse(typeof(T), input));
-
             return new ValueProperty<T>((T)Convert.ChangeType(input, typeof(T)));
         }
 
