@@ -17,7 +17,7 @@ namespace StatimUI.Components
         {
             foreach(var child in Children)
             {
-                child.Render(offset + Padding.Value.TopLeft);
+                child.Render(offset + TopLeftPadding);
             }
         }
 
@@ -56,7 +56,7 @@ namespace StatimUI.Components
                 child.Position.Value = new (child.Position.Value.X, currHeight);
                 currHeight += child.TotalPixelHeight;
 
-                Width.Value.Scalar = Math.Max(child.TotalPixelWidth + Padding.Value.Left + Padding.Value.Right, Width.Value.Scalar);
+                Width.Value.Scalar = Math.Max(child.Width.Value.Scalar + Padding.Value.Left + Padding.Value.Right, Width.Value.Scalar);
             }
 
             Height.Value.Scalar = currHeight + Padding.Value.Top + Padding.Value.Bottom;

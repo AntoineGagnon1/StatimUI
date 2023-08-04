@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,12 +17,6 @@ namespace StatimUI
         public float Top { get; set; }
         public float Right { get; set; }
         public float Bottom { get; set; }
-
-        public float Horizontal => Left + Right;
-        public float Vertical => Top + Bottom;
-
-        public Vector2 TopLeft => new Vector2(Left, Top);
-        public Vector2 BottomRight => new Vector2(Right, Bottom);
 
         public Thickness(float left, float top, float right, float bottom)
         {

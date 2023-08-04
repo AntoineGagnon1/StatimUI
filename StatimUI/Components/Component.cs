@@ -20,10 +20,8 @@ namespace StatimUI
         public Property<Dimension> Width { get; set; } = new ValueProperty<Dimension>(new Dimension(0, DimensionUnit.Auto));
         public Property<Dimension> MinWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
         public Property<Dimension> MaxWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
-        // Size (excluding margins)
         public float PixelWidth => Math.Max(Math.Min(Width.Value.GetPixelSize(Parent), MaxWidth.Value.GetPixelSize(Parent)), MinWidth.Value.GetPixelSize(Parent));
-        // Size (including margins)
-        public float TotalPixelWidth => PixelWidth + Margin.Value.Horizontal;
+        public float TotalPixelWidth => PixelWidth;
         #endregion // Width 
 
         #region Height
@@ -32,18 +30,18 @@ namespace StatimUI
         public Property<Dimension> MinHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
         public Property<Dimension> MaxHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
         public float PixelHeight => Math.Max(Math.Min(Height.Value.GetPixelSize(Parent), MaxHeight.Value.GetPixelSize(Parent)), MinHeight.Value.GetPixelSize(Parent));
-        public float TotalPixelHeight => PixelHeight + Margin.Value.Vertical;
+        public float TotalPixelHeight => PixelHeight;
         #endregion // Height
 
         #region Position
         public Property<Vector2> Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
-        public Vector2 DrawPosition => Position.Value + new Vector2(Margin.Value.Left, Margin.Value.Top);
+        public Vector2 InsideTopLeft => Position.Value;
         #endregion // Position
 
         // TODO : change to custom type with top/bottom/right/left
         public Property<Thickness> Padding { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
-        public Property<Thickness> Margin { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
-
+        public Vector2 TopLeftPadding => new Vector2(Padding.Value.Left, Padding.Value.Top);
+        public Vector2 BottomRightPadding => new Vector2(Padding.Value.Right, Padding.Value.Bottom);
 
         private float oldWidth = 0, oldHeight = 0; // Used by HasSizeChanged()
 

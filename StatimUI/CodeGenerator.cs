@@ -194,7 +194,7 @@ namespace StatimUIXmlComponents
             return HasSizeChanged();
         }}
 
-        public override void Render(System.Numerics.Vector2 offset) => Children[0].Render(offset + Padding.Value.TopLeft);
+        public override void Render(System.Numerics.Vector2 offset) => Children[0].Render(offset + TopLeftPadding);
         
         public override void Start(IList<Component> slots)
         {{
