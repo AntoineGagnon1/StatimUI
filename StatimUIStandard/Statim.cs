@@ -15,6 +15,8 @@ using System.Collections;
 using System.Numerics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+
+
 namespace StatimUI
 {
     public static class Statim
@@ -38,7 +40,8 @@ namespace StatimUI
                     if (stream == null)
                         continue;
 
-                    var tree = CodeGenerator.Parse(name.Split('.')[^2], stream);
+                    var parts = name.Split('.');
+                    var tree = CodeGenerator.Parse(parts[parts.Length - 3], stream);
                     trees.Add(tree);
                 }
             }

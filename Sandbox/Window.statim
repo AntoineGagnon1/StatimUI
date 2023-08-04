@@ -7,7 +7,7 @@
 		<text Content={item + "bonjour"}/>
 	</foreach>
 	
-	<if {items.Count > 6} >	
+	<if {items.Count > 6}>	
 		<text Content="aa"/>
 	</if>
  
