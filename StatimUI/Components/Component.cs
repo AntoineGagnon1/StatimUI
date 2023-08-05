@@ -37,7 +37,7 @@ namespace StatimUI
 
         #region Position
         public Property<Vector2> Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
-        public Vector2 DrawPosition => Position.Value + new Vector2(Margin.Value.Left, Margin.Value.Top);
+        public Vector2 DrawPosition => Position.Value + Margin.Value.TopLeft + Padding.Value.TopLeft;
         #endregion // Position
 
         // TODO : change to custom type with top/bottom/right/left

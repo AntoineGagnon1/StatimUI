@@ -57,8 +57,7 @@ namespace StatimUI.Components
                 Width.Value.Scalar = Math.Max(child.TotalPixelWidth + Padding.Value.Left + Padding.Value.Right, Width.Value.Scalar);
             }
 
-            if (Height.Value.Unit == DimensionUnit.Auto)
-                Height.Value.Scalar = currHeight + Padding.Value.Top + Padding.Value.Bottom;
+            Height.Value.Scalar = currHeight + Padding.Value.Top + Padding.Value.Bottom;
 
             return HasSizeChanged();
         }
