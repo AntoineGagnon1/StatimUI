@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,12 +12,12 @@ namespace StatimUI.Components
 {
     [ToDashCase]
     [Component("foreach")]
-    public class ForEach : Component
+    public class ForEach<T> : Component
     {
-        public Func<object, List<Component>> ComponentsCreator;
+        public Func<T, List<Component>> ComponentsCreator;
 
-        public Property<IEnumerable<object>> Items = new ValueProperty<IEnumerable<object>>(new object[] {});
-        private List<object> lastItems = new();
+        public Property<IEnumerable<T>> Items = new ValueProperty<IEnumerable<T>>(new T[] {});
+        private List<T> lastItems = new();
         public int StartIndex, Count;
 
         public override void Start(IList<Component> slots)
