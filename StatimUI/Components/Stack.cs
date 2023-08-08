@@ -69,11 +69,11 @@ namespace StatimUI.Components
             float total = 0.0f;
             var direction = Direction.Value;
 
-            if (direction == StackDirection.Vertical || direction == StackDirection.VerticalReverse)
+            if (direction == StackDirection.Vertical)
             {
                 foreach (var child in Children)
                 {
-                    child.Position.Value = new(child.Position.Value.X, PixelHeight - total - child.TotalPixelHeight);
+                    child.Position.Value = new(child.Position.Value.X, total);
                     total += child.TotalPixelHeight;
 
                     var childSize = child.TotalPixelWidth + Padding.Value.Left + Padding.Value.Right;
@@ -82,8 +82,7 @@ namespace StatimUI.Components
                 }
             }
 
-            if (Height.Value.Unit == DimensionUnit.Auto)
-                Height.Value.Scalar = total + Padding.Value.Top + Padding.Value.Bottom;
+            Height.Value.Scalar = total + Padding.Value.Top + Padding.Value.Bottom;
 
             return HasSizeChanged();
         }
