@@ -17,7 +17,7 @@ namespace StatimUI.Components
         {
             foreach(var child in Children)
             {
-                child.Render(offset + Padding.Value.TopLeft);
+                child.Render(offset + DrawPosition);
             }
         }
 

@@ -30,7 +30,7 @@ namespace StatimUI
 
             foreach(var child in c.Children)
             {
-                RenderDebug(child, offset + c.Padding.Value.TopLeft);
+                RenderDebug(child, offset + c.DrawPosition);
             }
         }
 #endif
