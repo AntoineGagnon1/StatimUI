@@ -37,9 +37,10 @@ namespace StatimUI
 
         static Window()
         {
-            // todo: find a better place to put this
+            // TODO: find a better place to put this
             ValueProperty<Thickness>.StringConverter = new ThicknessConverter();
             ValueProperty<Dimension>.StringConverter = new DimensionConverter();
+            ValueProperty<Vector2>.StringConverter = new Vector2Converter();
         }
     }
 }

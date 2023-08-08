@@ -168,8 +168,8 @@ namespace StatimUIXmlComponents
         {{ 
             Children[0].Update(); 
 
-            Width.Value.Scalar = Children[0].TotalPixelWidth + Padding.Value.Left + Padding.Value.Right;
-            Height.Value.Scalar = Children[0].TotalPixelHeight + Padding.Value.Top + Padding.Value.Bottom;
+            Width.Value = Width.Value.WithScalar(Children[0].TotalPixelWidth + Padding.Value.Horizontal);
+            Height.Value = Height.Value.WithScalar(Children[0].TotalPixelHeight + Padding.Value.Vertical);
 
             return HasSizeChanged();
         }}

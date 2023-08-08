@@ -35,9 +35,9 @@ namespace StatimUI.Components
         public override bool Update()
         {
             AssertParent();
-            var num = (new Random()).NextDouble();
-            if (num > 0.9995f)
-                ((List<string>)Items.Value).Add(num.ToString());
+            //var num = (new Random()).NextDouble();
+            //if (num > 0.9995f)
+            //    ((List<string>)Items.Value).Add(num.ToString());
 
             int i = 0;
             foreach (var newItem in Items.Value)
