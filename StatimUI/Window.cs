@@ -26,7 +26,7 @@ namespace StatimUI
 #if DEBUG
         private void RenderDebug(Component c, Vector2 offset)
         {
-            Debug.DebugSettings.RenderDebugInfo(c, offset);
+            Debug.DebugSettings.RenderDebugInfo(c, offset + c.DrawPosition);
 
             foreach(var child in c.Children)
             {
@@ -37,9 +37,10 @@ namespace StatimUI
 
         static Window()
         {
-            // todo: find a better place to put this
+            // TODO: find a better place to put this
             ValueProperty<Thickness>.StringConverter = new ThicknessConverter();
             ValueProperty<Dimension>.StringConverter = new DimensionConverter();
+            ValueProperty<Vector2>.StringConverter = new Vector2Converter();
         }
     }
 }

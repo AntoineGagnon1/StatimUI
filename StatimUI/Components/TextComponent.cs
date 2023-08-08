@@ -31,11 +31,11 @@ namespace StatimUI.Components
         
         override public bool Update()
         {
-            if ((new Random()).NextDouble() > 0.9995d)
-                Height.Value.Scalar += 2f;
+            //if ((new Random()).NextDouble() > 0.9995d)
+             //   Height.Value.Scalar += 2f;
 
 
-            Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X + Padding.Value.Horizontal;
+            Width.Value = Width.Value.WithScalar(ImGuiNET.ImGui.CalcTextSize(Content.Value).X + Padding.Value.Horizontal);
 
             return HasSizeChanged();
         }
