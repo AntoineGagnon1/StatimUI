@@ -15,8 +15,8 @@ namespace StatimUI.Components
         public override void Render(Vector2 offset)
         {
             string temp = Content;
-            if (ImGuiNET.ImGui.InputText($"##{this.GetHashCode()}", ref temp, 100))
-                Content.Value = temp;
+            //if (ImGuiNET.ImGui.InputText($"##{this.GetHashCode()}", ref temp, 100))
+            //    Content.Value = temp;
         }
 
         public override void Start(IList<Component> slots)

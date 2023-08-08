@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StatimUI.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,7 +20,11 @@ namespace StatimUI.Components
             if (Visible)
             {
                 ImGuiNET.ImGui.SetCursorPos(offset + DrawPosition);
-                ImGuiNET.ImGui.Text(Content.Value);
+                var startPos = offset + DrawPosition;
+                Vector4 color = new Vector4(1, 0, 0, 1);
+                Renderer.CurrentLayer.AddTriangle(new (startPos, color), new (startPos + new Vector2(20,0), new Vector4(1,0,1,1)), new (startPos + new Vector2(20, 10), color));
+                //ImGuiNET.ImGui.SetCursorPos(offset + DrawPosition);
+                //ImGuiNET.ImGui.Text(Content.Value);
             }
         }
 
@@ -35,7 +40,7 @@ namespace StatimUI.Components
                 Height.Value.Scalar += 2f;
 
 
-            Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X + Padding.Value.Horizontal;
+            //Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X + Padding.Value.Horizontal;
 
             return HasSizeChanged();
         }

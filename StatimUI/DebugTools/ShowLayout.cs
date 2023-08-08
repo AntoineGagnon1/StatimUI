@@ -35,17 +35,17 @@ namespace StatimUI.Debug
 
             // Margins
             uint marginColor = color | 0xFF000000;
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(marginTopLeft, bottomLeft, marginColor);
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(topLeft, marginTopRight, marginColor);
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(topRight, marginBottomRight, marginColor);
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(marginBottomLeft, bottomRight, marginColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(marginTopLeft, bottomLeft, marginColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(topLeft, marginTopRight, marginColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(topRight, marginBottomRight, marginColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(marginBottomLeft, bottomRight, marginColor);
 
             // Padding
             uint paddingColor = color | 0x50000000;
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(topLeft, paddingBottomLeft, paddingColor);
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(paddingTopLeft, topRight, paddingColor);
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(paddingTopRight, bottomRight, paddingColor);
-            ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(bottomLeft, paddingBottomRight, paddingColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(topLeft, paddingBottomLeft, paddingColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(paddingTopLeft, topRight, paddingColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(paddingTopRight, bottomRight, paddingColor);
+            //ImGuiNET.ImGui.GetForegroundDrawList().AddRectFilled(bottomLeft, paddingBottomRight, paddingColor);
         }
     }
 #endif

@@ -1,10 +1,15 @@
 ﻿//using Sandbox;
+using Sandbox.Adapters;
 using StatimUI;
 
 Statim.LoadEmbedded();
 StatimUI.Debug.DebugSettings.ShowLayout = true;
 
-Sandbox.Window window = new Sandbox.Window();
+var statimWindow = new StatimUI.Window();
+statimWindow.Root = Statim.CreateComponent("Window");
+
+Sandbox.Window window = new Sandbox.Window(statimWindow);
+
 
 window.Run();
 

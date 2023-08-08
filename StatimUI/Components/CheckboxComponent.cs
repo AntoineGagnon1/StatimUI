@@ -31,11 +31,11 @@ namespace StatimUI.Components
         public override void Render(Vector2 offset)
         {
             bool temp = value;
-            if (ImGuiNET.ImGui.Checkbox($"##{this.GetHashCode()}", ref temp))
-            {
-                value.Value = temp;
-                OnChange(temp);
-            }
+            //if (ImGuiNET.ImGui.Checkbox($"##{this.GetHashCode()}", ref temp))
+            //{
+            //    value.Value = temp;
+            //    OnChange(temp);
+            //}
         }
     }
 }

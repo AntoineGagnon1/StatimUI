@@ -19,7 +19,7 @@ namespace StatimUI
 
             Root.Render(Vector2.Zero);
 #if DEBUG
-            RenderDebug(Root, ImGuiNET.ImGui.GetWindowPos());
+            RenderDebug(Root, Vector2.Zero);
 #endif
         }
 
