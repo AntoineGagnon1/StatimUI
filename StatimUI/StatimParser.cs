@@ -210,7 +210,7 @@ namespace StatimUI
                     return new PropertySyntax(content, type, name.ToString());
                 }
 
-                throw new Exception("A property name must be followed by an equal sign");
+                return new PropertySyntax("true", PropertyType.Value, name.ToString());
             }
 
             return null;
@@ -316,13 +316,13 @@ namespace StatimUI
                         return MatchIf(lexer);
 
                     var properties = new List<PropertySyntax>();
-                    while (true)
-                    {
-                        var property = MatchProperty(lexer);
-                        if (property == null)
-                            break;
 
+                    var property = MatchProperty(lexer);
+                    while (property != null)
+                    {
                         properties.Add(property);
+
+                        property = MatchProperty(lexer);
                     }
 
                     if (lexer.Current.Type == TokenType.Slash)
