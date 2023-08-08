@@ -34,7 +34,7 @@ namespace StatimUI
             throw new InvalidDataException($"Invalid SizeUnit value : {Unit}({(int)Unit})");
         }
 
-        public Dimension WithScalar(float scalar) => new Dimension(scalar, Unit);
+        public Dimension WithScalar(float scalar) => new Dimension(Unit == DimensionUnit.Auto ? scalar : Scalar, Unit);
         public Dimension WithUnit(DimensionUnit unit) => new Dimension(Scalar, unit);
     }
 }

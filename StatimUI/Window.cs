@@ -26,11 +26,11 @@ namespace StatimUI
 #if DEBUG
         private void RenderDebug(Component c, Vector2 offset)
         {
-            Debug.DebugSettings.RenderDebugInfo(c, offset + c.DrawPosition);
+            Debug.DebugSettings.RenderDebugInfo(c, offset);
 
             foreach(var child in c.Children)
             {
-                RenderDebug(child, offset + c.Padding.Value.TopLeft);
+                RenderDebug(child, offset + c.DrawPosition);
             }
         }
 #endif
