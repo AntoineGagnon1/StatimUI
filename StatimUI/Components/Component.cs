@@ -18,6 +18,7 @@ namespace StatimUI
         public Component? Parent { get; set; }
 
         #region Width
+        // TODO : Discusting
         public Property<Dimension> Width { get; set; } = new ValueProperty<Dimension>(new Dimension(0, DimensionUnit.Auto));
         public Property<Dimension> MinWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
         public Property<Dimension> MaxWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
@@ -40,6 +41,7 @@ namespace StatimUI
         public Vector2 DrawPosition => Position.Value + Margin.Value.TopLeft + Padding.Value.TopLeft;
         #endregion // Position
 
+        // TODO : change to custom type with top/bottom/right/left
         public Property<Thickness> Padding { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
         public Property<Thickness> Margin { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
 

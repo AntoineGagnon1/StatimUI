@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis.Operations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,17 +8,25 @@ using System.Threading.Tasks;
 namespace StatimUI
 {
     public enum DimensionUnit { Pixel, Decimal, Auto }
-    public readonly struct Dimension
+    public class Dimension
     {
         public Dimension(float scalar, DimensionUnit unit)
         {
-            Scalar = scalar;
+            _scalar = scalar;
             Unit = unit;
         }
 
-        public readonly float Scalar;
-
-        public readonly DimensionUnit Unit;
+        private float _scalar = 0f;
+        public float Scalar 
+        {
+            get => _scalar;
+            set
+            {
+                if (Unit == DimensionUnit.Auto)
+                    _scalar = value;
+            }
+        }
+        public DimensionUnit Unit { get; set; }
 
         public float GetPixelSize(Component? parent)
         {
@@ -33,8 +40,5 @@ namespace StatimUI
             }
             throw new InvalidDataException($"Invalid SizeUnit value : {Unit}({(int)Unit})");
         }
-
-        public Dimension WithScalar(float scalar) => new Dimension(scalar, Unit);
-        public Dimension WithUnit(DimensionUnit unit) => new Dimension(Scalar, unit);
     }
 }
