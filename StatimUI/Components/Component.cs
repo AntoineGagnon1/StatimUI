@@ -15,6 +15,7 @@ namespace StatimUI
 
         public ChildList Children { get; } = new();
 
+
         public Component? Parent { get; set; }
 
         #region Width
