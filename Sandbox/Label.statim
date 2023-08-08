@@ -3,10 +3,9 @@
 	public int b;
 </script>
 
-<vertical>
-	<vertical>	
-		<text Content="{50}"/>
-	</vertical>
-	
-</vertical>
+<stack>
+	<stack>	
+		<text Content="{50.ToString()}"/>
+	</stack>
+</stack>
 

@@ -360,9 +360,9 @@ namespace StatimUI
             return null;
         }
 
-        public static ComponentSyntax? Parse(string xml)
+        public static ComponentSyntax? Parse(string statim)
         {
-            lexer.Text = xml;
+            lexer.Reset(statim);
 
             var watch = Stopwatch.StartNew();
             lexer.MoveNext();

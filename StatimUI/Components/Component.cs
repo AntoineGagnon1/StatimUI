@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StatimUI.Components;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -49,6 +50,7 @@ namespace StatimUI
 
         public abstract void Start(IList<Component> slots);
 
+        protected static ForEach<T> CreateForEach<T>(IEnumerable<T> _) => new ForEach<T>();
 
         /// <summary>
         /// 

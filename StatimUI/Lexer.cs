@@ -72,7 +72,12 @@ namespace StatimUI
         public string Text;
         public Token<T> Current;
         private T invalid;
-        private List<TokenDefinition<StatimParser.TokenType>> tokens;
+
+        public void Reset(string text)
+        {
+            Text = text;
+            pos = 0;
+        }
 
         internal void MoveNext()
         {

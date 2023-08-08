@@ -219,10 +219,11 @@ namespace StatimUIXmlComponents
         {
             var foreachContent = new ScriptBuilder();
             var foreachStartMethods = new List<string>();
+            
+            content.AppendLine($"var {variableName} = CreateForEach({foreachSyntax.Items});");
+            InitProperty(content, variableName, "Items", foreachSyntax.Items, PropertyType.OneWay);
 
-            content.AppendLine($"ForEach {variableName} = new {GetComponentName(foreachSyntax.Name)}();");
-
-            foreachContent.AppendLineNoIndent($"Func<object, List<Component>> {variableName}_foreach = ({foreachSyntax.Item}) => {{");
+            foreachContent.AppendLineNoIndent($"{variableName}.ComponentsCreator = ({foreachSyntax.Item}) => {{");
             foreachContent.Indent();
 
 
@@ -245,10 +246,7 @@ namespace StatimUIXmlComponents
             foreachContent.Unindent();
             foreachContent.AppendLine("};");
 
-            InitProperty(content, variableName, "Items", foreachSyntax.Items, PropertyType.OneWay);
-
             foreachContent.AppendLine($"{variableName}.Start(new List<Component> {{ }});");
-            foreachContent.AppendLine($"{variableName}.ComponentsCreator = {variableName}_foreach;");
             startMethods.Add(foreachContent.ToString());
         }
 

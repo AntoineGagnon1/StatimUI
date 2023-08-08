@@ -6,9 +6,6 @@
 	<foreach {item} in {items}>
 		<text Content={item + "bonjourrrrrrrrrrrrbonjourrrrrrrrrrrrbonjourrrrrrrrrrrr"} Margin="10, 0, 10, 10" Padding="5, 5, 5, 0"/>
 	</foreach>
-	
-	<if {items.Count > 6} >	
-		<text Content="aa"/>
-	</if>
+
  
-</vertical>
+</stack>
