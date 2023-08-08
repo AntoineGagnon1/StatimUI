@@ -19,7 +19,6 @@ namespace StatimUI.Components
         {
             if (Visible)
             {
-                ImGuiNET.ImGui.SetCursorPos(offset + DrawPosition);
                 var startPos = offset + DrawPosition;
                 Vector4 color = new Vector4(1, 0, 0, 1);
                 Renderer.CurrentLayer.AddTriangle(new (startPos, color), new (startPos + new Vector2(20,0), new Vector4(1,0,1,1)), new (startPos + new Vector2(20, 10), color));
