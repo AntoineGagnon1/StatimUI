@@ -1,11 +1,10 @@
 ﻿<script>
 	List<string> items = new List<string> { "1", "2", "3", "4" };
+	Dimension dimension = new Dimension(150f, DimensionUnit.Auto);
 </script>
 
 <vertical Padding="30, 30, 10, 10" Width="auto" Height="auto" Margin="20, 10, 7, 30" Position={new System.Numerics.Vector2(20, 90)}>
 	<foreach {item} in {items}>
-		<text Content={item + "bonjourrrrrrrrrrrrbonjourrrrrrrrrrrrbonjourrrrrrrrrrrr"} Margin="10, 0, 10, 10" Padding="5, 5, 5, 0"/>
+		<text Content={item} Margin="0, 10, 10, 10" Padding="0, 0, 0, 0" Width="20" Height="20"/>
 	</foreach>
-
- 
 </stack>
