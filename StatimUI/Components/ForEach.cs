@@ -35,9 +35,9 @@ namespace StatimUI.Components
         public override bool Update()
         {
             AssertParent();
-            var num = (new Random()).NextDouble();
+            /*var num = (new Random()).NextDouble();
             if (num > 0.9995f)
-                ((List<string>)Items.Value).Add(num.ToString());
+                ((List<string>)Items.Value).Add(num.ToString());*/
 
             int i = 0;
             foreach (var newItem in Items.Value)
@@ -74,7 +74,7 @@ namespace StatimUI.Components
             return false;
         }
 
-        public override void Render(Vector2 offset)
+        protected override void OnRender(Vector2 offset)
         {
             
         }

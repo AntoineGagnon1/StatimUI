@@ -32,11 +32,11 @@ namespace StatimUI.Components
         public Property<StackCrossAlign> CrossAlign = new ValueProperty<StackCrossAlign>(StackCrossAlign.Start);
         private int lastChildrenCount = 0;
 
-        public override void Render(Vector2 offset)
+        protected override void OnRender(Vector2 drawPosition)
         {
             foreach(var child in Children)
             {
-                child.Render(offset + DrawPosition);
+                child.Render(drawPosition);
             }
         }
 
@@ -68,51 +68,45 @@ namespace StatimUI.Components
         {
             var layout = GetLayout();
 
-            foreach (var child in layout.Children)
+            if (Direction.Value == StackDirection.Horizontal || Direction.Value == StackDirection.HorizontalReverse)
             {
-                child.Position.Value = GetChildPos(child, layout.Pos, layout.SubstractWidth, layout.SubstractHeight);
-                layout.Pos = GetNewLayoutPos(child, layout.Direction, layout.Pos, layout.Spacing);
+                foreach (var child in layout.Children)
+                {
+                    child.Position.Value = GetChildPos(child, new Vector2(layout.MainPos, layout.CrossPos), layout.SubstractMain, layout.SubstractCross);
+                    if (layout.DirectionReversed)
+                        layout.MainPos -= child.TotalPixelWidth + layout.Spacing;
+                    else
+                        layout.MainPos += child.TotalPixelWidth + layout.Spacing;
 
-                ResizeCrossAxis(child, layout.Direction);
+                    Height.Value = Height.Value.WithScalar(Math.Max(child.TotalPixelHeight + Padding.Value.Vertical, Height.Value.Scalar));
+                }
+
+                Width.Value = Width.Value.WithScalar(layout.MainPos + Padding.Value.Horizontal);
+            }
+            else
+            {
+                foreach (var child in layout.Children)
+                {
+                    child.Position.Value = GetChildPos(child, new Vector2(layout.CrossPos, layout.MainPos), layout.SubstractCross, layout.SubstractMain);
+                    if (layout.DirectionReversed)
+                        layout.MainPos -= child.TotalPixelHeight + layout.Spacing;
+                    else
+                        layout.MainPos += child.TotalPixelHeight + layout.Spacing;
+
+                    Width.Value = Width.Value.WithScalar(Math.Max(child.TotalPixelWidth + Padding.Value.Horizontal, Width.Value.Scalar));
+                }
+
+                Height.Value = Height.Value.WithScalar(layout.MainPos + Padding.Value.Vertical);
             }
 
-            ResizedMainAxis(layout.Pos, layout.Direction);
+            //ResizeMainAxis(layout.Pos, layout.Direction);
 
             return HasSizeChanged();
         }
 
-        private void ResizedMainAxis(Vector2 pos, StackDirection direction)
-        {
-            if (direction == StackDirection.Vertical || direction == StackDirection.VerticalReverse)
-                Height.Value = Height.Value.WithScalar(pos.Y + Padding.Value.Vertical);
-            else
-                Width.Value = Width.Value.WithScalar(pos.X + Padding.Value.Horizontal);
-        }
 
-        private void ResizeCrossAxis(Component child, StackDirection direction)
-        {
-            if (direction == StackDirection.Vertical || direction == StackDirection.VerticalReverse)
-                Width.Value = Width.Value.WithScalar(Math.Max(child.TotalPixelWidth + Padding.Value.Horizontal, Width.Value.Scalar));
-            else
-                Height.Value = Height.Value.WithScalar(Math.Max(child.TotalPixelHeight + Padding.Value.Vertical, Height.Value.Scalar));
-        }
-
-        private Vector2 GetNewLayoutPos(Component child, StackDirection direction, Vector2 pos, float spacing)
-        {
-            if (direction == StackDirection.Vertical)
-                pos.Y += child.TotalPixelHeight + spacing;
-            else if (direction == StackDirection.VerticalReverse)
-                pos.Y -= child.TotalPixelHeight + spacing;
-            else if (direction == StackDirection.Horizontal)
-                pos.X += child.TotalPixelWidth + spacing;
-            else if (direction == StackDirection.HorizontalReverse)
-                pos.X -= child.TotalPixelWidth + spacing;
-
-            return pos;
-        }
-
-        private Vector2 GetChildPos(Component child, Vector2 pos,SubstractSize subWidth, SubstractSize subHeight)
-        {
+        private static Vector2 GetChildPos(Component child, Vector2 pos,SubstractSize subWidth, SubstractSize subHeight)
+        {  
             if (subWidth == SubstractSize.Full)
                 pos.X -= child.TotalPixelWidth;
             else if (subWidth == SubstractSize.Half)
@@ -132,143 +126,112 @@ namespace StatimUI.Components
         }
         private struct Layout
         {
-            public Vector2 Pos;
-            public IEnumerable<Component> Children;
-            public SubstractSize SubstractWidth;
-            public SubstractSize SubstractHeight;
-            public StackDirection Direction;
+            public float MainPos;
+            public float CrossPos;
             public float Spacing;
+            public IEnumerable<Component> Children;
+            public bool DirectionReversed;
+            public SubstractSize SubstractMain;
+            public SubstractSize SubstractCross;
 
-            public Layout(Vector2 pos, IEnumerable<Component> children, StackDirection direction, SubstractSize substractWidth = SubstractSize.None, SubstractSize substractHeight = SubstractSize.None, float spacing = 0)
-            {
-                Pos = pos;
-                Children = children;
-                Direction = direction;
-                SubstractWidth = substractWidth;
-                SubstractHeight = substractHeight;
-                Spacing = 0;
-            }
         }
         private Layout GetLayout()
         {
+            var layout = new Layout();
+            bool reverse = false;
+            var visibleChildren = VisibleChildren;
+
             var align = Align.Value;
+            if (IsReversed())
+            {
+                reverse = true;
+                if (align == StackAlign.Start)
+                    align = StackAlign.End;
+                else if (align == StackAlign.End)
+                    align = StackAlign.Start;
+            }
             var crossAlign = CrossAlign.Value;
-            var direction = Direction.Value;
-            var layout = new Layout(new Vector2(0f), Children, StackDirection.Horizontal);
 
-            float innerWidth = PixelWidth - Padding.Value.Horizontal;
-            float innerHeight = PixelHeight - Padding.Value.Vertical;
-            if (direction == StackDirection.Vertical)
+            if (align == StackAlign.Center)
             {
-                if (align == StackAlign.Start)
-                {
-                    layout.Direction = StackDirection.Vertical;
-                }
-                else if (align == StackAlign.Center)
-                {
-                    layout.Direction = StackDirection.Vertical;
-                    layout.Pos.Y = innerHeight * 0.5f - GetTotalChildrenHeight() * 0.5f;
-                }
-                else if (align == StackAlign.End)
-                {
-                    layout.Direction = StackDirection.VerticalReverse;
-                    layout.Pos.Y = innerHeight;
-                    layout.SubstractHeight = SubstractSize.Full;
-                    layout.Children = Children.ReverseList();
-                }
-                else if (align == StackAlign.SpaceBetween)
-                {
-                    layout.Direction = StackDirection.Vertical;
-                    layout.Spacing = (innerHeight - GetTotalChildrenHeight()) / (float)(Children.Count - 1);
-                }
-                else if (align == StackAlign.SpaceAround)
-                {
-                    layout.Direction = StackDirection.Vertical;
-                    layout.Spacing = (innerHeight - GetTotalChildrenHeight()) / (float)Children.Count;
-                    layout.Pos.Y = layout.Spacing / 2f;
-                }
-                else if (align == StackAlign.SpaceEvenly)
-                {
-                    layout.Direction = StackDirection.Vertical;
-                    layout.Spacing = (innerHeight - GetTotalChildrenHeight()) / (float)(Children.Count + 1);
-                    layout.Pos.Y = layout.Spacing;
-                }
-
-                // nothing to do with StackCrossAlign.Start
-                if (crossAlign == StackCrossAlign.Center)
-                {
-                    layout.Pos.X = innerWidth * 0.5f;
-                    layout.SubstractWidth = SubstractSize.Half;
-                }
-                else if (crossAlign == StackCrossAlign.End)
-                {
-                    layout.Pos.X = innerWidth;
-                    layout.SubstractWidth = SubstractSize.Full;
-                }
+                layout.MainPos = MainInnerSize() * 0.5f - GetChildrenMainSize(visibleChildren) * 0.5f;
             }
-            else if (direction == StackDirection.Horizontal)
+            else if (align == StackAlign.End)
             {
-                if (align == StackAlign.Start)
-                {
-                    layout.Direction = StackDirection.Horizontal;
-                }
-                else if (align == StackAlign.Center)
-                {
-                    layout.Direction = StackDirection.Horizontal;
-                    layout.Pos.X = innerWidth * 0.5f - GetTotalChildrenWidth() * 0.5f;
-                }
-                else if (align == StackAlign.End)
-                {
-                    layout.Direction = StackDirection.HorizontalReverse;
-                    layout.Pos.X = innerWidth;
-                    layout.SubstractWidth = SubstractSize.Full;
-                    layout.Children = Children.ReverseList();
-                }
-                else if (align == StackAlign.SpaceBetween)
-                {
-                    layout.Direction = StackDirection.Horizontal;
-                    layout.Spacing = (innerWidth - GetTotalChildrenWidth()) / (float)(Children.Count - 1);
-                }
-                else if (align == StackAlign.SpaceAround)
-                {
-                    layout.Direction = StackDirection.Horizontal;
-                    layout.Spacing = (innerWidth - GetTotalChildrenWidth()) / (float)Children.Count;
-                    layout.Pos.X = layout.Spacing / 2f;
-                }
-                else if (align == StackAlign.SpaceEvenly)
-                {
-                    layout.Direction = StackDirection.Horizontal;
-                    layout.Spacing = (innerWidth - GetTotalChildrenWidth()) / (float)(Children.Count + 1);
-                    layout.Pos.X = layout.Spacing;
-                }
-
-                if (crossAlign == StackCrossAlign.Center)
-                {
-                    layout.Pos.Y = innerHeight * 0.5f;
-                    layout.SubstractHeight = SubstractSize.Half;
-                }
-                else if (crossAlign == StackCrossAlign.End)
-                {
-                    layout.Pos.Y = innerHeight;
-                    layout.SubstractHeight = SubstractSize.Full;
-                }
+                reverse = !reverse;
+                layout.DirectionReversed = true;
+                layout.MainPos = MainInnerSize();
+                layout.SubstractMain = SubstractSize.Full;
             }
+            else if (align == StackAlign.SpaceBetween)
+            {
+                layout.Spacing = (MainInnerSize() - GetChildrenMainSize(visibleChildren)) / (float)(visibleChildren.Count - 1);
+            }
+            else if (align == StackAlign.SpaceAround)
+            {
+                layout.Spacing = (MainInnerSize() - GetChildrenMainSize(visibleChildren)) / (float)visibleChildren.Count;
+                layout.MainPos = layout.Spacing / 2f;
+            }
+            else if (align == StackAlign.SpaceEvenly)
+            {
+                layout.Spacing = (MainInnerSize() - GetChildrenMainSize(visibleChildren)) / (float)(visibleChildren.Count + 1);
+                layout.MainPos = layout.Spacing;
+            }
+
+            if (crossAlign == StackCrossAlign.Center)
+            {
+                layout.CrossPos = CrossInnerSize() * 0.5f;
+                layout.SubstractCross = SubstractSize.Half;
+            }
+            else if (crossAlign == StackCrossAlign.End)
+            {
+                layout.CrossPos = CrossInnerSize();
+                layout.SubstractCross = SubstractSize.Full;
+            }
+
+            layout.Children = reverse ? visibleChildren.ReverseList() : visibleChildren;
 
             return layout;
         }
 
-        private float GetTotalChildrenWidth()
+        private bool IsReversed() => Direction.Value == StackDirection.HorizontalReverse || Direction.Value == StackDirection.VerticalReverse;
+
+        private float CrossInnerSize()
+        {
+            if (Direction.Value == StackDirection.Horizontal || Direction.Value == StackDirection.HorizontalReverse)
+                return InnerPixelHeight;
+
+            return InnerPixelWidth;
+        }
+
+        private float MainInnerSize()
+        {
+            if (Direction.Value == StackDirection.Horizontal || Direction.Value == StackDirection.HorizontalReverse)
+                return InnerPixelWidth;
+
+            return InnerPixelHeight;
+        }
+
+        private float GetChildrenMainSize(List<Component> children)
+        {
+            if (Direction.Value == StackDirection.Horizontal || Direction.Value == StackDirection.HorizontalReverse)
+                return GetTotalChildrenWidth(children);
+   
+            return GetTotalChildrenHeight(children);
+        }
+
+        private float GetTotalChildrenWidth(List<Component> children)
         {
             var total = 0f;
-            foreach (var child in Children)
+            foreach (var child in children)
                 total += child.TotalPixelWidth;
             return total;
         }
 
-        private float GetTotalChildrenHeight()
+        private float GetTotalChildrenHeight(List<Component> children)
         {
             var total = 0f;
-            foreach (var child in Children)
+            foreach (var child in children)
                 total += child.TotalPixelHeight;
             return total;
         }

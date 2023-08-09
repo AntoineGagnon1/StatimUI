@@ -18,7 +18,7 @@ namespace StatimUI.Components
             Visible = false;
         }
 
-        public override void Render(Vector2 offset)
+        protected override void OnRender(Vector2 drawPosition)
         {
             
         }

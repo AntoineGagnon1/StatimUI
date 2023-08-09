@@ -15,6 +15,19 @@ namespace StatimUI
 
         public ChildList Children { get; } = new();
 
+        public List<Component> VisibleChildren
+        {
+            get
+            {
+                var result = new List<Component>();
+                foreach (var child in Children)
+                {
+                    if (child.Visible)
+                        result.Add(child);
+                }
+                return result;
+            }
+        }
 
         public Component? Parent { get; set; }
 
@@ -22,6 +35,8 @@ namespace StatimUI
         public Property<Dimension> Width { get; set; } = new ValueProperty<Dimension>(new Dimension(0, DimensionUnit.Auto));
         public Property<Dimension> MinWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
         public Property<Dimension> MaxWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
+        // Size (excluding padding)
+        public float InnerPixelWidth => PixelWidth - Padding.Value.Horizontal;
         // Size (excluding margins)
         public float PixelWidth => Math.Max(Math.Min(Width.Value.GetPixelSize(Parent), MaxWidth.Value.GetPixelSize(Parent)), MinWidth.Value.GetPixelSize(Parent));
         // Size (including margins)
@@ -32,6 +47,7 @@ namespace StatimUI
         public Property<Dimension> Height { get; set; } = new ValueProperty<Dimension>(new Dimension(0, DimensionUnit.Auto));
         public Property<Dimension> MinHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
         public Property<Dimension> MaxHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
+        public float InnerPixelHeight => PixelHeight - Padding.Value.Vertical;
         public float PixelHeight => Math.Max(Math.Min(Height.Value.GetPixelSize(Parent), MaxHeight.Value.GetPixelSize(Parent)), MinHeight.Value.GetPixelSize(Parent));
         public float TotalPixelHeight => PixelHeight + Margin.Value.Vertical;
         #endregion // Height
@@ -56,7 +72,12 @@ namespace StatimUI
         /// </summary>
         /// <returns>Whether the component has updated its layout</returns>
         abstract public bool Update();
-        abstract public void Render(Vector2 offset);
+        public void Render(Vector2 offset)
+        {
+            if (Visible)
+                OnRender(offset + DrawPosition);
+        }
+        abstract protected void OnRender(Vector2 drawPosition);
 
         protected bool HasSizeChanged()
         {

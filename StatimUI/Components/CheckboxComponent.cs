@@ -28,7 +28,7 @@ namespace StatimUI.Components
             return false;
         }
 
-        public override void Render(Vector2 offset)
+        protected override void OnRender(Vector2 offset)
         {
             bool temp = value;
             if (ImGuiNET.ImGui.Checkbox($"##{this.GetHashCode()}", ref temp))

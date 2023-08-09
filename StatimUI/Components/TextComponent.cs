@@ -14,13 +14,10 @@ namespace StatimUI.Components
     {
         public Property<string> Content = new ValueProperty<string>("");
 
-        public override void Render(Vector2 offset)
+        protected override void OnRender(Vector2 drawPosition)
         {
-            if (Visible)
-            {
-                ImGuiNET.ImGui.SetCursorPos(offset + DrawPosition);
-                ImGuiNET.ImGui.Text(Content.Value);
-            }
+            ImGuiNET.ImGui.SetCursorPos(drawPosition);
+            ImGuiNET.ImGui.Text(Content.Value);
         }
 
         public override void Start(IList<Component> slots)

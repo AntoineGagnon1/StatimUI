@@ -12,7 +12,7 @@ namespace StatimUI.Components
     {
         public Property<string> Content = new ValueProperty<string>(string.Empty);
 
-        public override void Render(Vector2 offset)
+        protected override void OnRender(Vector2 offset)
         {
             string temp = Content;
             if (ImGuiNET.ImGui.InputText($"##{this.GetHashCode()}", ref temp, 100))
