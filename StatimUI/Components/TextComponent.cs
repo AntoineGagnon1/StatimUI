@@ -19,10 +19,9 @@ namespace StatimUI.Components
         {
             if (Visible)
             {
-                var startPos = offset + DrawPosition;
                 // TODO : cache cmd
                 var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, Vector4.One);
-                cmd.Transform = Matrix4x4.CreateTranslation(startPos.X, startPos.Y, 0);
+                cmd.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
                 Renderer.CurrentLayer.Commands.Add(cmd);
             }
         }

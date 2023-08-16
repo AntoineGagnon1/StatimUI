@@ -6,7 +6,10 @@ using StatimUI;
 StatimUI.Debug.DebugSettings.ShowLayout = true;
 
 var statimWindow = new StatimUI.Window();
-statimWindow.Root = Statim.CreateComponent("Window");
+
+var compiler = new Compiler();
+compiler.LoadEmbedded();
+statimWindow.Root = compiler.CreateComponent("Window");
 
 Sandbox.Window window = new Sandbox.Window(statimWindow);
 
