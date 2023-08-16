@@ -20,7 +20,7 @@ namespace StatimUI.Components
             if (Visible)
             {
                 // TODO : cache cmd
-                var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, Vector4.One);
+                var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, Color.FromHex(0xFF5000));
                 cmd.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
                 Renderer.CurrentLayer.Commands.Add(cmd);
             }

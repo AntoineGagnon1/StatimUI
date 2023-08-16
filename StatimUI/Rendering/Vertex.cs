@@ -11,16 +11,16 @@ namespace StatimUI.Rendering
     {
         public Vector2 Position;
         public Vector2 UV;
-        public Vector4 Color;
+        public Color Color;
 
-        public Vertex(Vector2 pos, Vector4 color)
+        public Vertex(Vector2 pos, Color color)
         {
             Position = pos;
             UV = Vector2.Zero;
             Color = color;
         }
 
-        public Vertex(Vector2 pos, Vector2 uv, Vector4 color)
+        public Vertex(Vector2 pos, Vector2 uv, Color color)
         {
             Position = pos;
             UV = uv;

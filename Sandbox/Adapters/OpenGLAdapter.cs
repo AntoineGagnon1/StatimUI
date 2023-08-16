@@ -83,7 +83,7 @@ void main()
             int stride = Unsafe.SizeOf<Vertex>();
             GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
             GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 8);
-            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, true, stride, 16);
+            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, stride, 16);
 
             GL.EnableVertexAttribArray(0);
             GL.EnableVertexAttribArray(1);

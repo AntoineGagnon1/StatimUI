@@ -99,7 +99,7 @@ namespace StatimUI.Rendering
             Renderer.Adapter!.SetTextureData(Texture, new Size((int)maxX * 16, (int)maxY * 8), pixelData);
         }
 
-        public RenderCommand MakeText(string text, Vector4 color)
+        public RenderCommand MakeText(string text, Color color)
         {
             RenderCommand cmd = new RenderCommand() { Texture = Texture };
 
