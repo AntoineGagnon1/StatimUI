@@ -13,8 +13,6 @@ namespace Sandbox
 {
     public class Window : GameWindow
     {
-        IRenderingAdapter adapter;
-
         StatimUI.Window window;
         public Window(StatimUI.Window window) : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(1600, 900), APIVersion = new Version(3, 3) })
         {
@@ -24,8 +22,6 @@ namespace Sandbox
         protected override void OnLoad()
         {
             base.OnLoad();
-
-            adapter = new OpenGLAdapter(window);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -35,7 +31,7 @@ namespace Sandbox
             // Update the opengl viewport
             GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
 
-            adapter.WindowResized(new System.Numerics.Vector2(ClientSize.X, ClientSize.Y));
+            Renderer.Adapter!.WindowResized(new System.Numerics.Vector2(ClientSize.X, ClientSize.Y));
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -46,7 +42,7 @@ namespace Sandbox
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
             var watch = Stopwatch.StartNew();
-            adapter.Render();
+            Renderer.Adapter!.Render();
             watch.Stop();
             Console.WriteLine(watch.Elapsed.TotalMilliseconds);
 

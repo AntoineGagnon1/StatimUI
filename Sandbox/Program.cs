@@ -10,6 +10,7 @@ statimWindow.Root = Statim.CreateComponent("Window");
 
 Sandbox.Window window = new Sandbox.Window(statimWindow);
 
+StatimUI.Rendering.Renderer.Adapter = new OpenGLAdapter(statimWindow);
 
 window.Run();
 

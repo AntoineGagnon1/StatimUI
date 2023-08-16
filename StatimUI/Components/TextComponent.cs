@@ -20,10 +20,10 @@ namespace StatimUI.Components
             if (Visible)
             {
                 var startPos = offset + DrawPosition;
-                Vector4 color = new Vector4(1, 0, 0, 1);
-                Renderer.CurrentLayer.AddTriangle(new (startPos, color), new (startPos + new Vector2(20,0), new Vector4(1,0,1,1)), new (startPos + new Vector2(20, 10), color));
-                //ImGuiNET.ImGui.SetCursorPos(offset + DrawPosition);
-                //ImGuiNET.ImGui.Text(Content.Value);
+                // TODO : cache cmd
+                var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, Vector4.One);
+                cmd.Transform = Matrix4x4.CreateTranslation(startPos.X, startPos.Y, 0);
+                Renderer.CurrentLayer.Commands.Add(cmd);
             }
         }
 

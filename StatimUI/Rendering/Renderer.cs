@@ -7,6 +7,8 @@ namespace StatimUI.Rendering
 {
     public static class Renderer
     {
+        public static IRenderingAdapter? Adapter { get; set; }
+
         public static List<RenderLayer> Layers { get; } = new () { new RenderLayer() };
         static int _currentLayerIndex = 0;
         static int currentLayerIndex
@@ -39,7 +41,7 @@ namespace StatimUI.Rendering
             currentLayerIndex = 0;
         }
 
-        public static int MaxVerticesCount() => Layers.Max(x => x.Vertices.Count);
-        public static int MaxIndicesCount() => Layers.Max(x => x.Indices.Count);
+        public static int MaxVerticesCount() => Layers.Max(x => x.Commands.Max(y => y.Vertices.Count));
+        public static int MaxIndicesCount() => Layers.Max(x => x.Commands.Max(y => y.Indices.Count));
     }
 }

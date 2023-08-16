@@ -19,5 +19,12 @@ namespace StatimUI.Rendering
             UV = Vector2.Zero;
             Color = color;
         }
+
+        public Vertex(Vector2 pos, Vector2 uv, Vector4 color)
+        {
+            Position = pos;
+            UV = uv;
+            Color = color;
+        }
     }
 }

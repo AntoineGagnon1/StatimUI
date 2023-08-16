@@ -3,6 +3,7 @@ using StatimUI.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -62,6 +63,8 @@ void main()
             string FragmentSource = @"
 #version 330 core
 
+uniform sampler2D in_fontTexture;
+
 in vec4 color;
 in vec2 UV;
 
@@ -69,7 +72,7 @@ out vec4 output_color;
 
 void main()
 {
-    output_color = color;
+    output_color = color * texture(in_fontTexture, UV);
 }";
 
             shader = CreateProgram("StatimUI", VertexSource, FragmentSource);
@@ -150,8 +153,7 @@ void main()
 
             CheckGLError();
 
-            // Set the projection matrix
-            var pMatrix = OpenTK.Mathematics.Matrix4.CreateOrthographicOffCenter(
+            var pMatrix = Matrix4x4.CreateOrthographicOffCenter(
                 0.0f,
                 windowSize.X,
                 windowSize.Y,
@@ -159,20 +161,31 @@ void main()
                 -1.0f,
                 1.0f);
 
-            GL.UniformMatrix4(shaderProjectionMatrixLocation, false, ref pMatrix);
             CheckGLError();
 
             // Draw the layers
             foreach (var layer in Renderer.Layers)
             {
-                if (layer.Vertices.Count == 0 || layer.Indices.Count == 0)
-                    continue;
+                foreach (var command in layer.Commands)
+                {
+                    if (command.Vertices.Count == 0 || command.Indices.Count == 0)
+                        continue;
 
-                // TODO : dont convert to array
-                GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, layer.Vertices.Count * Unsafe.SizeOf<Vertex>(), layer.Vertices.ToArray());
-                GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, layer.Indices.Count * sizeof(uint), layer.Indices.ToArray());
+                    if (command.Texture != IntPtr.Zero)
+                        BindTexture(command.Texture);
 
-                GL.DrawElements(BeginMode.Triangles, layer.Indices.Count, DrawElementsType.UnsignedInt, 0);
+                    unsafe
+                    {
+                        var matrix = command.Transform * pMatrix;
+                        GL.UniformMatrix4(shaderProjectionMatrixLocation, 1, false, (float*)&matrix);
+                    }
+
+                    // TODO : dont convert to array
+                    GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, command.Vertices.Count * Unsafe.SizeOf<Vertex>(), command.Vertices.ToArray());
+                    GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, command.Indices.Count * sizeof(uint), command.Indices.ToArray());
+
+                    GL.DrawElements(BeginMode.Triangles, command.Indices.Count, DrawElementsType.UnsignedInt, 0);
+                }
             }
 
             CheckGLError();
@@ -281,6 +294,37 @@ void main()
             {
                 Debug.Print($"OpenGL Error ({i++}): {error}");
             }
+        }
+
+        public void FreeTexture(IntPtr ptr)
+        {
+            GL.DeleteTexture((int)ptr);
+            CheckGLError();
+        }
+
+        public nint MakeTexture()
+        {
+            var texture = GL.GenTexture();
+            BindTexture(texture);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            return texture;
+        }
+
+        public void SetTextureData(IntPtr texture, Size size, byte[] data)
+        {
+            BindTexture(texture);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, size.Width, size.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
+            CheckGLError();
+        }
+
+        public void BindTexture(nint texture)
+        {
+            GL.BindTexture(TextureTarget.Texture2D, (int)texture);
+            CheckGLError();
         }
     }
 }
