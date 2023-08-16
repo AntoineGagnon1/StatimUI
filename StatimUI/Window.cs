@@ -20,21 +20,9 @@ namespace StatimUI
 
             Root.Render(Vector2.Zero);
 #if DEBUG
-            RenderDebug(Root, Vector2.Zero);
+            DebugTools.DebugSettings.RenderDebugInfo(Root, Vector2.Zero);
 #endif
         }
-
-#if DEBUG
-        private void RenderDebug(Component c, Vector2 offset)
-        {
-            Debug.DebugSettings.RenderDebugInfo(c, offset + c.DrawPosition);
-
-            foreach(var child in c.Children)
-            {
-                RenderDebug(child, offset + c.DrawPosition);
-            }
-        }
-#endif
 
         static Window()
         {

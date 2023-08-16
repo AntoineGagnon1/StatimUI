@@ -3,7 +3,8 @@ using StatimCodeGenerator;
 using Sandbox.Adapters;
 using StatimUI;
 
-StatimUI.Debug.DebugSettings.ShowLayout = true;
+StatimUI.DebugTools.DebugSettings.ShowLayout = true;
+StatimUI.DebugTools.DebugSettings.ShowTextRect = false;
 
 var statimWindow = new StatimUI.Window();
 

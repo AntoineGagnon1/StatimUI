@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using FreeTypeSharp.Native;
 using static FreeTypeSharp.Native.FT;
@@ -51,6 +52,12 @@ namespace StatimUI.Rendering
 
             s_fonts.Add(info, font);
             return font;
+        }
+
+        // Is this texture for a font ?
+        public static bool IsTextureFont(IntPtr texture)
+        {
+            return s_fonts.Any(kvp => kvp.Value.Texture == texture);
         }
     }
 }

@@ -41,7 +41,12 @@ namespace StatimUI.Rendering
             currentLayerIndex = 0;
         }
 
-        public static int MaxVerticesCount() => Layers.Max(x => x.Commands.Max(y => y.Vertices.Count));
-        public static int MaxIndicesCount() => Layers.Max(x => x.Commands.Max(y => y.Indices.Count));
+        public static int MaxVerticesCount() => Layers.MaxOrDefault(x => x.Commands.MaxOrDefault(y => y.Vertices.Count));
+        public static int MaxIndicesCount() => Layers.MaxOrDefault(x => x.Commands.MaxOrDefault(y => y.Indices.Count));
+
+        public static k MaxOrDefault<t, k>(this IEnumerable<t> enumeration, Func<t, k> selector)
+        {
+            return enumeration.Any() ? enumeration.Max(selector) : default;
+        }
     }
 }

@@ -8,7 +8,7 @@ using System.Drawing;
 using StatimUI.Rendering;
 using Color = StatimUI.Rendering.Color;
 
-namespace StatimUI.Debug
+namespace StatimUI.DebugTools
 {
 #if DEBUG
     public static class ShowLayout
@@ -51,9 +51,7 @@ namespace StatimUI.Debug
             cmd.AddFilledRectangle(paddingTopRight, bottomRight, paddingColor);
             cmd.AddFilledRectangle(bottomLeft, paddingBottomRight, paddingColor);
 
-            Renderer.PushLayer();
             Renderer.CurrentLayer.Commands.Add(cmd);
-            Renderer.PopLayer();
         }
     }
 #endif
