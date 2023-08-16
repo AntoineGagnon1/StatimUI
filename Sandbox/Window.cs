@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ImGuiNET;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
