@@ -14,13 +14,14 @@ namespace StatimUI.Components
     public class TextComponent : Component
     {
         public Property<string> Content = new ValueProperty<string>("");
+        public Property<Color> TextColor = new ValueProperty<Color>(Color.White);
 
         protected override void OnRender(Vector2 drawPosition)
         {
             if (Visible)
             {
                 // TODO : cache cmd
-                var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, Color.FromHex(0xFF5000));
+                var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, TextColor.Value);
                 cmd.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
                 Renderer.CurrentLayer.Commands.Add(cmd);
             }

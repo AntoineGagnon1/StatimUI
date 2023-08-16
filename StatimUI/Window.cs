@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StatimUI.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -41,6 +42,7 @@ namespace StatimUI
             ValueProperty<Thickness>.StringConverter = new ThicknessConverter();
             ValueProperty<Dimension>.StringConverter = new DimensionConverter();
             ValueProperty<Vector2>.StringConverter = new Vector2Converter();
+            ValueProperty<Color>.StringConverter = new ColorConverter();
         }
     }
 }

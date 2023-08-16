@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace StatimUI.Rendering
@@ -28,6 +29,28 @@ namespace StatimUI.Rendering
         private static byte FloatToByte(float value)
         {
             return (byte)Math.Max(Math.Min(value * 255, 255), 0);
+        }
+
+        public static readonly Color White = Color.FromHex(0xFFFFFF);
+        public static readonly Color Black = Color.FromHex(0x000000);
+
+        public static readonly Color Red = Color.FromHex(0xFF0000);
+        public static readonly Color Green = Color.FromHex(0x00FF00);
+        public static readonly Color Blue = Color.FromHex(0x0000FF);
+    }
+
+    internal class ColorConverter : IStringConverter<Color>
+    {
+        public Color ToValue(string input)
+        {
+            try
+            {
+                return Color.FromHex(Convert.ToUInt32(input, 16));
+            }
+            catch(Exception e)
+            {
+                throw new FormatException($"Invalid Color format : {input}, format must be 0xRRGGBB. Error : {e.Message}");
+            }
         }
     }
 }
