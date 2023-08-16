@@ -46,10 +46,5 @@ namespace StatimUI.Components
 
             return HasSizeChanged();
         }
-
-        private void UpdateCommand()
-        {
-            
-        }
     }
 }
