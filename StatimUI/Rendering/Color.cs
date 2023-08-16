@@ -21,9 +21,9 @@ namespace StatimUI.Rendering
         }
 
         // Format : 0xRRGGBB
-        public static Color FromHex(UInt32 color)
+        public static Color FromHex(UInt32 color, byte opacity = 255)
         {
-            return FromRGBABytes((byte)((color & 0xFF0000) >> 16), (byte)((color & 0xFF00) >> 8), (byte)(color & 0xFF));
+            return FromRGBABytes((byte)((color & 0xFF0000) >> 16), (byte)((color & 0xFF00) >> 8), (byte)(color & 0xFF), opacity);
         }
 
         private static byte FloatToByte(float value)

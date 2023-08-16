@@ -27,7 +27,7 @@ namespace StatimUI
 #if DEBUG
         private void RenderDebug(Component c, Vector2 offset)
         {
-            Debug.DebugSettings.RenderDebugInfo(c, offset);
+            Debug.DebugSettings.RenderDebugInfo(c, offset + c.DrawPosition);
 
             foreach(var child in c.Children)
             {

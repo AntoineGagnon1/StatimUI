@@ -181,7 +181,7 @@ namespace StatimUIXmlComponents
             return HasSizeChanged();
         }}
 
-        protected override void OnRender(System.Numerics.Vector2 offset) => Children[0].Render(offset + DrawPosition);
+        protected override void OnRender(System.Numerics.Vector2 offset) => Children[0].Render(offset);
         
         public override void Start(IList<Component> slots)
         {{

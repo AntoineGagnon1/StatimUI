@@ -26,6 +26,31 @@ namespace StatimUI.Rendering
             Vertices.Add(c);
         }
 
+        public void AddRectangle(Vertex topLeft, Vertex topRight, Vertex bottomLeft, Vertex bottomRight)
+        {
+            Indices.Add((uint)Vertices.Count);
+            Indices.Add((uint)Vertices.Count + 1);
+            Indices.Add((uint)Vertices.Count + 3);
+
+            Indices.Add((uint)Vertices.Count + 3);
+            Indices.Add((uint)Vertices.Count + 2);
+            Indices.Add((uint)Vertices.Count);
+
+            Vertices.Add(topLeft);
+            Vertices.Add(topRight);
+            Vertices.Add(bottomLeft);
+            Vertices.Add(bottomRight);
+        }
+
+        public void AddFilledRectangle(Vector2 topLeft, Vector2 bottomRight, Color color)
+        {
+            AddRectangle(
+                new Vertex(topLeft, color), 
+                new Vertex(new Vector2(bottomRight.X, topLeft.Y), color),
+                new Vertex(new Vector2(topLeft.X, bottomRight.Y), color),
+                new Vertex(bottomRight, color)
+                );
+        }
 
         internal void Clear()
         {

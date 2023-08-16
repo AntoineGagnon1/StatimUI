@@ -36,9 +36,9 @@ namespace StatimUI
         public Property<Dimension> MinWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
         public Property<Dimension> MaxWidth { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
         // Size (excluding padding)
-        public float InnerPixelWidth => PixelWidth - Padding.Value.Horizontal;
+        public float InnerPixelWidth => Math.Max(Math.Min(Width.Value.GetPixelSize(Parent), MaxWidth.Value.GetPixelSize(Parent)), MinWidth.Value.GetPixelSize(Parent));
         // Size (excluding margins)
-        public float PixelWidth => Math.Max(Math.Min(Width.Value.GetPixelSize(Parent), MaxWidth.Value.GetPixelSize(Parent)), MinWidth.Value.GetPixelSize(Parent));
+        public float PixelWidth => InnerPixelWidth + Padding.Value.Horizontal;
         // Size (including margins)
         public float TotalPixelWidth => PixelWidth + Margin.Value.Horizontal;
         #endregion // Width 
@@ -47,8 +47,8 @@ namespace StatimUI
         public Property<Dimension> Height { get; set; } = new ValueProperty<Dimension>(new Dimension(0, DimensionUnit.Auto));
         public Property<Dimension> MinHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MinValue, DimensionUnit.Pixel));
         public Property<Dimension> MaxHeight { get; set; } = new ValueProperty<Dimension>(new Dimension(float.MaxValue, DimensionUnit.Pixel));
-        public float InnerPixelHeight => PixelHeight - Padding.Value.Vertical;
-        public float PixelHeight => Math.Max(Math.Min(Height.Value.GetPixelSize(Parent), MaxHeight.Value.GetPixelSize(Parent)), MinHeight.Value.GetPixelSize(Parent));
+        public float InnerPixelHeight => Math.Max(Math.Min(Height.Value.GetPixelSize(Parent), MaxHeight.Value.GetPixelSize(Parent)), MinHeight.Value.GetPixelSize(Parent));
+        public float PixelHeight => InnerPixelHeight + Padding.Value.Vertical;
         public float TotalPixelHeight => PixelHeight + Margin.Value.Vertical;
         #endregion // Height
 

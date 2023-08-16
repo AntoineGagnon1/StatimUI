@@ -5,6 +5,6 @@
 
 <stack padding="30, 30, 10, 10" width="500" height="300" direction="VerticalReverse" align="SpaceEvenly" cross-align="Start">
 	<foreach {item} in {items}>
-		<text content={item} margin="10" text-color="0x00FF00"/>
+		<text content={item} margin="10" padding="20" text-color="0x00FF00"/>
 	</foreach>
 </stack>
