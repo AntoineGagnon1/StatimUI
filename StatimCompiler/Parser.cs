@@ -23,7 +23,7 @@ namespace StatimCodeGenerator
             for (int i = 1; i < t.Length; i++)
             {
                 c = t[i];
-                if (!char.IsLetterOrDigit(c) || c == '_' || c == '-' || c == '.')
+                if (!char.IsLetterOrDigit(c) && c != '_' && c != '-' && c != '.')
                     return new Match(i, t.Slice(0, i));
             }
             return new Match(t.Length, t);

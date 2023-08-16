@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
-    [Component("text")]
+    [Component("text", true)]
     public class TextComponent : Component
     {
         public Property<string> Content = new ValueProperty<string>("");

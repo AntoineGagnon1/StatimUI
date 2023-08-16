@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
-    [Component("textInput")]
+    [Component("textInput", true)]
     public class TextInputComponent : Component
     {
         public Property<string> Content = new ValueProperty<string>(string.Empty);

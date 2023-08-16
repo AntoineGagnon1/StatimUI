@@ -24,7 +24,7 @@ namespace StatimUI.Components
         Start, End, Center
     }
 
-    [Component("stack")]
+    [Component("stack", true)]
     public class Stack : Component
     {
         public Property<StackDirection> Direction = new ValueProperty<StackDirection>(StackDirection.Horizontal);
