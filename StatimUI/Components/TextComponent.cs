@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StatimUI.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,8 +17,14 @@ namespace StatimUI.Components
 
         protected override void OnRender(Vector2 drawPosition)
         {
-            ImGuiNET.ImGui.SetCursorPos(drawPosition);
-            ImGuiNET.ImGui.Text(Content.Value);
+            if (Visible)
+            {
+                var startPos = offset + DrawPosition;
+                // TODO : cache cmd
+                var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, Vector4.One);
+                cmd.Transform = Matrix4x4.CreateTranslation(startPos.X, startPos.Y, 0);
+                Renderer.CurrentLayer.Commands.Add(cmd);
+            }
         }
 
         public override void Start(IList<Component> slots)
@@ -32,7 +39,7 @@ namespace StatimUI.Components
              //   Height.Value.Scalar += 2f;
 
 
-            Width.Value = Width.Value.WithScalar(ImGuiNET.ImGui.CalcTextSize(Content.Value).X + Padding.Value.Horizontal);
+            //Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X + Padding.Value.Horizontal;
 
             return HasSizeChanged();
         }

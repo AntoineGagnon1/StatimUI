@@ -1,9 +1,16 @@
 ﻿//using Sandbox;
 using StatimCodeGenerator;
+using Sandbox.Adapters;
+using StatimUI;
 
 StatimUI.Debug.DebugSettings.ShowLayout = true;
 
-Sandbox.Window window = new Sandbox.Window();
+var statimWindow = new StatimUI.Window();
+statimWindow.Root = Statim.CreateComponent("Window");
+
+Sandbox.Window window = new Sandbox.Window(statimWindow);
+
+StatimUI.Rendering.Renderer.Adapter = new OpenGLAdapter(statimWindow);
 
 window.Run();
 
