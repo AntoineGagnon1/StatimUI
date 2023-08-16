@@ -31,6 +31,7 @@ namespace StatimUI.Rendering
         private FontGlyph[] Glyphs = new FontGlyph[128];
 
         private int MaxBearingY;
+        private int MaxHeight;
 
         // TODO : Destroy the texture in the destructor, but on the main thread
 
@@ -52,6 +53,8 @@ namespace StatimUI.Rendering
                 maxY = (uint)Math.Max(maxY, face.GlyphMetricHeight);
                 MaxBearingY = Math.Max(MaxBearingY, face.GlyphBitmapTop);
             }
+
+            MaxHeight = (int)maxY;
 
             Texture = Renderer.Adapter!.MakeTexture();
             var pixelData = new byte[maxX * maxY * 4 * 128];
@@ -99,9 +102,10 @@ namespace StatimUI.Rendering
             Renderer.Adapter!.SetTextureData(Texture, new Size((int)maxX * 16, (int)maxY * 8), pixelData);
         }
 
-        public RenderCommand MakeText(string text, Color color)
+        public RenderCommand MakeText(string text, Color color, out Vector2 textSize)
         {
             RenderCommand cmd = new RenderCommand() { Texture = Texture };
+            textSize = new Vector2(0, MaxHeight);
 
             if (text.Length == 0)
                 return cmd;
@@ -133,6 +137,7 @@ namespace StatimUI.Rendering
                 cursor.X += Glyphs[glyphIndex].Advance;
             }
 
+            textSize = new Vector2(cursor.X, MaxHeight);
             return cmd;
         }
 

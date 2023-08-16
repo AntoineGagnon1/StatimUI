@@ -16,32 +16,40 @@ namespace StatimUI.Components
         public Property<string> Content = new ValueProperty<string>("");
         public Property<Color> TextColor = new ValueProperty<Color>(Color.White);
 
+        private string lastContent = "";
+        private RenderCommand renderCommand = new RenderCommand();
+
         protected override void OnRender(Vector2 drawPosition)
         {
             if (Visible)
             {
-                // TODO : cache cmd
-                var cmd = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, TextColor.Value);
-                cmd.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
-                Renderer.CurrentLayer.Commands.Add(cmd);
+                renderCommand.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
+                Renderer.CurrentLayer.Commands.Add(renderCommand);
             }
         }
 
         public override void Start(IList<Component> slots)
         {
-            MinWidth.Value = new Dimension(10.0f + Padding.Value.Horizontal, DimensionUnit.Pixel);
-            MinHeight.Value = new Dimension(14.0f + Padding.Value.Vertical, DimensionUnit.Pixel);
         }
         
         override public bool Update()
         {
-            //if ((new Random()).NextDouble() > 0.9995d)
-             //   Height.Value.Scalar += 2f;
-
-
-            //Width.Value.Scalar = ImGuiNET.ImGui.CalcTextSize(Content.Value).X + Padding.Value.Horizontal;
+            if (Content.Value != lastContent)
+            {
+                lastContent = Content.Value;
+                renderCommand = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, TextColor.Value, out var textSize);
+                Width.Value = Width.Value.WithScalar(textSize.X);
+                Height.Value = Height.Value.WithScalar(textSize.Y);
+            }
+            if ((new Random()).NextDouble() > 0.9995d)
+               Content.Value += "a";
 
             return HasSizeChanged();
+        }
+
+        private void UpdateCommand()
+        {
+            
         }
     }
 }
