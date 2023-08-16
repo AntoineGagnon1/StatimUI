@@ -99,28 +99,5 @@ namespace StatimUI
         {
             Children.OnChildAdded += (sender, child) => { child.Parent = this; };
         }
-
-
-        public static Dictionary<string, Type> ComponentByName { get; private set; } = new();
-
-        static Component()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                var types = assembly.GetTypes();
-                foreach (var type in types)
-                {
-                    if (type.IsSubclassOf(typeof(Component)))
-                    {
-                        var nameAttr = type.GetCustomAttribute<ComponentAttribute>();
-                        if (nameAttr != null)
-                            ComponentByName.Add(nameAttr.TagName, type);
-                    }
-                }
-            }
-        }
-
-        public static Component? FromName(string name) => Activator.CreateInstance(ComponentByName[name]) as Component;
     }
 }

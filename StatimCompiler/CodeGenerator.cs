@@ -12,16 +12,22 @@ using System.Xml.Linq;
 using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using StatimUI.Components;
 using Microsoft.CodeAnalysis.Text;
 using System.Globalization;
 using System.IO;
 
-namespace StatimUI
+namespace StatimCodeGenerator
 {
-    public static class CodeGenerator
+    public class CodeGenerator
     {
-        public static SyntaxTree GenerateTree(string name, Stream stream)
+        public Dictionary<string, ComponentDefinition> ComponentDefinitions = new();
+
+        public CodeGenerator(Dictionary<string, ComponentDefinition> componentDefinitions)
+        {
+            ComponentDefinitions = componentDefinitions;
+        }
+
+        public SyntaxTree GenerateTree(string name, Stream stream)
         {
             var preParse = XMLPreParse(stream);
 
@@ -65,9 +71,10 @@ namespace StatimUI
 
                     var variablesSeparated = SyntaxFactory.SeparatedList(variables);
                     var newNode = field.WithDeclaration(
-                        field.Declaration.WithType(
-                            CreateGenericType("Property", field.Declaration.Type)
-                        ).WithVariables(variablesSeparated));
+                        field.Declaration
+                            .WithType(CreateGenericType("Property", field.Declaration.Type))
+                            .WithVariables(variablesSeparated)
+                    );
                     return newNode;
                 }
 
@@ -130,12 +137,12 @@ namespace StatimUI
             return new PreParseResult(scriptContent.ToString(), content.ToString());
         }
 
-        private static string CreateClassString(string name, string content, string statimSyntax)
+        private string CreateClassString(string name, string content, string statimSyntax)
         {
             ScriptBuilder startContent = new();
             if (!string.IsNullOrWhiteSpace(statimSyntax))
             {
-                var root = StatimParser.Parse(statimSyntax);
+                var root = Parser.Parse(statimSyntax);
                 if (root != null)
                 {
                     startContent.Indent(3);
@@ -186,7 +193,7 @@ namespace StatimUIXmlComponents
 }}";
         }
 
-        private static void InitComponent(ScriptBuilder content, List<string> startMethods, ComponentSyntax syntax, string variableName, string parentName)
+        private void InitComponent(ScriptBuilder content, List<string> startMethods, ComponentSyntax syntax, string variableName, string parentName)
         {
             if (syntax is ForEachSyntax foreachSyntax)
             {
@@ -204,18 +211,29 @@ namespace StatimUIXmlComponents
                 i++;
             }
 
-            var type = GetComponentName(syntax.Name);
-            content.AppendLine($"{type} {variableName} = new {type}();");
+            var definition = GetComponentDefinition(syntax.Name);
+            content.AppendLine($"{definition.TypeName} {variableName} = new {definition.TypeName}();");
 
             foreach (var property in syntax.Properties)
             {
-                InitProperty(content, variableName, property.Name, property.Value, property.Type);
+                InitProperty(
+                    content, variableName,
+                    definition.DashCase ? StringUtilities.DashToPascalCase(property.Name) : property.Name,
+                    property.Value, property.Type);
             }
 
             startMethods.Add($"{variableName}.Start(new List<Component> {{ {string.Join(",", childNames)} }});");
         }
 
-        private static void InitForeach(ScriptBuilder content, List<string> startMethods, ForEachSyntax foreachSyntax, string variableName, string parentName)
+        private ComponentDefinition GetComponentDefinition(string name)
+        {
+            if (ComponentDefinitions.TryGetValue(name, out var definition))
+                return definition;
+
+            return new (name, false);
+        }
+
+        private void InitForeach(ScriptBuilder content, List<string> startMethods, ForEachSyntax foreachSyntax, string variableName, string parentName)
         {
             var foreachContent = new ScriptBuilder();
             var foreachStartMethods = new List<string>();
@@ -264,16 +282,6 @@ namespace StatimUIXmlComponents
             {
                 content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToValueProperty(\"{value}\");");
             }
-        }
-
-        private static string GetComponentName(string typeName)
-        {
-            if (Component.ComponentByName.TryGetValue(typeName, out var type))
-            {
-                return type.Name;
-            }
-
-            return typeName;
         }
 
         private static void AddStartMethods(ScriptBuilder content, List<string> startMethods)

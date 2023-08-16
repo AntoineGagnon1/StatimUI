@@ -6,8 +6,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace StatimUI
+namespace StatimCodeGenerator
 {
+
     internal readonly struct TextSpan
     {
         public readonly string Text;

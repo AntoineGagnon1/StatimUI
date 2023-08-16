@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StatimUI
+namespace StatimCodeGenerator
 {
     internal class DotValueSyntaxRewriter : CSharpSyntaxRewriter
     {

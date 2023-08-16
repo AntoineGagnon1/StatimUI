@@ -31,7 +31,9 @@ namespace Sandbox
 
             _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
-            window.Root = Statim.CreateComponent("Window");
+            var compiler = new Compiler();
+            compiler.LoadEmbedded();
+            window.Root = compiler.CreateComponent("Window");
         }
 
         protected override void OnResize(ResizeEventArgs e)

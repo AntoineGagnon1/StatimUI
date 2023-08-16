@@ -40,33 +40,5 @@ namespace StatimUI
 
         public static Vector2 AddX(this Vector2 vec, float x) => vec + new Vector2(x, 0f);
         public static Vector2 AddY(this Vector2 vec, float y) => vec + new Vector2(0f, y);
-
-        public static string KebabToPascalCase(this string text)
-        {
-            StringBuilder builder = new();
-
-            bool nextUpperCase = false;
-            for (int i = 0; i < text.Length; i++)
-            {
-                var c = text[i];
-
-                if (i == 0)
-                {
-                    builder.Append(char.ToUpper(c));
-                    continue;
-                }
-
-                if (c == '-')
-                {
-                    nextUpperCase = true;
-                    continue;
-                }
-
-                builder.Append(nextUpperCase ? char.ToUpper(c) : c);
-                nextUpperCase = false;
-            }
-
-            return builder.ToString();
-        }
     }
 }

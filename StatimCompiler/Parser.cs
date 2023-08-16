@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace StatimUI
+namespace StatimCodeGenerator
 {
-    public static class StatimParser
+    public static class Parser
     {
 
         private static Match isChar(TextSpan span, char c) => span[0] == c ? new Match(1) : Match.Emtpy;
