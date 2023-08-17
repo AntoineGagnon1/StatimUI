@@ -57,11 +57,12 @@ namespace StatimUI.Rendering
         {
             try
             {
-                return Color.FromHex(Convert.ToUInt32(input, 16));
+                var color = System.Drawing.ColorTranslator.FromHtml(input);
+                return Color.FromRGBABytes(color.R, color.G, color.B, color.A);
             }
             catch(Exception e)
             {
-                throw new FormatException($"Invalid Color format : {input}, format must be 0xRRGGBB. Error : {e.Message}");
+                throw new FormatException($"Invalid Color format : {input}. Must be a html color (#RRGGBB or color name). Error : {e.Message}");
             }
         }
     }
