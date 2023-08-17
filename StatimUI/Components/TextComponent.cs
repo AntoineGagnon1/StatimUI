@@ -21,11 +21,9 @@ namespace StatimUI.Components
 
         protected override void OnRender(Vector2 drawPosition)
         {
-            if (Visible)
-            {
-                renderCommand.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
-                Renderer.CurrentLayer.Commands.Add(renderCommand);
-            }
+            base.OnRender(drawPosition);
+            renderCommand.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
+            Renderer.CurrentLayer.Commands.Add(renderCommand);
         }
 
         public override void Start(IList<Component> slots)

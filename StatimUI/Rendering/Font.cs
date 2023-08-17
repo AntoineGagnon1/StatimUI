@@ -99,6 +99,11 @@ namespace StatimUI.Rendering
                 }
             }
 
+            // The pixel at 0,0 is full white, so the vertices that dont use a texture will show up
+            pixelData[0] = 0xFF;
+            pixelData[1] = 0xFF;
+            pixelData[2] = 0xFF;
+            pixelData[3] = 0xFF;
             Renderer.Adapter!.SetTextureData(Texture, new Size((int)maxX * 16, (int)maxY * 8), pixelData);
         }
 

@@ -163,6 +163,10 @@ void main()
 
             CheckGLError();
 
+            // Clear
+            GL.ClearColor(1, 1, 1, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
             // Draw the layers
             foreach (var layer in Renderer.Layers)
             {

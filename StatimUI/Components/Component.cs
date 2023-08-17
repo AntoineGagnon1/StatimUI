@@ -1,11 +1,13 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using StatimUI.Components;
+using StatimUI.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Numerics;
 using System.Reflection;
+using Color = StatimUI.Rendering.Color;
 
 namespace StatimUI
 {
@@ -61,6 +63,9 @@ namespace StatimUI
         public Property<Thickness> Margin { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
 
 
+        public Property<Color> BackgroundColor { get; set; } = new ValueProperty<Color>(Color.Transparent);
+
+
         private float oldWidth = 0, oldHeight = 0; // Used by HasSizeChanged()
 
         public abstract void Start(IList<Component> slots);
@@ -77,7 +82,16 @@ namespace StatimUI
             if (Visible)
                 OnRender(offset + DrawPosition);
         }
-        abstract protected void OnRender(Vector2 drawPosition);
+        virtual protected void OnRender(Vector2 drawPosition)
+        {
+            if (BackgroundColor.Value.A != 0)
+            {
+                var cmd = new RenderCommand();
+                var topLeft = drawPosition - Padding.Value.TopLeft;
+                cmd.AddFilledRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value);
+                Renderer.CurrentLayer.Commands.Add(cmd);
+            }
+        }
 
         protected bool HasSizeChanged()
         {

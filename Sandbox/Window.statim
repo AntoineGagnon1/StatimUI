@@ -3,8 +3,8 @@
 	float value = 0f;
 </script>
 
-<stack padding="30, 30, 10, 10" width="500" height="300" direction="VerticalReverse" align="SpaceEvenly" cross-align="Start">
+<stack padding="30, 30, 10, 10" width="500" height="300" direction="VerticalReverse" align="SpaceEvenly" cross-align="Start" background-color="0x18191A">
 	<foreach {item} in {items}>
-		<text content={item} margin="10" padding="20" text-color="0x00FF00"/>
+		<text content={item} margin="10" padding="20" text-color="0xFFFFFF" background-color="0x000000"/>
 	</foreach>
 </stack>

@@ -33,7 +33,9 @@ namespace StatimUI.Components
 
         protected override void OnRender(Vector2 drawPosition)
         {
-            foreach(var child in Children)
+            base.OnRender(drawPosition);
+
+            foreach (var child in Children)
             {
                 child.Render(drawPosition);
             }
