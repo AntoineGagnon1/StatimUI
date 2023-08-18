@@ -13,15 +13,15 @@ namespace Sandbox
 {
     public class Window : GameWindow
     {
-        StatimUI.Window window;
-        public Window(StatimUI.Window window) : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(1600, 900), APIVersion = new Version(3, 3) })
+        public Window() : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(1600, 900), APIVersion = new Version(3, 3), NumberOfSamples = 8 })
         {
-            this.window = window;
         }
 
         protected override void OnLoad()
         {
             base.OnLoad();
+
+            GL.Enable(EnableCap.Multisample);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -38,8 +38,10 @@ namespace Sandbox
         {
             base.OnRenderFrame(e);
 
-            GL.ClearColor(new Color4(0, 32, 48, 255));
+            GL.ClearColor(1, 1, 1, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
             var watch = Stopwatch.StartNew();
             Renderer.Adapter!.Render();
