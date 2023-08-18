@@ -88,7 +88,7 @@ namespace StatimUI
             {
                 var cmd = new RenderCommand();
                 var topLeft = drawPosition - Padding.Value.TopLeft;
-                cmd.AddFilledRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value);
+                cmd.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value, 20);
                 Renderer.CurrentLayer.Commands.Add(cmd);
             }
         }
