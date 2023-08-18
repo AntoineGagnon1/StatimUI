@@ -13,10 +13,8 @@ namespace Sandbox
 {
     public class Window : GameWindow
     {
-        StatimUI.Window window;
-        public Window(StatimUI.Window window) : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(1600, 900), APIVersion = new Version(3, 3), NumberOfSamples = 8 })
+        public Window() : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(1600, 900), APIVersion = new Version(3, 3), NumberOfSamples = 8 })
         {
-            this.window = window;
         }
 
         protected override void OnLoad()

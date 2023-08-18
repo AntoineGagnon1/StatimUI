@@ -12,7 +12,7 @@ var compiler = new Compiler();
 compiler.LoadEmbedded();
 statimWindow.Root = compiler.CreateComponent("Window");
 
-Sandbox.Window window = new Sandbox.Window(statimWindow);
+Sandbox.Window window = new Sandbox.Window();
 
 StatimUI.Rendering.Renderer.Adapter = new OpenGLAdapter(statimWindow);
 
