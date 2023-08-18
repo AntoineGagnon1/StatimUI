@@ -82,8 +82,8 @@ namespace StatimUI
 
         public Component? CreateComponent(string name)
         {
-            if (codeGenerator.ComponentDefinitions.TryGetValue(name, out var definition))
-                name = definition.TypeName;
+            if (codeGenerator.ComponentNames.TryGetValue(name, out var newName))
+                name = newName;
 
             var type  = Assembly?.GetType("StatimUIXmlComponents." + name);
 
@@ -95,9 +95,9 @@ namespace StatimUI
             return instance;
         }
 
-        private static Dictionary<string, ComponentDefinition> GetComponentDefinitions()
+        private static Dictionary<string, string> GetComponentDefinitions()
         {
-            var definitions = new Dictionary<string, ComponentDefinition>();
+            var definitions = new Dictionary<string, string>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
@@ -108,7 +108,7 @@ namespace StatimUI
                     {
                         var nameAttr = type.GetCustomAttribute<ComponentAttribute>();
                         if (nameAttr != null)
-                            definitions.Add(nameAttr.TagName, new(type.Name, nameAttr.DashCase));
+                            definitions.Add(nameAttr.TagName, type.Name);
                     }
                 }
             }

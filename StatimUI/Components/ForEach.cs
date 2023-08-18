@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
-    [Component("foreach", true)]
+    [Component("foreach")]
     public class ForEach<T> : Component
     {
         public Func<T, List<Component>> ComponentsCreator;

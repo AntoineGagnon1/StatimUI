@@ -1,10 +1,10 @@
-﻿<script base="Button">{
+﻿<script>{
 	List<string> items = new List<string> { "1", "2", "3", "4" };
 	float value = 0f;
 }</script>
 
-<stack padding="30, 30, 10, 10" width="500" height="300" direction="VerticalReverse" align="SpaceEvenly" cross-align="Start" background-color="#18191A">
+<stack Padding="30, 30, 10, 10" Width="500" Height="300" Direction="VerticalReverse" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A">
 	<foreach {item} in {items}>
-		<text content={item} margin="10" padding="20" text-color="0xFFFFFF" background-color="black"/>
+		<Label Content={item} Margin="10" Padding="20" TextColor="0xFFFFFF"/>
 	</foreach>
 </stack>

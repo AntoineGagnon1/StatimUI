@@ -10,12 +10,10 @@ namespace StatimUI
     internal class ComponentAttribute : Attribute
     {
         public string TagName { get; private set; }
-        public bool DashCase { get; private set; }
 
-        public ComponentAttribute(string tagName, bool dashCase = false)
+        public ComponentAttribute(string tagName)
         {
             TagName = tagName;
-            DashCase = dashCase;
         }
     }
 }

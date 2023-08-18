@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
-    [Component("checkbox", true)]
+    [Component("checkbox")]
     public class CheckboxComponent : Component
     {
         public Property<bool> value = new ValueProperty<bool>(false);

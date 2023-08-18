@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI.Components
 {
-    [Component("if", true)]
+    [Component("if")]
     public class If : Component
     {
         public Property<bool> Condition = new ValueProperty<bool>(false);

@@ -349,19 +349,14 @@ namespace StatimCodeGenerator
 
         private static ScriptSyntax MatchScript(Lexer<TokenType> lexer)
         {
-            string? baseComponent = null;
-            if (lexer.Current.Type == TokenType.Identifier && lexer.Current.Content == "base")
+            var properties = new List<PropertySyntax>();
+
+            var property = MatchProperty(lexer);
+            while (property != null)
             {
-                lexer.MoveNext();
-                if (lexer.Current.Type == TokenType.Equal)
-                {
-                    lexer.MoveNext();
-                    if (lexer.Current.Type == TokenType.String)
-                    {
-                        baseComponent = lexer.Current.Content;
-                        lexer.MoveNext();
-                    }
-                }
+                properties.Add(property);
+
+                property = MatchProperty(lexer);
             }
 
             if (lexer.Current.Type == TokenType.Slash)
@@ -370,7 +365,7 @@ namespace StatimCodeGenerator
                 if (lexer.Current.Type == TokenType.ClosedAngleBracket)
                 {
                     lexer.MoveNext();
-                    return new ScriptSyntax("", baseComponent);
+                    return new ScriptSyntax("", properties);
                 }    
             }
 
@@ -393,7 +388,7 @@ namespace StatimCodeGenerator
                                 if (lexer.Current.Type == TokenType.ClosedAngleBracket)
                                 {
                                     lexer.MoveNext();
-                                    return new ScriptSyntax(code, baseComponent);
+                                    return new ScriptSyntax(code, properties);
                                 }
                             }
                         }
@@ -468,7 +463,7 @@ namespace StatimCodeGenerator
     {
         public string Code { get; }
 
-        public ScriptSyntax(string code, string? @base = null) : base("script", new() { })
+        public ScriptSyntax(string code, List<PropertySyntax> properties) : base("script", new() { }, properties)
         {
             Code = code;
         }

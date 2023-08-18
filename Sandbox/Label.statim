@@ -1,11 +1,1 @@
-﻿<script>{
-	public string a = "default";
-	public int b;
-}</script>
-
-<stack>
-	<stack>	
-		<text Content="{50.ToString()}"/>
-	</stack>
-</stack>
-
+﻿<script base="TextComponent" BackgroundColor="red" Width="20"/>
