@@ -64,6 +64,7 @@ namespace StatimUI
 
 
         public Property<Color> BackgroundColor { get; set; } = new ValueProperty<Color>(Color.Transparent);
+        public Property<int> BorderRadius { get; set; } = new ValueProperty<int>(0);
 
 
         private float oldWidth = 0, oldHeight = 0; // Used by HasSizeChanged()
@@ -88,7 +89,7 @@ namespace StatimUI
             {
                 var cmd = new RenderCommand();
                 var topLeft = drawPosition - Padding.Value.TopLeft;
-                cmd.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value, 20);
+                cmd.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value, BorderRadius.Value);
                 Renderer.CurrentLayer.Commands.Add(cmd);
             }
         }
