@@ -36,8 +36,8 @@ namespace StatimUI.Components
             {
                 lastContent = Content.Value;
                 renderCommand = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, TextColor.Value, out var textSize);
-                Width.Value = Width.Value.WithScalar(textSize.X);
-                Height.Value = Height.Value.WithScalar(textSize.Y);
+                Width.Value.Scalar = textSize.X;
+                Height.Value.Scalar = textSize.Y;
             }
             if ((new Random()).NextDouble() > 0.9995d)
                Content.Value += "a";

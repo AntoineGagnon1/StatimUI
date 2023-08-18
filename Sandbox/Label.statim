@@ -1,7 +1,7 @@
-﻿<script>
+﻿<script>{
 	public string a = "default";
 	public int b;
-</script>
+}</script>
 
 <stack>
 	<stack>	

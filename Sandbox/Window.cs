@@ -7,6 +7,7 @@ using System.Diagnostics;
 using StatimUI.Rendering;
 using OpenTK.Graphics.OpenGL;
 using Sandbox.Adapters;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Sandbox
 {

@@ -69,50 +69,52 @@ namespace StatimCodeGenerator
     internal class Lexer<T> where T : Enum
     {
         public List<TokenDefinition<T>> TokenDefinitions = new();
-        private int pos;
+        public int Pos;
         public string Text;
         public Token<T> Current;
         private T invalid;
 
+        public TextSpan RemainingText => new(Text, Pos);
+
         public void Reset(string text)
         {
             Text = text;
-            pos = 0;
+            Pos = 0;
         }
 
         internal void MoveNext()
         {
-            if (pos >= Text.Length)
+            if (Pos >= Text.Length)
             {
                 Current = new Token<T>(invalid, string.Empty);
                 return;
             }
 
-            while (char.IsWhiteSpace(Text[pos]))
+            while (char.IsWhiteSpace(Text[Pos]))
             {
-                if (pos >= Text.Length - 1)
+                if (Pos >= Text.Length - 1)
                 {
                     Current = new Token<T>(invalid, string.Empty);
                     return;
                 }
-                pos++;
+                Pos++;
             }
 
             foreach (var tokenDefinition in TokenDefinitions)
             {
-                var match = tokenDefinition.Matcher(new TextSpan(Text, pos));
+                var match = tokenDefinition.Matcher(new TextSpan(Text, Pos));
                 if (match.Length > 0)
                 {
                     Current = new Token<T>(tokenDefinition.TokenType, match.Content.ToString());
 
-                    pos += match.Length;
+                    Pos += match.Length;
 
                     return;
                 }
                 
             }
 
-            throw new Exception("No token found. The remainingText is: "  + Text.Substring(pos));
+            throw new Exception("No token found. The remainingText is: "  + Text.Substring(Pos));
         }
 
         public Lexer(List<TokenDefinition<T>> tokenDefinitions, T invalidToken)
