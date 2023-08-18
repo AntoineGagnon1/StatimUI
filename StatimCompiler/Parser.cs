@@ -107,7 +107,8 @@ namespace StatimCodeGenerator
                         i += stringMatch.Length - 1;
                         continue;
                     }
-
+                    // TODO: match comments too because if they contain a { or } you don't want the comment to mess up the depth
+                    // TODO: match also char literals
                     var c = t[i];
                     if (c == '{')
                         depthLevel++;
@@ -125,7 +126,7 @@ namespace StatimCodeGenerator
             return Match.Emtpy;
         }
 
-        private static Match MatchOneWayBinding(TextSpan t)
+        private static Match MatchCode(TextSpan t)
         {
             var c = t[0];
             char startingBrace;
@@ -142,18 +143,6 @@ namespace StatimCodeGenerator
             return Match.Emtpy;
         }
 
-        private static Match MatchTwoWayBinding(TextSpan t)
-        {
-            var match = MatchOneWayBinding(t);
-            if (match.Length == 0)
-                return Match.Emtpy;
-
-            if (match.Content.StartsWith("bind "))
-                return new Match(match.Length, match.Content.Slice(5));
-
-            return Match.Emtpy;
-        }
-
         internal enum TokenType
         {
             OpenAngleBracket,
@@ -161,8 +150,7 @@ namespace StatimCodeGenerator
             Slash,
             Equal,
 
-            TwoWayBinding,
-            OneWayBinding,
+            Code,
             Identifier,
             String,
 
@@ -175,8 +163,7 @@ namespace StatimCodeGenerator
             new (TokenType.ClosedAngleBracket, t => isChar(t, '>')),
             new (TokenType.Slash, t => isChar(t, '/')),
             new (TokenType.Equal, t => isChar(t, '=')),
-            new (TokenType.TwoWayBinding, MatchTwoWayBinding),
-            new (TokenType.OneWayBinding, MatchOneWayBinding),
+            new (TokenType.Code, MatchCode),
             new (TokenType.Identifier, IsIdentifier),
             new (TokenType.String, MatchString),
         };
@@ -187,10 +174,8 @@ namespace StatimCodeGenerator
         {
             if (token == TokenType.String)
                 return PropertyType.Value;
-            if (token == TokenType.OneWayBinding)
-                return PropertyType.OneWay;
-            if (token == TokenType.TwoWayBinding)
-                return PropertyType.TwoWay;
+            if (token == TokenType.Code)
+                return PropertyType.Binding;
 
             throw new Exception("Could not parse the property");
         }
@@ -218,7 +203,7 @@ namespace StatimCodeGenerator
 
         private static ComponentSyntax MatchIf(Lexer<TokenType> lexer)
         {
-            if (lexer.Current.Type == TokenType.OneWayBinding)
+            if (lexer.Current.Type == TokenType.Code)
             {
                 var condition = lexer.Current.Content;
                 lexer.MoveNext();
@@ -227,7 +212,7 @@ namespace StatimCodeGenerator
                     lexer.MoveNext();
                     var children = MatchChildren(lexer);
                     EnsureClosingTag(lexer);
-                    return new ComponentSyntax("if", children, new List<PropertySyntax> { new PropertySyntax(condition, PropertyType.OneWay, "Condition") });
+                    return new ComponentSyntax("if", children, new List<PropertySyntax> { new PropertySyntax(condition, PropertyType.Binding, "Condition") });
                 }
 
                 if (lexer.Current.Type == TokenType.Slash)
@@ -239,14 +224,14 @@ namespace StatimCodeGenerator
 
         private static ForEachSyntax MatchForEach(Lexer<TokenType> lexer)
         {
-            if (lexer.Current.Type == TokenType.OneWayBinding)
+            if (lexer.Current.Type == TokenType.Code)
             {
                 var item = lexer.Current.Content;
                 lexer.MoveNext();
                 if (lexer.Current.Type == TokenType.Identifier && lexer.Current.Content == "in")
                 {
                     lexer.MoveNext();
-                    if (lexer.Current.Type == TokenType.OneWayBinding)
+                    if (lexer.Current.Type == TokenType.Code)
                     {
                         var items = lexer.Current.Content;
                         lexer.MoveNext();
@@ -308,6 +293,8 @@ namespace StatimCodeGenerator
                     var name = lexer.Current.Content;
                     lexer.MoveNext();
 
+                    if (name == "script")
+                        return MatchScript(lexer);
 
                     if (name == "foreach")
                         return MatchForEach(lexer);
@@ -346,7 +333,7 @@ namespace StatimCodeGenerator
                         return new ComponentSyntax(name.ToString(), children, properties);
                     }
 
-                    if (lexer.Current.Type == TokenType.String || lexer.Current.Type == TokenType.OneWayBinding || lexer.Current.Type == TokenType.TwoWayBinding || lexer.Current.Type == TokenType.Equal)
+                    if (lexer.Current.Type == TokenType.String || lexer.Current.Type == TokenType.Code || lexer.Current.Type == TokenType.Equal)
                         throw new Exception("Properties must have a name");
 
                     throw new Exception("A component declaration can contain properties and must end by a closed angle bracket");
@@ -360,23 +347,95 @@ namespace StatimCodeGenerator
             return null;
         }
 
-        public static ComponentSyntax? Parse(string statim)
+        private static ScriptSyntax MatchScript(Lexer<TokenType> lexer)
+        {
+            string? baseComponent = null;
+            if (lexer.Current.Type == TokenType.Identifier && lexer.Current.Content == "base")
+            {
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.Equal)
+                {
+                    lexer.MoveNext();
+                    if (lexer.Current.Type == TokenType.String)
+                    {
+                        baseComponent = lexer.Current.Content;
+                        lexer.MoveNext();
+                    }
+                }
+            }
+
+            if (lexer.Current.Type == TokenType.Slash)
+            {
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+                {
+                    lexer.MoveNext();
+                    return new ScriptSyntax("", baseComponent);
+                }    
+            }
+
+            if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+            {
+                lexer.MoveNext();
+                if (lexer.Current.Type == TokenType.Code)
+                {
+                    var code = lexer.Current.Content;
+                    lexer.MoveNext();
+                    if (lexer.Current.Type == TokenType.OpenAngleBracket)
+                    {
+                        lexer.MoveNext();
+                        if (lexer.Current.Type == TokenType.Slash)
+                        {
+                            lexer.MoveNext();
+                            if (lexer.Current.Type == TokenType.Identifier && lexer.Current.Content == "script")
+                            {
+                                lexer.MoveNext();
+                                if (lexer.Current.Type == TokenType.ClosedAngleBracket)
+                                {
+                                    lexer.MoveNext();
+                                    return new ScriptSyntax(code, baseComponent);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // TODO: better error;
+            throw new Exception("invalid script syntax");
+        }
+
+        public static ParsingResult Parse(string statim)
         {
             lexer.Reset(statim);
-
-            var watch = Stopwatch.StartNew();
             lexer.MoveNext();
-            var result = MatchComponent(lexer);
-            watch.Stop();
-            Console.WriteLine("parsing time: " + watch.ElapsedTicks / 10_000f);
-            return result;
+            ScriptSyntax? scriptSyntax = null;
+            ComponentSyntax? root = null;
+            ComponentSyntax? component = null;
+
+            while ((component = MatchComponent(lexer)) != null)
+            {
+                if (component is ScriptSyntax script)
+                {
+                    if (scriptSyntax != null)
+                        throw new Exception("A component cannot have more than one script tag");
+                    scriptSyntax = script;
+                }
+                else
+                {
+                    if (root != null)
+                        throw new Exception("A component cannot have more than one root");
+                    root = component;
+                }
+            }
+            return new ParsingResult(root, scriptSyntax);
         }
     }
 
 
     public enum PropertyType
     {
-        Value, OneWay, TwoWay
+        Value, Binding
     }
 
     public class PropertySyntax
@@ -390,6 +449,28 @@ namespace StatimCodeGenerator
             Value = value;
             Type = type;
             Name = name;
+        }
+    }
+
+    public class ParsingResult
+    {
+        public ComponentSyntax? Root { get; }
+        public ScriptSyntax? Script { get; }
+
+        public ParsingResult(ComponentSyntax? root, ScriptSyntax? script)
+        {
+            Root = root;
+            Script = script;
+        }
+    }
+
+    public class ScriptSyntax : ComponentSyntax
+    {
+        public string Code { get; }
+
+        public ScriptSyntax(string code, string? @base = null) : base("script", new() { })
+        {
+            Code = code;
         }
     }
 

@@ -52,7 +52,7 @@ namespace StatimUI
                     if (stream == null)
                         continue;
                     var parts = name.Split('.');
-                    var tree = codeGenerator.GenerateTree(parts[parts.Length - 2], stream);
+                    var tree = codeGenerator.GenerateTree(parts[parts.Length - 2], (new StreamReader (stream)).ReadToEnd());
                     trees.Add(tree);
                 }
             }

@@ -1,7 +1,7 @@
-﻿<script>
+﻿<script base="Button">{
 	List<string> items = new List<string> { "1", "2", "3", "4" };
 	float value = 0f;
-</script>
+}</script>
 
 <stack padding="30, 30, 10, 10" width="500" height="300" direction="VerticalReverse" align="SpaceEvenly" cross-align="Start" background-color="#18191A">
 	<foreach {item} in {items}>

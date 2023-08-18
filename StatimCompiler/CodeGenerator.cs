@@ -27,11 +27,9 @@ namespace StatimCodeGenerator
             ComponentDefinitions = componentDefinitions;
         }
 
-        public SyntaxTree GenerateTree(string name, Stream stream)
+        public SyntaxTree GenerateTree(string name, string statimSyntax)
         {
-            var preParse = XMLPreParse(stream);
-
-            var tree = CSharpSyntaxTree.ParseText(CreateClassString(name, preParse.Script, preParse.Child));
+            var tree = CSharpSyntaxTree.ParseText(GenerateClass(name, statimSyntax));
 
             return AddProperties(tree);
         }
@@ -87,74 +85,22 @@ namespace StatimCodeGenerator
         }
         private static GenericNameSyntax CreateGenericType(string name, TypeSyntax genericType)
             => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { genericType })));
-
-        private struct PreParseResult
-        {
-            public string Script, Child;
-
-            public PreParseResult(string script, string child)
-            {
-                Script = script;
-                Child = child;
-            }
-        }
-        private static PreParseResult XMLPreParse(Stream stream)
-        {
-            const string scriptStartTag = "<script>";
-            const string scriptEndTag = "</script>";
-
-            StringBuilder scriptContent = new();
-            StringBuilder content = new();
-            bool readingScript = false;
-
-            using (StreamReader reader = new(stream))
-            {
-                string? line = null;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith(scriptStartTag))
-                    {
-                        readingScript = true;
-                        line = line.Substring(line.IndexOf(scriptStartTag) + scriptStartTag.Length);
-                    }
-                    if (line.StartsWith(scriptEndTag)) // No else because <script> and </script> might be on the same line 
-                    {
-                        readingScript = false;
-                        scriptContent.AppendLine(line.Substring(0, line.IndexOf(scriptEndTag)));
-                        line = line.Substring(line.IndexOf(scriptEndTag) + scriptEndTag.Length);
-                    }
-
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue; // Skip empty lines
-
-                    if (readingScript)
-                        scriptContent.AppendLine(line);
-                    else
-                        content.AppendLine(line);
-                }
-            }
-
-            return new PreParseResult(scriptContent.ToString(), content.ToString());
-        }
-
-        private string CreateClassString(string name, string content, string statimSyntax)
+      
+        private string GenerateClass(string name, string statimSyntax)
         {
             ScriptBuilder startContent = new();
-            if (!string.IsNullOrWhiteSpace(statimSyntax))
+            var parsingResult = Parser.Parse(statimSyntax);
+            if (parsingResult.Root != null)
             {
-                var root = Parser.Parse(statimSyntax);
-                if (root != null)
-                {
-                    startContent.Indent(3);
+                startContent.Indent(3);
 
-                    var startMethods = new List<string>();
-                    InitComponent(startContent, startMethods, root, "__child", "this");
-                    AddStartMethods(startContent, startMethods);
+                var startMethods = new List<string>();
+                InitComponent(startContent, startMethods, parsingResult.Root, "__child", "this");
+                AddStartMethods(startContent, startMethods);
 
-                    startContent.AppendLine("Children.Add(__child);");
+                startContent.AppendLine("Children.Add(__child);");
 
-                    startContent.Unindent(3);
-                }
+                startContent.Unindent(3);
             }
 
             return @$"
@@ -175,8 +121,8 @@ namespace StatimUIXmlComponents
         {{ 
             Children[0].Update(); 
 
-            Width.Value = Width.Value.WithScalar(Children[0].TotalPixelWidth + Padding.Value.Horizontal);
-            Height.Value = Height.Value.WithScalar(Children[0].TotalPixelHeight + Padding.Value.Vertical);
+            Width.Value.Scalar = Children[0].TotalPixelWidth + Padding.Value.Horizontal;
+            Height.Value.Scalar = Children[0].TotalPixelHeight + Padding.Value.Vertical;
 
             return HasSizeChanged();
         }}
@@ -188,7 +134,7 @@ namespace StatimUIXmlComponents
 {startContent}
         }}
 
-{content}
+{parsingResult.Script?.Code}
     }}
 }}";
         }
@@ -239,9 +185,9 @@ namespace StatimUIXmlComponents
             var foreachStartMethods = new List<string>();
             
             content.AppendLine($"var {variableName} = CreateForEach({foreachSyntax.Items});");
-            InitProperty(content, variableName, "Items", foreachSyntax.Items, PropertyType.OneWay);
+            InitProperty(content, variableName, "Items", foreachSyntax.Items, PropertyType.Binding);
 
-            foreachContent.AppendLineNoIndent($"{variableName}.ComponentsCreator = ({foreachSyntax.Item}) => {{");
+            foreachContent.AppendLineNoIndent($"{variableName}.ComponentsCreator = {foreachSyntax.Item} => {{");
             foreachContent.Indent();
 
 
@@ -270,13 +216,9 @@ namespace StatimUIXmlComponents
 
         private static void InitProperty(ScriptBuilder content, string variableName, string name, string value, PropertyType propertyType)
         {
-            if (propertyType == PropertyType.TwoWay)
+            if (propertyType == PropertyType.Binding)
             {
-                content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToTwoWayProperty(() => {value}, __value => {value} = __value);");
-            }
-            else if (propertyType == PropertyType.OneWay)
-            {
-                content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToOneWayProperty(() => {value});");
+                content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToBinding(() => {value});");
             }
             else
             {
@@ -288,23 +230,6 @@ namespace StatimUIXmlComponents
         {
             for (int i = startMethods.Count - 1; i >= 0; i--)
                 content.AppendLine(startMethods[i]);
-        }
-
-        private static bool IsBinding(string value) => value.StartsWith("{") && value.EndsWith("}");
-        private static bool IsTwoWayBinding(string value) => value.StartsWith("{bind ") && value.EndsWith("}");
-        private static string GetBindingContent(string value)
-        {
-            if(IsBinding(value))
-            {
-                if (IsTwoWayBinding(value))
-                    return value.Substring("{bind ".Length, value.Length - (1 + "{bind ".Length));
-                else
-                    return value.Substring(1, value.Length - 2);
-            }
-            else
-            {
-                return value;
-            }
         }
     }
 }

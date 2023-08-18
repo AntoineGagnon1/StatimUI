@@ -79,10 +79,10 @@ namespace StatimUI.Components
                     else
                         layout.MainPos += child.TotalPixelWidth + layout.Spacing;
 
-                    Height.Value = Height.Value.WithScalar(Math.Max(child.TotalPixelHeight + Padding.Value.Vertical, Height.Value.Scalar));
+                    Height.Value.Scalar = Math.Max(child.TotalPixelHeight + Padding.Value.Vertical, Height.Value.Scalar);
                 }
 
-                Width.Value = Width.Value.WithScalar(layout.MainPos + Padding.Value.Horizontal);
+                Width.Value.Scalar = layout.MainPos + Padding.Value.Horizontal;
             }
             else
             {
@@ -94,10 +94,10 @@ namespace StatimUI.Components
                     else
                         layout.MainPos += child.TotalPixelHeight + layout.Spacing;
 
-                    Width.Value = Width.Value.WithScalar(Math.Max(child.TotalPixelWidth + Padding.Value.Horizontal, Width.Value.Scalar));
+                    Width.Value.Scalar = Math.Max(child.TotalPixelWidth + Padding.Value.Horizontal, Width.Value.Scalar);
                 }
 
-                Height.Value = Height.Value.WithScalar(layout.MainPos + Padding.Value.Vertical);
+                Height.Value.Scalar = layout.MainPos + Padding.Value.Vertical;
             }
 
             //ResizeMainAxis(layout.Pos, layout.Direction);
