@@ -231,22 +231,5 @@ namespace StatimUIXmlComponents
             for (int i = startMethods.Count - 1; i >= 0; i--)
                 content.AppendLine(startMethods[i]);
         }
-
-        private static bool IsBinding(string value) => value.StartsWith("{") && value.EndsWith("}");
-        private static bool IsTwoWayBinding(string value) => value.StartsWith("{bind ") && value.EndsWith("}");
-        private static string GetBindingContent(string value)
-        {
-            if(IsBinding(value))
-            {
-                if (IsTwoWayBinding(value))
-                    return value.Substring("{bind ".Length, value.Length - (1 + "{bind ".Length));
-                else
-                    return value.Substring(1, value.Length - 2);
-            }
-            else
-            {
-                return value;
-            }
-        }
     }
 }

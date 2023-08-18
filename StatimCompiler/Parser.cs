@@ -411,8 +411,8 @@ namespace StatimCodeGenerator
             lexer.MoveNext();
             ScriptSyntax? scriptSyntax = null;
             ComponentSyntax? root = null;
-
             ComponentSyntax? component = null;
+
             while ((component = MatchComponent(lexer)) != null)
             {
                 if (component is ScriptSyntax script)
