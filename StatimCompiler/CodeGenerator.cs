@@ -97,11 +97,31 @@ namespace StatimCodeGenerator
             }
         }
 
+        private static (string Content, string Usings) SeparateUsings(string script)
+        {
+            var content = new StringBuilder();
+            var usings = new StringBuilder();
+
+            var lines = script.Split('\n');
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+                if (trimmedLine.StartsWith("using"))
+                    usings.AppendLine(trimmedLine);
+                else
+                    content.AppendLine(line);
+            }
+
+            return (content.ToString(), usings.ToString());
+        }
+
         private string GenerateClass(string name, string statimSyntax)
         {
             ScriptBuilder startContent = new();
             startContent.Indent(3);
             var parsingResult = Parser.Parse(statimSyntax);
+            (string scriptContent, string usings) = SeparateUsings(parsingResult.Script?.Code ?? "");
+
             var baseClass = parsingResult.Script?.Properties.FirstOrDefault(prop => prop.Name == "base")?.Value ?? "Component";
             if (baseClass != "Component")
                 startContent.AppendLine("base.Start(slots);");
@@ -132,6 +152,7 @@ using System.Linq;
 using System;
 using StatimUI;
 using StatimUI.Components;
+{usings}
 
 namespace StatimUIXmlComponents
 {{ 
@@ -162,7 +183,7 @@ namespace StatimUIXmlComponents
 {startContent}
         }}
 
-{parsingResult.Script?.Code}
+{scriptContent}
     }}
 }}";
         }

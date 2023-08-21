@@ -1,1 +1,1 @@
-﻿<script base="TextComponent" BackgroundColor="red" Width="20"/>
+﻿<script base="TextComponent" BackgroundColor="red" BorderRadius="20"/>
