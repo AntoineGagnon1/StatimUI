@@ -106,7 +106,7 @@ namespace StatimCodeGenerator
             foreach (var line in lines)
             {
                 var trimmedLine = line.Trim();
-                if (trimmedLine.StartsWith("using"))
+                if (trimmedLine.StartsWith("using "))
                     usings.AppendLine(trimmedLine);
                 else
                     content.AppendLine(line);
