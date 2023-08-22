@@ -97,8 +97,8 @@ namespace StatimUI
             if (OutlineStyle == StatimUI.OutlineStyle.Solid)
             {
                 var cmd = new RenderCommand();
-                var topLeft = drawPosition - Padding.Value.TopLeft - new Vector2(2);
-                cmd.AddRectangleFilled(topLeft, topLeft + new Vector2(PixelWidth + 4, PixelHeight + 4), Color.Blue, BorderRadius.Value);
+                var topLeft = drawPosition - Padding.Value.TopLeft;
+                cmd.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth , PixelHeight), Color.FromHex(0x3b82f6), 4f);
                 Renderer.CurrentLayer.Commands.Add(cmd);
             }
         }

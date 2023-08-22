@@ -26,6 +26,60 @@ namespace StatimUI.Rendering
             Vertices.Add(c);
         }
 
+        public void AddRectangle(Vector2 topLeft, Vector2 bottomRight, Color strokeColor, float width, int rounding = 0)
+        {
+            if (rounding == 0)
+            {
+                Indices.Add((uint)Vertices.Count);
+                Indices.Add((uint)Vertices.Count + 1);
+                Indices.Add((uint)Vertices.Count + 4);
+
+                Indices.Add((uint)Vertices.Count + 1);
+                Indices.Add((uint)Vertices.Count + 4);
+                Indices.Add((uint)Vertices.Count + 5);
+
+
+                Indices.Add((uint)Vertices.Count + 1);
+                Indices.Add((uint)Vertices.Count + 3);
+                Indices.Add((uint)Vertices.Count + 5);
+
+                Indices.Add((uint)Vertices.Count + 3);
+                Indices.Add((uint)Vertices.Count + 5);
+                Indices.Add((uint)Vertices.Count + 7);
+
+
+                Indices.Add((uint)Vertices.Count + 3);
+                Indices.Add((uint)Vertices.Count + 2);
+                Indices.Add((uint)Vertices.Count + 7);
+
+                Indices.Add((uint)Vertices.Count + 2);
+                Indices.Add((uint)Vertices.Count + 7);
+                Indices.Add((uint)Vertices.Count + 6);
+
+
+                Indices.Add((uint)Vertices.Count + 2);
+                Indices.Add((uint)Vertices.Count);
+                Indices.Add((uint)Vertices.Count + 6);
+
+                Indices.Add((uint)Vertices.Count);
+                Indices.Add((uint)Vertices.Count + 6);
+                Indices.Add((uint)Vertices.Count + 4);
+
+                var widthSize = new Vector2(width);
+                Vertices.Add(new Vertex(topLeft - widthSize, strokeColor));
+                Vertices.Add(new Vertex(new Vector2(bottomRight.X + width, topLeft.Y - width), strokeColor));
+                Vertices.Add(new Vertex(new Vector2(topLeft.X - width, bottomRight.Y + width), strokeColor));
+                Vertices.Add(new Vertex(bottomRight + widthSize, strokeColor));
+
+                Vertices.Add(new Vertex(topLeft, strokeColor));
+                Vertices.Add(new Vertex(new Vector2(bottomRight.X, topLeft.Y), strokeColor));
+                Vertices.Add(new Vertex(new Vector2(topLeft.X, bottomRight.Y), strokeColor));
+                Vertices.Add(new Vertex(bottomRight, strokeColor));
+            }
+
+            // TODO: rounding
+        }
+
         public void AddRectangleFilled(Vector2 topLeft, Vector2 bottomRight, Color fillColor, int rounding = 0)
         {
             if (rounding == 0)

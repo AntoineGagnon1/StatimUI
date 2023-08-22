@@ -97,7 +97,7 @@ namespace StatimCodeGenerator
             }
         }
 
-        private static (string Content, string Usings) SeparateUsings(string script)
+        private static (string content, string usings) SeparateUsings(string script)
         {
             var content = new StringBuilder();
             var usings = new StringBuilder();
