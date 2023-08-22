@@ -17,6 +17,8 @@ namespace StatimUI.Components
         public override void Start(IList<Component> slots)
         {
         }
+         
+        public override bool Focusable => true;
 
         protected void OnChange(bool value)
         {

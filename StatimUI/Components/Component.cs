@@ -13,6 +13,20 @@ namespace StatimUI
 {
     public abstract class Component
     {
+        public abstract bool Focusable { get; }
+
+        public bool Focused => FocusManager.FocusedComponent == this;
+        public bool Focus()
+        {
+            if (Focusable)
+            {
+                FocusManager.FocusedComponent = this;
+                return true;
+            }
+
+            return false;
+        }
+
         public bool Visible { get; set; } = true;
 
         public ChildList Children { get; } = new();
@@ -73,6 +87,22 @@ namespace StatimUI
 
         protected static ForEach<T> CreateForEach<T>(IEnumerable<T> _) => new ForEach<T>();
 
+        public Property<OutlineStyle> OutlineStyle { get; set; } = new ValueProperty<OutlineStyle>(StatimUI.OutlineStyle.Solid);
+
+        private void RenderOutline(Vector2 drawPosition)
+        {
+            if (!Focused)
+                return;
+            
+            if (OutlineStyle == StatimUI.OutlineStyle.Solid)
+            {
+                var cmd = new RenderCommand();
+                var topLeft = drawPosition - Padding.Value.TopLeft - new Vector2(2);
+                cmd.AddRectangleFilled(topLeft, topLeft + new Vector2(PixelWidth + 4, PixelHeight + 4), Color.Blue, BorderRadius.Value);
+                Renderer.CurrentLayer.Commands.Add(cmd);
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -81,7 +111,10 @@ namespace StatimUI
         public void Render(Vector2 offset)
         {
             if (Visible)
+            {
+                RenderOutline(offset + DrawPosition);
                 OnRender(offset + DrawPosition);
+            }
         }
         virtual protected void OnRender(Vector2 drawPosition)
         {
@@ -89,7 +122,7 @@ namespace StatimUI
             {
                 var cmd = new RenderCommand();
                 var topLeft = drawPosition - Padding.Value.TopLeft;
-                cmd.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value, BorderRadius.Value);
+                cmd.AddRectangleFilled(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value, BorderRadius.Value);
                 Renderer.CurrentLayer.Commands.Add(cmd);
             }
         }

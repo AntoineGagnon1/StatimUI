@@ -19,6 +19,8 @@ namespace StatimUI.Components
         private string lastContent = "";
         private RenderCommand renderCommand = new RenderCommand();
 
+        public override bool Focusable => true;
+
         protected override void OnRender(Vector2 drawPosition)
         {
             base.OnRender(drawPosition);

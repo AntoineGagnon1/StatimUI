@@ -31,6 +31,8 @@ namespace StatimUI.Components
         public Property<StackCrossAlign> CrossAlign = new ValueProperty<StackCrossAlign>(StackCrossAlign.Start);
         private int lastChildrenCount = 0;
 
+        public override bool Focusable => false;
+
         protected override void OnRender(Vector2 drawPosition)
         {
             base.OnRender(drawPosition);

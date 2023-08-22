@@ -123,10 +123,12 @@ namespace StatimCodeGenerator
             (string scriptContent, string usings) = SeparateUsings(parsingResult.Script?.Code ?? "");
 
             var baseClass = parsingResult.Script?.Properties.FirstOrDefault(prop => prop.Name == "base")?.Value ?? "Component";
-            if (baseClass != "Component")
+            var customParent = baseClass != "Component";
+            if (customParent)
                 startContent.AppendLine("base.Start(slots);");
-            var baseRender = baseClass != "Component" ? "base.OnRender(offset);" : "";
-            var baseUpdate = baseClass != "Component" ? "base.Update() || " : "";
+            var baseRender = customParent ? "base.OnRender(offset);" : "";
+            var baseUpdate = customParent ? "base.Update() || " : "";
+            var focusable = !customParent ? "public override bool Focusable => false;" : "";
 
             if (parsingResult.Script != null)
                 AddScriptProperties(startContent, parsingResult.Script);
@@ -159,6 +161,8 @@ namespace StatimUIXmlComponents
 
     public class {name} : {baseClass}
     {{
+        {focusable}
+
         public override bool Update() 
         {{ 
             if (Children.Count > 0)

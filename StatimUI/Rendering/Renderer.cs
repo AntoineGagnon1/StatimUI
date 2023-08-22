@@ -29,6 +29,7 @@ namespace StatimUI.Rendering
         }
 
         public static RenderLayer CurrentLayer => Layers[currentLayerIndex];
+        public static RenderCommand CurrentCommand => CurrentLayer.Commands[CurrentLayer.Commands.Count - 1];
 
         public static void PushLayer() => currentLayerIndex++;
         public static void PopLayer() => currentLayerIndex--;

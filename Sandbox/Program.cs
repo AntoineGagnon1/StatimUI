@@ -11,6 +11,7 @@ var statimWindow = new StatimUI.Window();
 var compiler = new Compiler();
 compiler.LoadEmbedded();
 statimWindow.Root = compiler.CreateComponent("Window");
+FocusManager.FocusedComponent = statimWindow.Root;
 
 Sandbox.Window window = new Sandbox.Window();
 

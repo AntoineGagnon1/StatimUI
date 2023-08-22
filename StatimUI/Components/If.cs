@@ -18,6 +18,8 @@ namespace StatimUI.Components
             Visible = false;
         }
 
+        public override bool Focusable => false;
+
         protected override void OnRender(Vector2 drawPosition)
         {
             

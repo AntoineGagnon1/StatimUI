@@ -25,6 +25,8 @@ namespace StatimUI.Components
             StartIndex = Parent.Children.IndexOf(this) + 1;
         }
 
+        public override bool Focusable => false;
+
         public ForEach()
         {
             Visible = false;

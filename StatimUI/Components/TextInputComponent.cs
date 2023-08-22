@@ -12,6 +12,8 @@ namespace StatimUI.Components
     {
         public Property<string> Content = new ValueProperty<string>(string.Empty);
 
+        public override bool Focusable => true;
+
         protected override void OnRender(Vector2 offset)
         {
             string temp = Content;

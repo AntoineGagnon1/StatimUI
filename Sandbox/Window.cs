@@ -8,6 +8,7 @@ using StatimUI.Rendering;
 using OpenTK.Graphics.OpenGL;
 using Sandbox.Adapters;
 using static System.Net.Mime.MediaTypeNames;
+using StatimUI;
 
 namespace Sandbox
 {
@@ -42,7 +43,8 @@ namespace Sandbox
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
+            if (IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Tab))
+                FocusManager.ShiftFocus();
             var watch = Stopwatch.StartNew();
             Renderer.Adapter!.Render();
             watch.Stop();

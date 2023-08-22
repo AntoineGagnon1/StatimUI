@@ -5,8 +5,16 @@
 	float value = 0f;
 }</script>
 
-<stack Padding="30, 30, 10, 10" Width="500" Height="300" Direction="VerticalReverse" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A">
-	<foreach {item} in {items}>
-		<Label Content={item} Margin="10" Padding="20" TextColor="0xFFFFFF"/>
-	</foreach>
+<stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A">
+	<stack>
+		<text Content="heyy"></text>
+		<stack>
+			<text Content="heyy2"></text>
+		</stack>
+	</stack>
+	<stack>
+		<foreach {item} in {items}>
+			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF"/>
+		</foreach>
+	</stack>
 </stack>

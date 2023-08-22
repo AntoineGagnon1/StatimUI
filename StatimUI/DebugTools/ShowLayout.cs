@@ -39,17 +39,17 @@ namespace StatimUI.DebugTools
 
             // Margins
             Color marginColor = Color.FromHex(color, 255);
-            cmd.AddRectangle(marginTopLeft, bottomLeft, marginColor);
-            cmd.AddRectangle(topLeft, marginTopRight, marginColor);
-            cmd.AddRectangle(topRight, marginBottomRight, marginColor);
-            cmd.AddRectangle(marginBottomLeft, bottomRight, marginColor);
+            cmd.AddRectangleFilled(marginTopLeft, bottomLeft, marginColor);
+            cmd.AddRectangleFilled(topLeft, marginTopRight, marginColor);
+            cmd.AddRectangleFilled(topRight, marginBottomRight, marginColor);
+            cmd.AddRectangleFilled(marginBottomLeft, bottomRight, marginColor);
 
             // Padding
             Color paddingColor = Color.FromHex(color, 120);
-            cmd.AddRectangle(topLeft, paddingBottomLeft, paddingColor);
-            cmd.AddRectangle(paddingTopLeft, topRight, paddingColor);
-            cmd.AddRectangle(paddingTopRight, bottomRight, paddingColor);
-            cmd.AddRectangle(bottomLeft, paddingBottomRight, paddingColor);
+            cmd.AddRectangleFilled(topLeft, paddingBottomLeft, paddingColor);
+            cmd.AddRectangleFilled(paddingTopLeft, topRight, paddingColor);
+            cmd.AddRectangleFilled(paddingTopRight, bottomRight, paddingColor);
+            cmd.AddRectangleFilled(bottomLeft, paddingBottomRight, paddingColor);
 
             Renderer.CurrentLayer.Commands.Add(cmd);
         }

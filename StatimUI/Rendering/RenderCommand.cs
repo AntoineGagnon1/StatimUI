@@ -26,7 +26,7 @@ namespace StatimUI.Rendering
             Vertices.Add(c);
         }
 
-        public void AddRectangle(Vector2 topLeft, Vector2 bottomRight, Color fillColor, int rounding = 0)
+        public void AddRectangleFilled(Vector2 topLeft, Vector2 bottomRight, Color fillColor, int rounding = 0)
         {
             if (rounding == 0)
             {
