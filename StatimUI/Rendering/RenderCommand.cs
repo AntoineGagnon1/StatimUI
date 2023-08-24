@@ -13,7 +13,7 @@ namespace StatimUI.Rendering
 
         public IntPtr Texture { get; set; }
 
-        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
+        public Matrix4x4 Transform = Matrix4x4.Identity;
 
         public void AddTriangle(Vertex a, Vertex b, Vertex c)
         {
