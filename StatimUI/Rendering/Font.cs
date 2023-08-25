@@ -107,20 +107,28 @@ namespace StatimUI.Rendering
             Renderer.Adapter!.SetTextureData(Texture, new Size((int)maxX * 16, (int)maxY * 8), pixelData);
         }
 
-        public RenderCommand MakeText(string text, Color color, out Vector2 textSize)
+        public Vector2 GetTextSize(string text)
         {
-            RenderCommand cmd = new RenderCommand() { Texture = Texture };
-            textSize = new Vector2(0, MaxHeight);
-
             if (text.Length == 0)
-                return cmd;
+                return new(0f);
+
+            float x = 0f;
+            foreach (var letter in text)
+                x += Glyphs[GetGlyphIndex(letter)].Advance;
+            return new Vector2(x, MaxHeight);
+        }
+
+        public Vector2 MakeText(RenderCommand cmd, string text, Vector2 pos, Color color)
+        {
+            if (text.Length == 0)
+                return new(0f);
 
             Vector2 cursor = new Vector2(-Glyphs[GetGlyphIndex(text.First())].BearingX, MaxBearingY); // align the top-left of the text at 0,0
             foreach (char letter in text)
             {
                 int glyphIndex = GetGlyphIndex(letter);
 
-                Vector2 topLeft = cursor + new Vector2(Glyphs[glyphIndex].BearingX, -Glyphs[glyphIndex].BearingY);
+                Vector2 topLeft = cursor + new Vector2(Glyphs[glyphIndex].BearingX, -Glyphs[glyphIndex].BearingY) + pos;
                 Vector2 topRight = topLeft + new Vector2(Glyphs[glyphIndex].Width, 0);
                 Vector2 bottomLeft = topLeft + new Vector2(0, Glyphs[glyphIndex].Height);
                 Vector2 bottomRight = bottomLeft + new Vector2(Glyphs[glyphIndex].Width, 0);
@@ -128,22 +136,24 @@ namespace StatimUI.Rendering
                 Vector2 uvStart = Glyphs[glyphIndex].UVTopLeft;
                 Vector2 uvSize = Glyphs[glyphIndex].UVSize;
 
-                cmd.AddTriangle(
-                    new(bottomLeft, uvStart + new Vector2(0, uvSize.Y), color),
-                    new(topLeft, uvStart, color),
-                    new(topRight, uvStart + new Vector2(uvSize.X, 0), color)
-                    );
-                cmd.AddTriangle(
-                    new(topRight, uvStart + new Vector2(uvSize.X, 0), color),
-                    new(bottomRight, uvStart + uvSize, color),
-                    new(bottomLeft, uvStart + new Vector2(0, uvSize.Y), color)
-                    );
+                cmd.Indices.Add((uint)cmd.Vertices.Count);
+                cmd.Indices.Add((uint)cmd.Vertices.Count + 1);
+                cmd.Indices.Add((uint)cmd.Vertices.Count + 2);
+
+                cmd.Indices.Add((uint)cmd.Vertices.Count + 2);
+                cmd.Indices.Add((uint)cmd.Vertices.Count + 3);
+                cmd.Indices.Add((uint)cmd.Vertices.Count);
+
+                cmd.Vertices.Add(new(bottomLeft, uvStart + new Vector2(0, uvSize.Y), color));
+                cmd.Vertices.Add(new(topLeft, uvStart, color));
+                cmd.Vertices.Add(new(topRight, uvStart + new Vector2(uvSize.X, 0), color));
+                cmd.Vertices.Add(new(bottomRight, uvStart + uvSize, color));
+
 
                 cursor.X += Glyphs[glyphIndex].Advance;
             }
 
-            textSize = new Vector2(cursor.X, MaxHeight);
-            return cmd;
+            return new Vector2(cursor.X, MaxHeight);
         }
 
         private static int GetGlyphIndex(char letter)

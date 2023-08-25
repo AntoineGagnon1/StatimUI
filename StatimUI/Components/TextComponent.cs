@@ -24,8 +24,8 @@ namespace StatimUI.Components
         protected override void OnRender(Vector2 drawPosition)
         {
             base.OnRender(drawPosition);
-            renderCommand.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
-            Renderer.CurrentLayer.Commands.Add(renderCommand);
+            //renderCommand.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
+            Renderer.CurrentLayer.AddText(Content.Value, drawPosition, TextColor.Value);
         }
 
         public override void Start(IList<Component> slots)
@@ -34,13 +34,9 @@ namespace StatimUI.Components
         
         override public bool Update()
         {
-            if (Content.Value != lastContent)
-            {
-                lastContent = Content.Value;
-                renderCommand = FontManager.GetFont("arial.ttf", 14).MakeText(Content.Value, TextColor.Value, out var textSize);
-                Width.Value.Scalar = textSize.X;
-                Height.Value.Scalar = textSize.Y;
-            }
+            var textSize = FontManager.DefaultFont.GetTextSize(Content.Value);
+            Width.Value.Scalar = textSize.X;
+            Height.Value.Scalar = textSize.Y;
             if ((new Random()).NextDouble() > 0.9995d)
                Content.Value += "a";
 

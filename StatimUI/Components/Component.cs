@@ -96,10 +96,8 @@ namespace StatimUI
             
             if (OutlineStyle == StatimUI.OutlineStyle.Solid)
             {
-                var cmd = new RenderCommand();
                 var topLeft = drawPosition - Padding.Value.TopLeft;
-                cmd.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth , PixelHeight), Color.FromHex(0x3b82f6), 4f);
-                Renderer.CurrentLayer.Commands.Add(cmd);
+                Renderer.CurrentLayer.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), Color.FromHex(0x3b82f6), 4f);
             }
         }
 
@@ -120,10 +118,8 @@ namespace StatimUI
         {
             if (BackgroundColor.Value.A != 0)
             {
-                var cmd = new RenderCommand();
                 var topLeft = drawPosition - Padding.Value.TopLeft;
-                cmd.AddRectangleFilled(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value, BorderRadius.Value);
-                Renderer.CurrentLayer.Commands.Add(cmd);
+                Renderer.CurrentLayer.AddRectangleFilled(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), BackgroundColor.Value, BorderRadius.Value);
             }
         }
 

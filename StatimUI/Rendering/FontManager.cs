@@ -27,6 +27,7 @@ namespace StatimUI.Rendering
 
         private static FreeTypeSharp.FreeTypeLibrary s_freeType = new ();
 
+        public static Font DefaultFont { get; set; }
 
         // Will load the font if needed
         // if fontSizeX is 0 it will be determined from the y size

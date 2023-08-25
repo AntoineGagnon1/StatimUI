@@ -35,23 +35,21 @@ namespace StatimUI.DebugTools
             Vector2 paddingBottomLeft = bottomLeft + new Vector2(c.Padding.Value.Left, -c.Padding.Value.Bottom);
             Vector2 paddingBottomRight = bottomRight - c.Padding.Value.BottomRight;
 
-            var cmd = new RenderCommand();
+            var layer = Renderer.CurrentLayer;
 
             // Margins
             Color marginColor = Color.FromHex(color, 255);
-            cmd.AddRectangleFilled(marginTopLeft, bottomLeft, marginColor);
-            cmd.AddRectangleFilled(topLeft, marginTopRight, marginColor);
-            cmd.AddRectangleFilled(topRight, marginBottomRight, marginColor);
-            cmd.AddRectangleFilled(marginBottomLeft, bottomRight, marginColor);
+            layer.AddRectangleFilled(marginTopLeft, bottomLeft, marginColor);
+            layer.AddRectangleFilled(topLeft, marginTopRight, marginColor);
+            layer.AddRectangleFilled(topRight, marginBottomRight, marginColor);
+            layer.AddRectangleFilled(marginBottomLeft, bottomRight, marginColor);
 
             // Padding
             Color paddingColor = Color.FromHex(color, 120);
-            cmd.AddRectangleFilled(topLeft, paddingBottomLeft, paddingColor);
-            cmd.AddRectangleFilled(paddingTopLeft, topRight, paddingColor);
-            cmd.AddRectangleFilled(paddingTopRight, bottomRight, paddingColor);
-            cmd.AddRectangleFilled(bottomLeft, paddingBottomRight, paddingColor);
-
-            Renderer.CurrentLayer.Commands.Add(cmd);
+            layer.AddRectangleFilled(topLeft, paddingBottomLeft, paddingColor);
+            layer.AddRectangleFilled(paddingTopLeft, topRight, paddingColor);
+            layer.AddRectangleFilled(paddingTopRight, bottomRight, paddingColor);
+            layer.AddRectangleFilled(bottomLeft, paddingBottomRight, paddingColor);
         }
     }
 #endif
