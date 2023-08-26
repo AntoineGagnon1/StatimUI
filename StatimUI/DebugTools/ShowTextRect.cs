@@ -15,7 +15,7 @@ namespace StatimUI.DebugTools
             {
                 foreach(var renderCommand in layer.Commands)
                 {
-                    if (FontManager.IsTextureFont(renderCommand.Texture))
+                    if (FontManager.IsTextureFont(renderCommand.Texture.Id))
                     {
                         for(int i = 0; i < renderCommand.Vertices.Count; i++)
                         {

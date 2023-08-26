@@ -101,8 +101,9 @@ void main()
         public void Render()
         {
             Renderer.ClearLayers();
-
+            Renderer.CurrentLayer.PushClipRect(new RectangleF(0f, 0f, 900, 900));
             window.Update(); // TODO : remove ref to window when the window system changes
+            Renderer.CurrentLayer.PopClipRect();
 
             // Cache the current state
             int prevVAO = GL.GetInteger(GetPName.VertexArrayBinding);
@@ -128,6 +129,7 @@ void main()
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Disable(EnableCap.CullFace);
             GL.Disable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.ScissorTest);
 
             CheckGLError();
 
@@ -171,8 +173,8 @@ void main()
                     if (command.Vertices.Count == 0 || command.Indices.Count == 0)
                         continue;
 
-                    if (command.Texture != IntPtr.Zero)
-                        BindTexture(command.Texture);
+                    if (command.Texture.Id != IntPtr.Zero)
+                        BindTexture(command.Texture.Id);
 
                     unsafe
                     {
@@ -183,6 +185,9 @@ void main()
                     // TODO : dont convert to array
                     GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, command.Vertices.Count * Unsafe.SizeOf<Vertex>(), command.Vertices.ToArray());
                     GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, command.Indices.Count * sizeof(uint), command.Indices.ToArray());
+
+                    // since OpenGl has inverted Y
+                    GL.Scissor((int)command.ClipRect.X, (int)(windowSize.Y - command.ClipRect.Y), (int)command.ClipRect.Width, (int)-command.ClipRect.Height);
 
                     GL.DrawElements(BeginMode.Triangles, command.Indices.Count, DrawElementsType.UnsignedInt, 0);
                 }

@@ -24,6 +24,7 @@ namespace Sandbox
 
             FontManager.DefaultFont = FontManager.GetFont("arial.ttf", 14);
 
+
             GL.Enable(EnableCap.Multisample);
         }
 

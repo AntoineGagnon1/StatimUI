@@ -11,21 +11,35 @@ namespace StatimUI.Rendering
     {
         public List<RenderCommand> Commands { get; set; } = new ();
         public RenderCommand LastCommand => Commands[Commands.Count - 1];
+        private Stack<RectangleF> clipRects = new();
+
+
+        public void PushClipRect(RectangleF rect)
+        {
+            clipRects.Push(rect);
+            var command = RenderCommand.CreateDefault();
+            command.ClipRect = rect;
+            Commands.Add(command);
+        }
+
+        public void PopClipRect()
+        {
+            var clipRect = clipRects.Pop();
+            var command = RenderCommand.CreateDefault();
+            command.ClipRect = clipRect;
+            Commands.Add(command);
+        }
 
         private RenderCommand GetDrawCommand()
         {
             if (Commands.Count > 0)
             {
                 var lastCommand = Commands[Commands.Count - 1];
-                if (lastCommand.TextureHasDefaultPixel)
+                if (lastCommand.Texture.HasDefaultPixel)
                     return lastCommand;
             }
 
-            var newCommand = new RenderCommand
-            {
-                TextureHasDefaultPixel = true,
-                Texture = FontManager.DefaultFont.Texture
-            };
+            var newCommand = RenderCommand.CreateDefault();
             Commands.Add(newCommand);
             return newCommand;
         }
@@ -217,13 +231,13 @@ namespace StatimUI.Rendering
         public Vector2 AddText(string text, Vector2 pos, Color color, Font font)
         {
             RenderCommand cmd;
-            if (LastCommand.Texture == font.Texture)
+            if (LastCommand.Texture.Id == font.Texture)
             {
                 cmd = LastCommand;
             }
             else
             {
-                cmd = new RenderCommand { Texture = font.Texture };
+                cmd = new RenderCommand { Texture = new(font.Texture) };
                 Commands.Add(cmd);
             }
 
@@ -232,6 +246,7 @@ namespace StatimUI.Rendering
 
         internal void Clear()
         {
+            clipRects.Clear();
             Commands.Clear();
         }
     }
