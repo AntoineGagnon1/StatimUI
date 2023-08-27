@@ -69,7 +69,8 @@ namespace Sandbox.Adapters
                     Size = new Vector2i(window.Size.Width, window.Size.Height),
                     WindowBorder = WindowBorder.Resizable,
                     NumberOfSamples = msaa,
-                    APIVersion = OpenglGLVersion
+                    APIVersion = OpenglGLVersion,
+                    Vsync = VSyncMode.On
                   }), 
                   msaa
               )
