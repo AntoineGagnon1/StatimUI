@@ -1,4 +1,4 @@
-﻿<script>{
+﻿<script base="Panel">{
 	using System;
 	
 	List<string> items = new List<string> { "1", "2", "3", "4" };

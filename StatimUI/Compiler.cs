@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Drawing;
 
 namespace StatimUI
 {
@@ -92,6 +93,19 @@ namespace StatimUI
 
             var instance = Activator.CreateInstance(type) as Component;
             instance?.Start(new List<Component>());
+            return instance;
+        }
+
+        public Panel? CreatePanel(string name, Size size)
+        {
+            var type = Assembly?.GetType("StatimUIXmlComponents." + name);
+
+            if (type == null)
+                return null;
+
+            var instance = Activator.CreateInstance(type) as Panel;
+            if (instance != null)
+                instance.Size = size;
             return instance;
         }
 

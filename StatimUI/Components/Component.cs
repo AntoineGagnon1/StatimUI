@@ -90,7 +90,7 @@ namespace StatimUI
 
         public abstract void Start(IList<Component> slots);
 
-        protected static ForEach<T> CreateForEach<T>(IEnumerable<T> _) => new ForEach<T>();
+        public static ForEach<T> CreateForEach<T>(IEnumerable<T> _) => new ForEach<T>();
 
         public Property<OutlineStyle> OutlineStyle { get; set; } = new ValueProperty<OutlineStyle>(StatimUI.OutlineStyle.Solid);
 
