@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace StatimUI
 {
-    public class Window
+    public class Panel
     {
         public Component Root { get; set; }
         public Size Size { get; set; } = new();
@@ -32,7 +32,7 @@ namespace StatimUI
 #endif
         }
 
-        static Window()
+        static Panel()
         {
             // TODO: find a better place to put this
             ValueProperty<Thickness>.StringConverter = new ThicknessConverter();

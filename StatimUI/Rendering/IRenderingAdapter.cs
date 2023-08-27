@@ -8,8 +8,8 @@ namespace StatimUI.Rendering
 {
     public interface IRenderingAdapter
     {
-        public abstract void CreateSubWindow(Window window);
-        public abstract void DestroySubWindow(Window window);
+        public abstract void CreateSubWindow(Panel window);
+        public abstract void DestroySubWindow(Panel window);
 
         public abstract void BindTexture(IntPtr texture);
         public abstract IntPtr MakeTexture();

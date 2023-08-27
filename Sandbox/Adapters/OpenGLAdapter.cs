@@ -33,13 +33,13 @@ namespace Sandbox.Adapters
         private int shaderProjectionMatrixLocation;
 
         private NativeWindow mainWindow;
-        private Dictionary<Window, SubWindow> subWindows = new ();
+        private Dictionary<Panel, SubWindow> subWindows = new ();
 
         private int msaaSamples;
 
         public static Version OpenglGLVersion = new Version(3, 3);
 
-        public OpenGLAdapter(Window window, NativeWindow nativeWindow, int msaa = 4)
+        public OpenGLAdapter(Panel window, NativeWindow nativeWindow, int msaa = 4)
         {
             msaaSamples = msaa;
             mainWindow = nativeWindow;
@@ -61,7 +61,7 @@ namespace Sandbox.Adapters
 
 
         // Will create a main window
-        public OpenGLAdapter(Window window, int msaa = 4)
+        public OpenGLAdapter(Panel window, int msaa = 4)
             : this(
                   window, 
                   new NativeWindow(new NativeWindowSettings()
@@ -120,7 +120,7 @@ namespace Sandbox.Adapters
             }
         }
 
-        private void RenderTriangles(Window window, SubWindow subWindow)
+        private void RenderTriangles(Panel window, SubWindow subWindow)
         {
             GL.BindVertexArray(subWindow.VertexArrayObject);
             CheckGLError();
@@ -303,7 +303,7 @@ namespace Sandbox.Adapters
             CheckGLError();
         }
 
-        public void CreateSubWindow(StatimUI.Window window)
+        public void CreateSubWindow(StatimUI.Panel window)
         {
             var nativeWindow = new NativeWindow(new NativeWindowSettings()
             {
@@ -328,7 +328,7 @@ namespace Sandbox.Adapters
             GL.Enable(EnableCap.Multisample);
         }
 
-        public void DestroySubWindow(StatimUI.Window window)
+        public void DestroySubWindow(StatimUI.Panel window)
         {
             var subWindow = subWindows[window];
 
