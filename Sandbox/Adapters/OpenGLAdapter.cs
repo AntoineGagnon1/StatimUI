@@ -104,6 +104,7 @@ namespace Sandbox.Adapters
                 Renderer.ClearLayers();
                 Renderer.CurrentLayer.PushClipRect(new RectangleF(0f, 0f, pair.Key.Size.Width, pair.Key.Size.Height));
                 pair.Key.Update(); // TODO : remove ref to window when the window system changes
+                pair.Key.Render();
                 Renderer.CurrentLayer.PopClipRect();
 
                 GL.Viewport(0, 0, pair.Key.Size.Width, pair.Key.Size.Height);
