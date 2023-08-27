@@ -16,6 +16,11 @@ namespace StatimUI
         public abstract bool Focusable { get; }
 
         public bool Focused => FocusManager.FocusedComponent == this;
+
+        /// <summary>
+        ///     Tries to focus this component.
+        /// </summary>
+        /// <returns>Whether the component got focused. True if it is Focusable, otherwise false.</returns>
         public bool Focus()
         {
             if (Focusable)
