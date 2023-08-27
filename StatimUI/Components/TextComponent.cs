@@ -25,7 +25,7 @@ namespace StatimUI.Components
         {
             base.OnRender(drawPosition);
             //renderCommand.Transform = Matrix4x4.CreateTranslation(drawPosition.X, drawPosition.Y, 0);
-            Renderer.CurrentLayer.AddText(Content.Value, drawPosition, TextColor.Value);
+            Renderer.CurrentLayer.AddText(Content.Value, drawPosition, TextColor.Value, FontManager.DefaultFont);
         }
 
         public override void Start(IList<Component> slots)

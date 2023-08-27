@@ -1,6 +1,7 @@
 ﻿using StatimUI.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -13,6 +14,13 @@ namespace StatimUI
     public class Window
     {
         public Component Root { get; set; }
+        public Size Size { get; set; } = new();
+
+        public void TryClose()
+        {
+            // TODO : chose if the window should close or not
+            Renderer.Adapter!.DestroySubWindow(this);
+        }
 
         public void Update()
         {
@@ -30,7 +38,7 @@ namespace StatimUI
             ValueProperty<Thickness>.StringConverter = new ThicknessConverter();
             ValueProperty<Dimension>.StringConverter = new DimensionConverter();
             ValueProperty<Vector2>.StringConverter = new Vector2Converter();
-            ValueProperty<Color>.StringConverter = new ColorConverter();
+            ValueProperty<StatimUI.Rendering.Color>.StringConverter = new ColorConverter();
         }
     }
 }

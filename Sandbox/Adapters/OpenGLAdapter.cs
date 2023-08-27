@@ -1,129 +1,131 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
+using StatimUI;
 using StatimUI.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO.Pipes;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Sandbox.Adapters
 {
+
     public class OpenGLAdapter : StatimUI.Rendering.IRenderingAdapter, IDisposable
     {
-        private int vertexArray;
+        private struct SubWindow
+        {
+            public NativeWindow NativeWindow;
+            public int VertexArrayObject; // Cannot be shared between contexts
+        }
+
+        // Shared for all windows
         private int vertexBuffer;
         private int vertexBufferSize;
         private int indexBuffer;
         private int indexBufferSize;
-
         private int shader;
-        private Vector2 windowSize = Vector2.Zero;
         private int shaderProjectionMatrixLocation;
 
-        private StatimUI.Window window;
+        private NativeWindow mainWindow;
+        private Dictionary<Window, SubWindow> subWindows = new ();
 
-        public OpenGLAdapter(StatimUI.Window window)
+        private int msaaSamples;
+
+        public static Version OpenglGLVersion = new Version(3, 3);
+
+        public OpenGLAdapter(Window window, NativeWindow nativeWindow, int msaa = 4)
         {
+            msaaSamples = msaa;
+            mainWindow = nativeWindow;
+
+            mainWindow.Resize += (e) => {
+                window.Size = new(e.Size.X, e.Size.Y);
+            };
+
+            mainWindow.MakeCurrent();
+
             vertexBufferSize = 10000;
             indexBufferSize = 2000;
+            CreateSharedData();
 
-            int prevVAO = GL.GetInteger(GetPName.VertexArrayBinding);
-            int prevArrayBuffer = GL.GetInteger(GetPName.ArrayBufferBinding);
+            GL.Enable(EnableCap.Multisample);
 
-            vertexArray = GL.GenVertexArray();
-            GL.BindVertexArray(vertexArray);
-
-            vertexBuffer = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer);
-            GL.BufferData(BufferTarget.ArrayBuffer, vertexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
-
-            indexBuffer = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, indexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
-
-            string VertexSource = @"
-#version 330 core
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_UV;
-layout(location = 2) in vec4 in_color;
-
-out vec4 color;
-out vec2 UV;
-
-uniform mat4 projection_matrix;
-
-void main()
-{
-    gl_Position = projection_matrix * vec4(in_position, 0, 1);
-    UV = in_UV;
-    color = in_color;
-}";
-            string FragmentSource = @"
-#version 330 core
-
-uniform sampler2D in_fontTexture;
-
-in vec4 color;
-in vec2 UV;
-
-out vec4 output_color;
-
-void main()
-{
-    output_color = color * texture(in_fontTexture, UV);
-}";
-
-            shader = CreateProgram("StatimUI", VertexSource, FragmentSource);
-            CheckGLError();
-            shaderProjectionMatrixLocation = GL.GetUniformLocation(shader, "projection_matrix");
-            CheckGLError();
-
-            int stride = Unsafe.SizeOf<Vertex>();
-            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
-            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 8);
-            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, stride, 16);
-
-            GL.EnableVertexAttribArray(0);
-            GL.EnableVertexAttribArray(1);
-            GL.EnableVertexAttribArray(2);
-            CheckGLError();
-
-            // Go back to the previously bound state
-            GL.BindVertexArray(prevVAO);
-            CheckGLError();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, prevArrayBuffer);
-            this.window = window;
-            CheckGLError();
+            subWindows.Add(window, new() { NativeWindow = mainWindow, VertexArrayObject = CreateVAO(mainWindow) }); // Add the main window to the list of subwindows, this way it will also be rendered
         }
 
-        public void Render()
+
+        // Will create a main window
+        public OpenGLAdapter(Window window, int msaa = 4)
+            : this(
+                  window, 
+                  new NativeWindow(new NativeWindowSettings()
+                  {
+                    Size = new Vector2i(window.Size.Width, window.Size.Height),
+                    WindowBorder = WindowBorder.Resizable,
+                    NumberOfSamples = msaa,
+                    APIVersion = OpenglGLVersion
+                  }), 
+                  msaa
+              )
         {
-            Renderer.ClearLayers();
-            Renderer.CurrentLayer.PushClipRect(new RectangleF(0f, 0f, 900, 900));
-            window.Update(); // TODO : remove ref to window when the window system changes
-            Renderer.CurrentLayer.PopClipRect();
+        }
 
-            // Cache the current state
-            int prevVAO = GL.GetInteger(GetPName.VertexArrayBinding);
-            int prevArrayBuffer = GL.GetInteger(GetPName.ArrayBufferBinding);
-            int prevProgram = GL.GetInteger(GetPName.CurrentProgram);
-            bool prevBlendEnabled = GL.GetBoolean(GetPName.Blend);
-            int prevBlendEquationRgb = GL.GetInteger(GetPName.BlendEquationRgb);
-            int prevBlendEquationAlpha = GL.GetInteger(GetPName.BlendEquationAlpha);
-            int prevBlendFuncSrcRgb = GL.GetInteger(GetPName.BlendSrcRgb);
-            int prevBlendFuncSrcAlpha = GL.GetInteger(GetPName.BlendSrcAlpha);
-            int prevBlendFuncDstRgb = GL.GetInteger(GetPName.BlendDstRgb);
-            int prevBlendFuncDstAlpha = GL.GetInteger(GetPName.BlendDstAlpha);
-            bool prevCullFaceEnabled = GL.GetBoolean(GetPName.CullFace);
-            bool prevDepthTestEnabled = GL.GetBoolean(GetPName.DepthTest);
+        public unsafe void Start()
+        {
+            while (!OpenTK.Windowing.GraphicsLibraryFramework.GLFW.WindowShouldClose(mainWindow.WindowPtr))
+            {
+                OpenTK.Windowing.GraphicsLibraryFramework.GLFW.PollEvents();
+                Update();
 
-            // Bind our stuff
-            GL.BindVertexArray(vertexArray);
+                foreach(var pair in subWindows)
+                {
+                    pair.Value.NativeWindow.ProcessInputEvents();
+                }
+            }
+        }
+
+        public void Update()
+        {
+            foreach (var pair in subWindows)
+            {
+                if(!pair.Value.NativeWindow.Context.IsCurrent) // must check, otherwise will crash
+                    pair.Value.NativeWindow.Context.MakeCurrent();
+
+                if (pair.Value.NativeWindow.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Tab))
+                    FocusManager.ShiftFocus();
+
+                Renderer.ClearLayers();
+                Renderer.CurrentLayer.PushClipRect(new RectangleF(0f, 0f, pair.Key.Size.Width, pair.Key.Size.Height));
+                pair.Key.Update(); // TODO : remove ref to window when the window system changes
+                Renderer.CurrentLayer.PopClipRect();
+
+                GL.Viewport(0, 0, pair.Key.Size.Width, pair.Key.Size.Height);
+                GL.ClearColor(1, 1, 1, 1);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+                //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+                var watch = Stopwatch.StartNew();
+                RenderTriangles(pair.Key, pair.Value);
+                watch.Stop();
+                Console.WriteLine($"{pair.Value.NativeWindow.Title} : {watch.Elapsed.TotalMilliseconds}");
+
+                pair.Value.NativeWindow.Context.SwapBuffers();
+            }
+        }
+
+        private void RenderTriangles(Window window, SubWindow subWindow)
+        {
+            GL.BindVertexArray(subWindow.VertexArrayObject);
+            CheckGLError();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer);
             GL.UseProgram(shader);
-            GL.BindVertexArray(vertexArray);
             GL.Enable(EnableCap.Blend);
             GL.BlendEquation(BlendEquationMode.FuncAdd);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -157,8 +159,8 @@ void main()
 
             var pMatrix = Matrix4x4.CreateOrthographicOffCenter(
                 0.0f,
-                windowSize.X,
-                windowSize.Y,
+                window.Size.Width,
+                window.Size.Height,
                 0.0f,
                 -1.0f,
                 1.0f);
@@ -175,7 +177,6 @@ void main()
 
                     if (command.Texture.Id != IntPtr.Zero)
                         BindTexture(command.Texture.Id);
-
                     unsafe
                     {
                         var matrix = command.Transform * pMatrix;
@@ -186,43 +187,14 @@ void main()
                     GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, command.Vertices.Count * Unsafe.SizeOf<Vertex>(), command.Vertices.ToArray());
                     GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, command.Indices.Count * sizeof(uint), command.Indices.ToArray());
 
-                    // since OpenGl has inverted Y
-                    GL.Scissor((int)command.ClipRect.X, (int)(windowSize.Y - command.ClipRect.Y), (int)command.ClipRect.Width, (int)-command.ClipRect.Height);
+                    // 0,0 is bottom-left in opengl
+                    GL.Scissor((int)command.ClipRect.X, (int)(window.Size.Height - command.ClipRect.Height - command.ClipRect.Y), (int)command.ClipRect.Width, (int)command.ClipRect.Height);
 
                     GL.DrawElements(BeginMode.Triangles, command.Indices.Count, DrawElementsType.UnsignedInt, 0);
                 }
             }
 
             CheckGLError();
-
-            // Reset state
-            GL.UseProgram(prevProgram);
-            GL.BindVertexArray(prevVAO);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, prevArrayBuffer);
-            GL.BlendEquationSeparate((BlendEquationMode)prevBlendEquationRgb, (BlendEquationMode)prevBlendEquationAlpha);
-            GL.BlendFuncSeparate((BlendingFactorSrc)prevBlendFuncSrcRgb, (BlendingFactorDest)prevBlendFuncDstRgb, (BlendingFactorSrc)prevBlendFuncSrcAlpha, (BlendingFactorDest)prevBlendFuncDstAlpha);
-
-            if (prevBlendEnabled) 
-                GL.Enable(EnableCap.Blend); 
-            else 
-                GL.Disable(EnableCap.Blend);
-
-            if (prevDepthTestEnabled) 
-                GL.Enable(EnableCap.DepthTest);
-            else 
-                GL.Disable(EnableCap.DepthTest);
-
-            if (prevCullFaceEnabled) 
-                GL.Enable(EnableCap.CullFace); 
-            else 
-                GL.Disable(EnableCap.CullFace);
-
-            CheckGLError();
-        }
-
-        public void WindowResized(Vector2 size)
-        {
-            windowSize = size;
         }
 
         public static int CreateProgram(string name, string vertexSource, string fragmentSoruce)
@@ -283,7 +255,6 @@ void main()
 
         public void Dispose()
         {
-            GL.DeleteVertexArray(vertexArray);
             GL.DeleteBuffer(vertexBuffer);
             GL.DeleteBuffer(indexBuffer);
 
@@ -297,7 +268,7 @@ void main()
             int i = 1;
             while ((error = GL.GetError()) != ErrorCode.NoError)
             {
-                Debug.Print($"OpenGL Error ({i++}): {error}");
+                Console.WriteLine($"OpenGL Error ({i++}): {error}");
             }
         }
 
@@ -329,6 +300,113 @@ void main()
         public void BindTexture(nint texture)
         {
             GL.BindTexture(TextureTarget.Texture2D, (int)texture);
+            CheckGLError();
+        }
+
+        public void CreateSubWindow(StatimUI.Window window)
+        {
+            var nativeWindow = new NativeWindow(new NativeWindowSettings()
+            {
+                SharedContext = mainWindow.Context,
+                Size = new Vector2i(window.Size.Width, window.Size.Height),
+                WindowBorder = WindowBorder.Resizable,
+                NumberOfSamples = msaaSamples,
+                APIVersion = OpenglGLVersion
+            });
+
+            nativeWindow.Resize += (e) => {
+                window.Size = new (e.Size.X, e.Size.Y);
+            };
+
+            nativeWindow.Closing += (e) => {
+                window.TryClose();
+            };
+
+            subWindows.Add(window, new() { NativeWindow = nativeWindow, VertexArrayObject = CreateVAO(nativeWindow) });
+            nativeWindow.MakeCurrent();
+
+            GL.Enable(EnableCap.Multisample);
+        }
+
+        public void DestroySubWindow(StatimUI.Window window)
+        {
+            var subWindow = subWindows[window];
+
+            subWindow.NativeWindow.MakeCurrent();
+            GL.DeleteVertexArray(subWindow.VertexArrayObject);
+            subWindow.NativeWindow.Dispose();
+            subWindows.Remove(window);
+        }
+
+        // Creates a vao for the window
+        private int CreateVAO(NativeWindow window)
+        {
+            window.MakeCurrent();
+
+            int vao = GL.GenVertexArray();
+            GL.BindVertexArray(vao);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer);
+
+            int stride = Unsafe.SizeOf<Vertex>();
+            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
+            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 8);
+            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, stride, 16);
+
+            GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(2);
+            CheckGLError();
+
+            return vao;
+        }
+
+        private void CreateSharedData()
+        {
+            vertexBuffer = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBuffer);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+
+            indexBuffer = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, indexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+
+            string VertexSource = @"
+#version 330 core
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_UV;
+layout(location = 2) in vec4 in_color;
+
+out vec4 color;
+out vec2 UV;
+
+uniform mat4 projection_matrix;
+
+void main()
+{
+    gl_Position = projection_matrix * vec4(in_position, 0, 1);
+    UV = in_UV;
+    color = in_color;
+}";
+            string FragmentSource = @"
+#version 330 core
+
+uniform sampler2D in_fontTexture;
+
+in vec4 color;
+in vec2 UV;
+
+out vec4 output_color;
+
+void main()
+{
+    output_color = color * texture(in_fontTexture, UV);
+}";
+
+            shader = CreateProgram("StatimUI", VertexSource, FragmentSource);
+            CheckGLError();
+            shaderProjectionMatrixLocation = GL.GetUniformLocation(shader, "projection_matrix");
             CheckGLError();
         }
     }

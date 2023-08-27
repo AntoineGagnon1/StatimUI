@@ -226,8 +226,6 @@ namespace StatimUI.Rendering
             command.Indices.Add((uint)indexEnd);
         }
 
-        public Vector2 AddText(string text, Vector2 pos, Color color) => AddText(text, pos, color, FontManager.DefaultFont);
-
         public Vector2 AddText(string text, Vector2 pos, Color color, Font font)
         {
             RenderCommand cmd;

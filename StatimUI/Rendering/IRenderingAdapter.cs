@@ -8,8 +8,8 @@ namespace StatimUI.Rendering
 {
     public interface IRenderingAdapter
     {
-        public abstract void Render();
-        public abstract void WindowResized(Vector2 size);
+        public abstract void CreateSubWindow(Window window);
+        public abstract void DestroySubWindow(Window window);
 
         public abstract void BindTexture(IntPtr texture);
         public abstract IntPtr MakeTexture();
