@@ -46,85 +46,85 @@ namespace StatimUI.Rendering
 
         public void AddTriangle(Vertex a, Vertex b, Vertex c)
         {
-            var command = GetDrawCommand();
+            var cmd = GetDrawCommand();
 
-            command.Indices.Add((uint)command.Vertices.Count);
-            command.Indices.Add((uint)command.Vertices.Count + 1);
-            command.Indices.Add((uint)command.Vertices.Count + 2);
+            cmd.Indices.Add(cmd.VerticesCountU);
+            cmd.Indices.Add(cmd.VerticesCountU + 1);
+            cmd.Indices.Add(cmd.VerticesCountU + 2);
 
-            command.Vertices.Add(a);
-            command.Vertices.Add(b);
-            command.Vertices.Add(c);
+            cmd.AddVertex(a);
+            cmd.AddVertex(b);
+            cmd.AddVertex(c);
         }
 
         public void AddRectangle(Vertex a, Vertex b, Vertex c, Vertex d)
         {
             var cmd = GetDrawCommand();
 
-            cmd.Indices.Add((uint)cmd.Vertices.Count);
-            cmd.Indices.Add((uint)cmd.Vertices.Count + 1);
-            cmd.Indices.Add((uint)cmd.Vertices.Count + 2);
+            cmd.Indices.Add(cmd.VerticesCountU);
+            cmd.Indices.Add(cmd.VerticesCountU + 1);
+            cmd.Indices.Add(cmd.VerticesCountU + 2);
 
-            cmd.Indices.Add((uint)cmd.Vertices.Count + 2);
-            cmd.Indices.Add((uint)cmd.Vertices.Count + 3);
-            cmd.Indices.Add((uint)cmd.Vertices.Count);
+            cmd.Indices.Add(cmd.VerticesCountU + 2);
+            cmd.Indices.Add(cmd.VerticesCountU + 3);
+            cmd.Indices.Add(cmd.VerticesCountU);
 
-            cmd.Vertices.Add(a);
-            cmd.Vertices.Add(b);
-            cmd.Vertices.Add(c);
-            cmd.Vertices.Add(d);
+            cmd.AddVertex(a);
+            cmd.AddVertex(b);
+            cmd.AddVertex(c);
+            cmd.AddVertex(d);
         }
         public void AddRectangle(Vector2 topLeft, Vector2 bottomRight, Color strokeColor, float width, int rounding = 0)
         {
-            var command = GetDrawCommand();
+            var cmd = GetDrawCommand();
 
             if (rounding == 0)
             {
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 1);
-                command.Indices.Add((uint)command.Vertices.Count + 4);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 1);
+                cmd.Indices.Add(cmd.VerticesCountU + 4);
 
-                command.Indices.Add((uint)command.Vertices.Count + 1);
-                command.Indices.Add((uint)command.Vertices.Count + 4);
-                command.Indices.Add((uint)command.Vertices.Count + 5);
-
-
-                command.Indices.Add((uint)command.Vertices.Count + 1);
-                command.Indices.Add((uint)command.Vertices.Count + 3);
-                command.Indices.Add((uint)command.Vertices.Count + 5);
-
-                command.Indices.Add((uint)command.Vertices.Count + 3);
-                command.Indices.Add((uint)command.Vertices.Count + 5);
-                command.Indices.Add((uint)command.Vertices.Count + 7);
+                cmd.Indices.Add(cmd.VerticesCountU + 1);
+                cmd.Indices.Add(cmd.VerticesCountU + 4);
+                cmd.Indices.Add(cmd.VerticesCountU + 5);
 
 
-                command.Indices.Add((uint)command.Vertices.Count + 3);
-                command.Indices.Add((uint)command.Vertices.Count + 2);
-                command.Indices.Add((uint)command.Vertices.Count + 7);
+                cmd.Indices.Add(cmd.VerticesCountU + 1);
+                cmd.Indices.Add(cmd.VerticesCountU + 3);
+                cmd.Indices.Add(cmd.VerticesCountU + 5);
 
-                command.Indices.Add((uint)command.Vertices.Count + 2);
-                command.Indices.Add((uint)command.Vertices.Count + 7);
-                command.Indices.Add((uint)command.Vertices.Count + 6);
+                cmd.Indices.Add(cmd.VerticesCountU + 3);
+                cmd.Indices.Add(cmd.VerticesCountU + 5);
+                cmd.Indices.Add(cmd.VerticesCountU + 7);
 
 
-                command.Indices.Add((uint)command.Vertices.Count + 2);
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 6);
+                cmd.Indices.Add(cmd.VerticesCountU + 3);
+                cmd.Indices.Add(cmd.VerticesCountU + 2);
+                cmd.Indices.Add(cmd.VerticesCountU + 7);
 
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 6);
-                command.Indices.Add((uint)command.Vertices.Count + 4);
+                cmd.Indices.Add(cmd.VerticesCountU + 2);
+                cmd.Indices.Add(cmd.VerticesCountU + 7);
+                cmd.Indices.Add(cmd.VerticesCountU + 6);
+
+
+                cmd.Indices.Add(cmd.VerticesCountU + 2);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 6);
+
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 6);
+                cmd.Indices.Add(cmd.VerticesCountU + 4);
 
                 var widthSize = new Vector2(width);
-                command.Vertices.Add(new Vertex(topLeft - widthSize, strokeColor));
-                command.Vertices.Add(new Vertex(new Vector2(bottomRight.X + width, topLeft.Y - width), strokeColor));
-                command.Vertices.Add(new Vertex(new Vector2(topLeft.X - width, bottomRight.Y + width), strokeColor));
-                command.Vertices.Add(new Vertex(bottomRight + widthSize, strokeColor));
-
-                command.Vertices.Add(new Vertex(topLeft, strokeColor));
-                command.Vertices.Add(new Vertex(new Vector2(bottomRight.X, topLeft.Y), strokeColor));
-                command.Vertices.Add(new Vertex(new Vector2(topLeft.X, bottomRight.Y), strokeColor));
-                command.Vertices.Add(new Vertex(bottomRight, strokeColor));
+                cmd.AddVertex(new Vertex(topLeft - widthSize, strokeColor));
+                cmd.AddVertex(new Vertex(new Vector2(bottomRight.X + width, topLeft.Y - width), strokeColor));
+                cmd.AddVertex(new Vertex(new Vector2(topLeft.X - width, bottomRight.Y + width), strokeColor));
+                cmd.AddVertex(new Vertex(bottomRight + widthSize, strokeColor));
+                        
+                cmd.AddVertex(new Vertex(topLeft, strokeColor));
+                cmd.AddVertex(new Vertex(new Vector2(bottomRight.X, topLeft.Y), strokeColor));
+                cmd.AddVertex(new Vertex(new Vector2(topLeft.X, bottomRight.Y), strokeColor));
+                cmd.AddVertex(new Vertex(bottomRight, strokeColor));
             }
 
             // TODO: rounding
@@ -132,7 +132,7 @@ namespace StatimUI.Rendering
 
         public void AddRectangleFilled(Vector2 topLeft, Vector2 bottomRight, Color fillColor, int rounding = 0)
         {
-            var command = GetDrawCommand();
+            var cmd = GetDrawCommand();
 
             /*if (!Transform.IsIdentity)
             {
@@ -143,56 +143,56 @@ namespace StatimUI.Rendering
 
             if (rounding == 0)
             {
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 1);
-                command.Indices.Add((uint)command.Vertices.Count + 3);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 1);
+                cmd.Indices.Add(cmd.VerticesCountU + 3);
 
-                command.Indices.Add((uint)command.Vertices.Count + 3);
-                command.Indices.Add((uint)command.Vertices.Count + 2);
-                command.Indices.Add((uint)command.Vertices.Count);
+                cmd.Indices.Add(cmd.VerticesCountU + 3);
+                cmd.Indices.Add(cmd.VerticesCountU + 2);
+                cmd.Indices.Add(cmd.VerticesCountU);
 
-                command.Vertices.Add(new Vertex(topLeft, fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(bottomRight.X, topLeft.Y), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(topLeft.X, bottomRight.Y), fillColor));
-                command.Vertices.Add(new Vertex(bottomRight, fillColor));
+                cmd.AddVertex(new Vertex(topLeft, fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(bottomRight.X, topLeft.Y), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(topLeft.X, bottomRight.Y), fillColor));
+                cmd.AddVertex(new Vertex(bottomRight, fillColor));
             }
             else
             {
                 // Split the rectangle in multiple triangle, all starting from the middle
                 // 4 main triangles
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 1);
-                command.Indices.Add((uint)command.Vertices.Count + 2);
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 4);
-                command.Indices.Add((uint)command.Vertices.Count + 6);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 1);
+                cmd.Indices.Add(cmd.VerticesCountU + 2);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 4);
+                cmd.Indices.Add(cmd.VerticesCountU + 6);
 
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 8);
-                command.Indices.Add((uint)command.Vertices.Count + 7);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 8);
+                cmd.Indices.Add(cmd.VerticesCountU + 7);
 
-                command.Indices.Add((uint)command.Vertices.Count);
-                command.Indices.Add((uint)command.Vertices.Count + 5);
-                command.Indices.Add((uint)command.Vertices.Count + 3);
-                int indexOff = command.Vertices.Count;
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 5);
+                cmd.Indices.Add(cmd.VerticesCountU + 3);
+                int indexOff = cmd.VerticesCount;
 
                 Vector2 center = Vector2.Lerp(topLeft, bottomRight, 0.5f);
-                command.Vertices.Add(new Vertex(center, fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(topLeft.X + rounding, topLeft.Y), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(bottomRight.X - rounding, topLeft.Y), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(topLeft.X, topLeft.Y + rounding), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(bottomRight.X, topLeft.Y + rounding), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(topLeft.X, bottomRight.Y - rounding), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(bottomRight.X, bottomRight.Y - rounding), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(topLeft.X + rounding, bottomRight.Y), fillColor));
-                command.Vertices.Add(new Vertex(new Vector2(bottomRight.X - rounding, bottomRight.Y), fillColor));
+                cmd.AddVertex(new Vertex(center, fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(topLeft.X + rounding, topLeft.Y), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(bottomRight.X - rounding, topLeft.Y), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(topLeft.X, topLeft.Y + rounding), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(bottomRight.X, topLeft.Y + rounding), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(topLeft.X, bottomRight.Y - rounding), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(bottomRight.X, bottomRight.Y - rounding), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(topLeft.X + rounding, bottomRight.Y), fillColor));
+                cmd.AddVertex(new Vertex(new Vector2(bottomRight.X - rounding, bottomRight.Y), fillColor));
 
                 // Corners
                 int numDivisions = (int)Math.Ceiling(rounding / 2f);
-                RoundTriangle(command, indexOff + 1, indexOff + 3, indexOff, Math.PI / 2, Math.PI, numDivisions, rounding, new Vector2(topLeft.X + rounding, topLeft.Y + rounding), fillColor);
-                RoundTriangle(command, indexOff + 4, indexOff + 2, indexOff, 0, Math.PI / 2, numDivisions, rounding, new Vector2(bottomRight.X - rounding, topLeft.Y + rounding), fillColor);
-                RoundTriangle(command, indexOff + 8, indexOff + 6, indexOff, (3 * Math.PI) / 2, 2 * Math.PI, numDivisions, rounding, new Vector2(bottomRight.X - rounding, bottomRight.Y - rounding), fillColor);
-                RoundTriangle(command, indexOff + 5, indexOff + 7, indexOff, Math.PI, (3 * Math.PI) / 2, numDivisions, rounding, new Vector2(topLeft.X + rounding, bottomRight.Y - rounding), fillColor);
+                RoundTriangle(cmd, indexOff + 1, indexOff + 3, indexOff, Math.PI / 2, Math.PI, numDivisions, rounding, new Vector2(topLeft.X + rounding, topLeft.Y + rounding), fillColor);
+                RoundTriangle(cmd, indexOff + 4, indexOff + 2, indexOff, 0, Math.PI / 2, numDivisions, rounding, new Vector2(bottomRight.X - rounding, topLeft.Y + rounding), fillColor);
+                RoundTriangle(cmd, indexOff + 8, indexOff + 6, indexOff, (3 * Math.PI) / 2, 2 * Math.PI, numDivisions, rounding, new Vector2(bottomRight.X - rounding, bottomRight.Y - rounding), fillColor);
+                RoundTriangle(cmd, indexOff + 5, indexOff + 7, indexOff, Math.PI, (3 * Math.PI) / 2, numDivisions, rounding, new Vector2(topLeft.X + rounding, bottomRight.Y - rounding), fillColor);
             }
         }
 
@@ -207,7 +207,7 @@ namespace StatimUI.Rendering
         // radius : the radius of the rounding
         // roundCenter : the position of the center of the rounding, must be in +y is up +x is right space (does not have to be the same as the center index)
         // color : the color of the new vertices that will be created
-        private void RoundTriangle(RenderCommand command, int indexStart, int indexEnd, int indexCenter, double angleStart, double angleEnd, int divisions, int radius, Vector2 roundCenter, Color color)
+        private void RoundTriangle(RenderCommand cmd, int indexStart, int indexEnd, int indexCenter, double angleStart, double angleEnd, int divisions, int radius, Vector2 roundCenter, Color color)
         {
             int currentStart = indexStart;
             double angle = angleStart;
@@ -219,18 +219,18 @@ namespace StatimUI.Rendering
 
                 Vector2 currentEnd = new Vector2((float)Math.Cos(angle) * radius, -(float)Math.Sin(angle) * radius) + roundCenter; // Invert the y because -y is up
 
-                command.Indices.Add((uint)indexCenter);
-                command.Indices.Add((uint)currentStart);
-                command.Indices.Add((uint)command.Vertices.Count);
-                currentStart = command.Vertices.Count;
+                cmd.Indices.Add((uint)indexCenter);
+                cmd.Indices.Add((uint)currentStart);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                currentStart = cmd.VerticesCount;
 
-                command.Vertices.Add(new Vertex(currentEnd, color));
+                cmd.AddVertex(new Vertex(currentEnd, color));
             }
 
             //Last triangle that connects to indexEnd
-            command.Indices.Add((uint)indexCenter);
-            command.Indices.Add((uint)currentStart);
-            command.Indices.Add((uint)indexEnd);
+            cmd.Indices.Add((uint)indexCenter);
+            cmd.Indices.Add((uint)currentStart);
+            cmd.Indices.Add((uint)indexEnd);
         }
 
         public Vector2 AddText(string text, Vector2 pos, Color color, Font font)

@@ -136,18 +136,18 @@ namespace StatimUI.Rendering
                 Vector2 uvStart = Glyphs[glyphIndex].UVTopLeft;
                 Vector2 uvSize = Glyphs[glyphIndex].UVSize;
 
-                cmd.Indices.Add((uint)cmd.Vertices.Count);
-                cmd.Indices.Add((uint)cmd.Vertices.Count + 1);
-                cmd.Indices.Add((uint)cmd.Vertices.Count + 2);
+                cmd.Indices.Add(cmd.VerticesCountU);
+                cmd.Indices.Add(cmd.VerticesCountU + 1);
+                cmd.Indices.Add(cmd.VerticesCountU + 2);
 
-                cmd.Indices.Add((uint)cmd.Vertices.Count + 2);
-                cmd.Indices.Add((uint)cmd.Vertices.Count + 3);
-                cmd.Indices.Add((uint)cmd.Vertices.Count);
+                cmd.Indices.Add(cmd.VerticesCountU + 2);
+                cmd.Indices.Add(cmd.VerticesCountU + 3);
+                cmd.Indices.Add(cmd.VerticesCountU);
 
-                cmd.Vertices.Add(new(bottomLeft, uvStart + new Vector2(0, uvSize.Y), color));
-                cmd.Vertices.Add(new(topLeft, uvStart, color));
-                cmd.Vertices.Add(new(topRight, uvStart + new Vector2(uvSize.X, 0), color));
-                cmd.Vertices.Add(new(bottomRight, uvStart + uvSize, color));
+                cmd.AddVertex(new(bottomLeft, uvStart + new Vector2(0, uvSize.Y), color));
+                cmd.AddVertex(new(topLeft, uvStart, color));
+                cmd.AddVertex(new(topRight, uvStart + new Vector2(uvSize.X, 0), color));
+                cmd.AddVertex(new(bottomRight, uvStart + uvSize, color));
 
 
                 cursor.X += Glyphs[glyphIndex].Advance;

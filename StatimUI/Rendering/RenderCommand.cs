@@ -11,8 +11,11 @@ namespace StatimUI.Rendering
     {
         // TODO: maybe this is a Rectangle(not F)? I don't know if other rendering apis support float scissor
         public RectangleF ClipRect { get; set; }
-        private List<Vertex> Vertices { get; } = new();
+        private List<Vertex> vertices { get; } = new();
         public List<uint> Indices { get; } = new();
+
+        public int VerticesCount => vertices.Count;
+        public uint VerticesCountU => (uint)vertices.Count;
 
         public Texture Texture { get; set; }
         // TODO: this is temporary, might want to find a better solution or make a Texture struct
@@ -21,14 +24,19 @@ namespace StatimUI.Rendering
 
         internal void Clear()
         {
-            Vertices.Clear();
+            vertices.Clear();
             Indices.Clear();
         }
 
-        public void PushVertex(Vertex vertex)
+        public Vertex[] VerticesToArray() => vertices.ToArray();
+
+
+
+        public void AddVertex(Vertex vertex)
         {
-            if (Transform.IsIdentity)
-                vertex.Position = Vector2.Transform(vertex.Position, Transform);
+            if (!StatimUI.TransformManager.IsEmpty)
+                vertex.Position = Vector2.Transform(vertex.Position, StatimUI.TransformManager.Matrix);
+            vertices.Add(vertex);
         }
 
         public static RenderCommand CreateDefault() => new RenderCommand { Texture =  new Texture(FontManager.DefaultFont.Texture, true) };

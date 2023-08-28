@@ -17,9 +17,9 @@ namespace StatimUI.DebugTools
                 {
                     if (FontManager.IsTextureFont(renderCommand.Texture.Id))
                     {
-                        for(int i = 0; i < renderCommand.Vertices.Count; i++)
+                        for(int i = 0; i < renderCommand.VerticesCount; i++)
                         {
-                            renderCommand.Vertices[i] = new Vertex(renderCommand.Vertices[i].Position, Vector2.Zero, renderCommand.Vertices[i].Color);
+                            //renderCommand.Vertices[i] = new Vertex(renderCommand.Vertices[i].Position, Vector2.Zero, renderCommand.Vertices[i].Color);
                         }
                     }
                 }

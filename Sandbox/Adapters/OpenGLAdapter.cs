@@ -44,7 +44,7 @@ namespace Sandbox.Adapters
             msaaSamples = msaa;
             mainWindow = nativeWindow;
 
-            //AnimationManager.Start(new AnimationDesc(panel.Children[0], new Test(), 2f, new OutBounce()));
+            AnimationManager.Start(new AnimationDesc(panel.Children[0], new Test(), 2f, new OutBounce()));
 
             mainWindow.Resize += (e) => {
                 panel.Size = new(e.Size.X, e.Size.Y);
@@ -179,7 +179,7 @@ namespace Sandbox.Adapters
             {
                 foreach (var command in layer.Commands)
                 {
-                    if (command.Vertices.Count == 0 || command.Indices.Count == 0)
+                    if (command.VerticesCount == 0 || command.Indices.Count == 0)
                         continue;
 
                     if (command.Texture.Id != IntPtr.Zero)
@@ -191,7 +191,7 @@ namespace Sandbox.Adapters
                     }
 
                     // TODO : dont convert to array
-                    GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, command.Vertices.Count * Unsafe.SizeOf<Vertex>(), command.Vertices.ToArray());
+                    GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, command.VerticesCount * Unsafe.SizeOf<Vertex>(), command.VerticesToArray());
                     GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, command.Indices.Count * sizeof(uint), command.Indices.ToArray());
 
                     // 0,0 is bottom-left in opengl

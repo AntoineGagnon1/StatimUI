@@ -79,9 +79,10 @@ namespace StatimUI
         #endregion // Position
 
         #region Transform
-        public Property<Vector2> Scale { get; set; } = new ValueProperty<Vector2>();
+        public Property<Vector2> Origin { get; set; } = new ValueProperty<Vector2>();
+        public Property<Vector2> Translation { get; set; } = new ValueProperty<Vector2>();
+        public Property<Vector2> Scale { get; set; } = new ValueProperty<Vector2>(new Vector2(1f));
         public Property<float> Rotation { get; set; } = new ValueProperty<float>();
-        public Property<Vector2> Translate { get; set; } = new ValueProperty<Vector2>();
         #endregion
 
         public Property<Thickness> Padding { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
@@ -122,15 +123,17 @@ namespace StatimUI
         {
             if (Visible)
             {
-                var drawPos = offset + DrawPosition + Translate.Value;
-                if (Scale.Value != Vector2.Zero)
-                    Transform.PushScale(Scale.Value);
-                    
+                var drawPos = offset + DrawPosition + Translation.Value;
+
+                bool transform = Scale.Value != Vector2.One || Rotation.Value != 0;
+                if (transform)
+                    TransformManager.PushTransform(Transform.FromComponent(this));
+
                 RenderOutline(drawPos);
                 OnRender(drawPos);
 
-                if (Scale.Value != Vector2.Zero)
-                    Transform.PopScale();
+                if (transform)
+                    TransformManager.PopTransform();
             }
         }
         virtual protected void OnRender(Vector2 drawPosition)

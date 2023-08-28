@@ -5,16 +5,16 @@
 	float value = 0f;
 }</script>
 
-<stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A">
+<stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A" Scale="1, 2" Rotation={{value += 0.0001f; return value;}}>
 	<stack>
 		<text Content="heyy"></text>
 		<stack>
-			<text Content="heyy2" Scale="3, 2"></text>
+			<text Content="heyy2"></text>
 		</stack>
 	</stack>
 	<stack>
 		<foreach {item} in {items}>
-			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF"/>
+			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF" Scale="5, 1"/>
 		</foreach>
 	</stack>
 </stack>

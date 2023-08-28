@@ -10,7 +10,7 @@ namespace StatimUI
         public void Update(Component component, float t)
         {
             Console.WriteLine("T: " + t);
-            component.Scale.Value.X = t;
+            component.Translation.Value.X = t * 100f;
         }
     }
 }
