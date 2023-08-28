@@ -44,10 +44,6 @@ namespace Sandbox.Adapters
             msaaSamples = msaa;
             mainWindow = nativeWindow;
 
-            mainWindow.Resize += (e) => {
-                window.Size = new(e.Size.X, e.Size.Y);
-            };
-
             mainWindow.MakeCurrent();
 
             vertexBufferSize = 10000;
@@ -57,6 +53,7 @@ namespace Sandbox.Adapters
             GL.Enable(EnableCap.Multisample);
 
             var dockspace = new Dockspace(window, new(nativeWindow.Size.X, nativeWindow.Size.Y));
+            RegisterWindowEvents(nativeWindow, dockspace);
             subWindows.Add(dockspace, new() { NativeWindow = mainWindow, VertexArrayObject = CreateVAO(mainWindow) }); // Add the main window to the list of subwindows, this way it will also be rendered
         }
 
@@ -313,9 +310,21 @@ namespace Sandbox.Adapters
                 Size = new Vector2i(size.Width, size.Height),
                 WindowBorder = WindowBorder.Resizable,
                 NumberOfSamples = msaaSamples,
-                APIVersion = OpenglGLVersion
+                APIVersion = OpenglGLVersion,
+                Title = dockspace.Panels.FirstOrDefault()?.GetType()?.Name ?? ""
             });
 
+            RegisterWindowEvents(nativeWindow, dockspace);
+
+            dockspace.Resize(size);
+            subWindows.Add(dockspace, new() { NativeWindow = nativeWindow, VertexArrayObject = CreateVAO(nativeWindow) });
+            nativeWindow.MakeCurrent();
+
+            GL.Enable(EnableCap.Multisample);
+        }
+
+        private void RegisterWindowEvents(NativeWindow nativeWindow, Dockspace dockspace)
+        {
             nativeWindow.Resize += (e) => {
                 dockspace.Resize(new(e.Size.X, e.Size.Y));
             };
@@ -324,11 +333,9 @@ namespace Sandbox.Adapters
                 dockspace.TryClose();
             };
 
-            dockspace.Resize(size);
-            subWindows.Add(dockspace, new() { NativeWindow = nativeWindow, VertexArrayObject = CreateVAO(nativeWindow) });
-            nativeWindow.MakeCurrent();
-
-            GL.Enable(EnableCap.Multisample);
+            nativeWindow.MouseMove += (e) => {
+                EventManager.SetMousePos(new(e.X, e.Y), dockspace);
+            };
         }
 
         public void DestroySubWindow(Dockspace dockspace)

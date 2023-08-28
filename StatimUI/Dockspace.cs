@@ -20,6 +20,7 @@ namespace StatimUI
         public DockDirection Direction { get; set; } = DockDirection.X;
         public int SplitPosition { get; set; } = 0;
 
+        public Panel SelectedPanel { get; set; }
         public List<Panel> Panels { get; private set; } = new List<Panel>();
 
         public Size Size { get; private set; }
@@ -28,6 +29,7 @@ namespace StatimUI
         {
             Dockspaces.Add(this);
             Panels.Add(panel);
+            SelectedPanel = panel;
         }
 
         public Dockspace(Panel panel, Size size)
@@ -69,6 +71,30 @@ namespace StatimUI
             }
 
             Resize(Size);
+        }
+
+        public Panel? FindPanelAt(Vector2 pos, out Vector2 panelOffset)
+        {
+            if (pos.X < 0 || pos.Y < 0 || pos.X > Size.Width || pos.Y > Size.Height)
+            {
+                panelOffset = Vector2.Zero;
+                return null;
+            }
+            
+            var pair = FindPanelAt(pos, Vector2.Zero);
+            panelOffset = pair.Item2;
+            return pair.Item1;
+        }
+
+        private (Panel, Vector2) FindPanelAt(Vector2 pos, Vector2 panelOffset)
+        {
+            if (Child == null)
+                return (SelectedPanel, panelOffset);
+
+            if (Direction == DockDirection.X)
+                return (pos.X < SplitPosition ? (SelectedPanel, panelOffset) : (Child.FindPanelAt(pos - GetChildOffset(), panelOffset + GetChildOffset())));
+            else
+                return (pos.Y < SplitPosition ? (SelectedPanel, panelOffset) : (Child.FindPanelAt(pos - GetChildOffset(), panelOffset + GetChildOffset())));
         }
 
         public void Update(Vector2 offset)
@@ -120,6 +146,8 @@ namespace StatimUI
         }
 
         private Size GetChildSize() => Size - (Direction == DockDirection.X ? new Size(SplitPosition, 0) : new Size(0, SplitPosition));
+
+        private Vector2 GetChildOffset() => Direction == DockDirection.X ? new Vector2(SplitPosition, 0) : new Vector2(0, SplitPosition);
 
         // One Dockspace for each os window
         public static List<Dockspace> Dockspaces = new List<Dockspace>();
