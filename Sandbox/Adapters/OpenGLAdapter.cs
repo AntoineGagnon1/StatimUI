@@ -96,9 +96,6 @@ namespace Sandbox.Adapters
                 if(!pair.Value.NativeWindow.Context.IsCurrent) // must check, otherwise will crash
                     pair.Value.NativeWindow.Context.MakeCurrent();
 
-                if (pair.Value.NativeWindow.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Tab))
-                    FocusManager.ShiftFocus();
-
                 Renderer.ClearLayers();
                 Renderer.CurrentLayer.PushClipRect(new RectangleF(0f, 0f, pair.Key.Size.Width, pair.Key.Size.Height));
                 pair.Key.Update(System.Numerics.Vector2.Zero);
@@ -335,6 +332,21 @@ namespace Sandbox.Adapters
 
             nativeWindow.MouseMove += (e) => {
                 EventManager.SetMousePos(new(e.X, e.Y), dockspace);
+            };
+
+            nativeWindow.MouseDown += (e) => {
+                if (e.Action == OpenTK.Windowing.GraphicsLibraryFramework.InputAction.Press && e.Button == OpenTK.Windowing.GraphicsLibraryFramework.MouseButton.Left)
+                    EventManager.MouseClicked();
+            };
+
+            nativeWindow.FocusedChanged += (e) => {
+                if (e.IsFocused)
+                    EventManager.DockspaceFocused(dockspace);
+            };
+
+            nativeWindow.KeyDown += (e) => {
+                if (e.Key == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Tab)
+                    EventManager.TabNavigationNext();
             };
         }
 

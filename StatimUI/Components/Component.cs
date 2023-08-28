@@ -15,18 +15,6 @@ namespace StatimUI
     {
         public abstract bool Focusable { get; }
 
-        public bool Focused => FocusManager.FocusedComponent == this;
-        public bool Focus()
-        {
-            if (Focusable)
-            {
-                FocusManager.FocusedComponent = this;
-                return true;
-            }
-
-            return false;
-        }
-
         public bool Visible { get; set; } = true;
 
         public ChildList Children { get; } = new();
@@ -84,9 +72,22 @@ namespace StatimUI
         #region Events
         public event Action OnHover = delegate { };
         public event Action OnHoverEnd = delegate { };
-
+        public bool IsHovered => EventManager.Hovered == this;
         internal void OnMouseEnter() => OnHover?.Invoke();
         internal void OnMouseExit() => OnHoverEnd?.Invoke();
+
+
+        public event Action Clicked = delegate { };
+        internal void OnMouseClick() => Clicked?.Invoke();
+
+
+        public event Action Focused = delegate { };
+        public bool IsFocused => EventManager.Focused == this;
+
+
+        public event Action TabNavigation = delegate { };
+        public bool IsTabFocused => EventManager.TabNavigation == this;
+        internal void OnTabNavigate() => TabNavigation?.Invoke();
 
         #endregion
 
@@ -100,7 +101,7 @@ namespace StatimUI
 
         private void RenderOutline(Vector2 drawPosition)
         {
-            if (!Focused)
+            if (!IsTabFocused)
                 return;
             
             if (OutlineStyle == StatimUI.OutlineStyle.Solid)
