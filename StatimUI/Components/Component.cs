@@ -78,12 +78,19 @@ namespace StatimUI
         public Vector2 DrawPosition => Position.Value + Margin.Value.TopLeft + Padding.Value.TopLeft;
         #endregion // Position
 
+        #region Transform
+        public Property<Vector2> Scale { get; set; } = new ValueProperty<Vector2>();
+        public Property<float> Rotation { get; set; } = new ValueProperty<float>();
+        public Property<Vector2> Translate { get; set; } = new ValueProperty<Vector2>();
+        #endregion
+
         public Property<Thickness> Padding { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
         public Property<Thickness> Margin { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
 
 
         public Property<Color> BackgroundColor { get; set; } = new ValueProperty<Color>(Color.Transparent);
         public Property<int> BorderRadius { get; set; } = new ValueProperty<int>(0);
+
 
 
         private float oldWidth = 0, oldHeight = 0; // Used by HasSizeChanged()
@@ -115,8 +122,15 @@ namespace StatimUI
         {
             if (Visible)
             {
-                RenderOutline(offset + DrawPosition);
-                OnRender(offset + DrawPosition);
+                var drawPos = offset + DrawPosition + Translate.Value;
+                if (Scale.Value != Vector2.Zero)
+                    Transform.PushScale(Scale.Value);
+                    
+                RenderOutline(drawPos);
+                OnRender(drawPos);
+
+                if (Scale.Value != Vector2.Zero)
+                    Transform.PopScale();
             }
         }
         virtual protected void OnRender(Vector2 drawPosition)

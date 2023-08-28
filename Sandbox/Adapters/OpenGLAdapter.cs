@@ -39,13 +39,15 @@ namespace Sandbox.Adapters
 
         public static Version OpenglGLVersion = new Version(3, 3);
 
-        public OpenGLAdapter(Panel window, NativeWindow nativeWindow, int msaa = 4)
+        public OpenGLAdapter(Panel panel, NativeWindow nativeWindow, int msaa = 4)
         {
             msaaSamples = msaa;
             mainWindow = nativeWindow;
 
+            //AnimationManager.Start(new AnimationDesc(panel.Children[0], new Test(), 2f, new OutBounce()));
+
             mainWindow.Resize += (e) => {
-                window.Size = new(e.Size.X, e.Size.Y);
+                panel.Size = new(e.Size.X, e.Size.Y);
             };
 
             mainWindow.MakeCurrent();
@@ -56,7 +58,7 @@ namespace Sandbox.Adapters
 
             GL.Enable(EnableCap.Multisample);
 
-            subWindows.Add(window, new() { NativeWindow = mainWindow, VertexArrayObject = CreateVAO(mainWindow) }); // Add the main window to the list of subwindows, this way it will also be rendered
+            subWindows.Add(panel, new() { NativeWindow = mainWindow, VertexArrayObject = CreateVAO(mainWindow) }); // Add the main window to the list of subwindows, this way it will also be rendered
         }
 
 
@@ -82,7 +84,8 @@ namespace Sandbox.Adapters
             while (!OpenTK.Windowing.GraphicsLibraryFramework.GLFW.WindowShouldClose(mainWindow.WindowPtr))
             {
                 OpenTK.Windowing.GraphicsLibraryFramework.GLFW.PollEvents();
-                Update();
+
+                Update(0.016f);
 
                 foreach(var pair in subWindows)
                 {
@@ -91,8 +94,10 @@ namespace Sandbox.Adapters
             }
         }
 
-        public void Update()
+        public void Update(float dt)
         {
+            AnimationManager.Update(dt);
+
             foreach (var pair in subWindows)
             {
                 if(!pair.Value.NativeWindow.Context.IsCurrent) // must check, otherwise will crash

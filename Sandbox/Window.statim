@@ -9,7 +9,7 @@
 	<stack>
 		<text Content="heyy"></text>
 		<stack>
-			<text Content="heyy2"></text>
+			<text Content="heyy2" Scale="3, 2"></text>
 		</stack>
 	</stack>
 	<stack>

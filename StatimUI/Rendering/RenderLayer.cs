@@ -134,6 +134,13 @@ namespace StatimUI.Rendering
         {
             var command = GetDrawCommand();
 
+            /*if (!Transform.IsIdentity)
+            {
+
+                topLeft = Vector2.Transform(topLeft, Transform.Matrix);
+                bottomRight = Vector2.Transform(bottomRight, Transform.Matrix);
+            }*/
+
             if (rounding == 0)
             {
                 command.Indices.Add((uint)command.Vertices.Count);
