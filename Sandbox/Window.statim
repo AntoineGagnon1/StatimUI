@@ -5,7 +5,7 @@
 	float value = 0f;
 }</script>
 
-<stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A" Scale="1, 2" Rotation={{value += 0.0001f; return value;}}>
+<stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A">
 	<stack>
 		<text Content="heyy"></text>
 		<stack>
@@ -14,7 +14,7 @@
 	</stack>
 	<stack>
 		<foreach {item} in {items}>
-			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF" Scale="5, 1"/>
+			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF" Scale="2, 1"/>
 		</foreach>
 	</stack>
 </stack>

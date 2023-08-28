@@ -58,7 +58,7 @@ namespace Sandbox.Adapters
 
             GL.Enable(EnableCap.Multisample);
 
-            var dockspace = new Dockspace(window, new(nativeWindow.Size.X, nativeWindow.Size.Y));
+            var dockspace = new Dockspace(panel, new(nativeWindow.Size.X, nativeWindow.Size.Y));
             RegisterWindowEvents(nativeWindow, dockspace);
             subWindows.Add(dockspace, new() { NativeWindow = mainWindow, VertexArrayObject = CreateVAO(mainWindow) }); // Add the main window to the list of subwindows, this way it will also be rendered
         }

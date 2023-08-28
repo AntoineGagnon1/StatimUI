@@ -16,7 +16,7 @@ namespace StatimUI
             Scale = scale;
         }
 
-        public static Transform FromComponent(Component component) => new Transform(component.Origin.Value, component.Rotation.Value, component.Scale.Value);
+        public static Transform FromComponent(Vector2 drawPos, Component component) => new Transform(drawPos + component.Origin.Value, component.Rotation.Value, component.Scale.Value);
     }
 
     public static class TransformManager

@@ -15,7 +15,7 @@ namespace StatimUI
     {
         public abstract bool Focusable { get; }
 
-        public bool Focused => FocusManager.FocusedComponent == this;
+        /*public bool Focused => FocusManager.FocusedComponent == this;
 
         /// <summary>
         ///     Tries to focus this component.
@@ -30,7 +30,7 @@ namespace StatimUI
             }
 
             return false;
-        }
+        }*/
 
         public bool Visible { get; set; } = true;
 
@@ -163,10 +163,12 @@ namespace StatimUI
             if (Visible)
             {
                 var drawPos = offset + DrawPosition + Translation.Value;
+                if (Translation.Value != Vector2.Zero)
+                    Console.WriteLine("");
 
                 bool transform = Scale.Value != Vector2.One || Rotation.Value != 0;
                 if (transform)
-                    TransformManager.PushTransform(Transform.FromComponent(this));
+                    TransformManager.PushTransform(Transform.FromComponent(drawPos, this));
 
                 RenderOutline(drawPos);
                 OnRender(drawPos);
