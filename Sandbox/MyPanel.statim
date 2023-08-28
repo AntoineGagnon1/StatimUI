@@ -1,0 +1,5 @@
+﻿<script base="Panel">{
+
+}</script>
+
+<text Content="Panel Here" BackgroundColor="Gray" BorderRadius="6" TextColor="White" Padding="5"></text>
