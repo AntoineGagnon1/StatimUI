@@ -49,6 +49,8 @@ namespace StatimUI
                 FocusedDockspace = dockspace;
                 FocusedPanel = FocusedDockspace?.Panels.FirstOrDefault();
             }
+
+            TabNavigation = null;
         }
 
         public static void TabNavigationNext()
