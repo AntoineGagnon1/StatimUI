@@ -33,7 +33,7 @@ namespace Sandbox.Adapters
         private int shaderProjectionMatrixLocation;
 
         private NativeWindow mainWindow;
-        private Dictionary<Panel, SubWindow> subWindows = new ();
+        private Dictionary<Dockspace, SubWindow> subWindows = new ();
 
         private int msaaSamples;
 
@@ -58,21 +58,23 @@ namespace Sandbox.Adapters
 
             GL.Enable(EnableCap.Multisample);
 
-            subWindows.Add(panel, new() { NativeWindow = mainWindow, VertexArrayObject = CreateVAO(mainWindow) }); // Add the main window to the list of subwindows, this way it will also be rendered
+            var dockspace = new Dockspace(window, new(nativeWindow.Size.X, nativeWindow.Size.Y));
+            RegisterWindowEvents(nativeWindow, dockspace);
+            subWindows.Add(dockspace, new() { NativeWindow = mainWindow, VertexArrayObject = CreateVAO(mainWindow) }); // Add the main window to the list of subwindows, this way it will also be rendered
         }
 
 
         // Will create a main window
-        public OpenGLAdapter(Panel window, int msaa = 4)
+        public OpenGLAdapter(Panel window, Size windowSize, int msaa = 4)
             : this(
                   window, 
                   new NativeWindow(new NativeWindowSettings()
                   {
-                    Size = new Vector2i(window.Size.Width, window.Size.Height),
+                    Size = new Vector2i(windowSize.Width, windowSize.Height),
                     WindowBorder = WindowBorder.Resizable,
                     NumberOfSamples = msaa,
                     APIVersion = OpenglGLVersion,
-                    Vsync = VSyncMode.On
+                    Vsync = VSyncMode.On,
                   }), 
                   msaa
               )
@@ -103,13 +105,9 @@ namespace Sandbox.Adapters
                 if(!pair.Value.NativeWindow.Context.IsCurrent) // must check, otherwise will crash
                     pair.Value.NativeWindow.Context.MakeCurrent();
 
-                if (pair.Value.NativeWindow.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Tab))
-                    FocusManager.ShiftFocus();
-
                 Renderer.ClearLayers();
                 Renderer.CurrentLayer.PushClipRect(new RectangleF(0f, 0f, pair.Key.Size.Width, pair.Key.Size.Height));
-                pair.Key.Update(); // TODO : remove ref to window when the window system changes
-                pair.Key.Render();
+                pair.Key.Update(System.Numerics.Vector2.Zero);
                 Renderer.CurrentLayer.PopClipRect();
 
                 GL.Viewport(0, 0, pair.Key.Size.Width, pair.Key.Size.Height);
@@ -127,7 +125,7 @@ namespace Sandbox.Adapters
             }
         }
 
-        private void RenderTriangles(Panel window, SubWindow subWindow)
+        private void RenderTriangles(Dockspace dockspace, SubWindow subWindow)
         {
             GL.BindVertexArray(subWindow.VertexArrayObject);
             CheckGLError();
@@ -166,8 +164,8 @@ namespace Sandbox.Adapters
 
             var pMatrix = Matrix4x4.CreateOrthographicOffCenter(
                 0.0f,
-                window.Size.Width,
-                window.Size.Height,
+                dockspace.Size.Width,
+                dockspace.Size.Height,
                 0.0f,
                 -1.0f,
                 1.0f);
@@ -195,7 +193,7 @@ namespace Sandbox.Adapters
                     GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, command.Indices.Count * sizeof(uint), command.Indices.ToArray());
 
                     // 0,0 is bottom-left in opengl
-                    GL.Scissor((int)command.ClipRect.X, (int)(window.Size.Height - command.ClipRect.Height - command.ClipRect.Y), (int)command.ClipRect.Width, (int)command.ClipRect.Height);
+                    GL.Scissor((int)command.ClipRect.X, (int)(dockspace.Size.Height - command.ClipRect.Height - command.ClipRect.Y), (int)command.ClipRect.Width, (int)command.ClipRect.Height);
 
                     GL.DrawElements(BeginMode.Triangles, command.Indices.Count, DrawElementsType.UnsignedInt, 0);
                 }
@@ -310,39 +308,65 @@ namespace Sandbox.Adapters
             CheckGLError();
         }
 
-        public void CreateSubWindow(StatimUI.Panel window)
+        public void CreateSubWindow(Dockspace dockspace, Size size)
         {
             var nativeWindow = new NativeWindow(new NativeWindowSettings()
             {
                 SharedContext = mainWindow.Context,
-                Size = new Vector2i(window.Size.Width, window.Size.Height),
+                Size = new Vector2i(size.Width, size.Height),
                 WindowBorder = WindowBorder.Resizable,
                 NumberOfSamples = msaaSamples,
-                APIVersion = OpenglGLVersion
+                APIVersion = OpenglGLVersion,
+                Title = dockspace.Panels.FirstOrDefault()?.GetType()?.Name ?? ""
             });
 
-            nativeWindow.Resize += (e) => {
-                window.Size = new (e.Size.X, e.Size.Y);
-            };
+            RegisterWindowEvents(nativeWindow, dockspace);
 
-            nativeWindow.Closing += (e) => {
-                window.TryClose();
-            };
-
-            subWindows.Add(window, new() { NativeWindow = nativeWindow, VertexArrayObject = CreateVAO(nativeWindow) });
+            dockspace.Resize(size);
+            subWindows.Add(dockspace, new() { NativeWindow = nativeWindow, VertexArrayObject = CreateVAO(nativeWindow) });
             nativeWindow.MakeCurrent();
 
             GL.Enable(EnableCap.Multisample);
         }
 
-        public void DestroySubWindow(StatimUI.Panel window)
+        private void RegisterWindowEvents(NativeWindow nativeWindow, Dockspace dockspace)
         {
-            var subWindow = subWindows[window];
+            nativeWindow.Resize += (e) => {
+                dockspace.Resize(new(e.Size.X, e.Size.Y));
+            };
+
+            nativeWindow.Closing += (e) => {
+                dockspace.TryClose();
+            };
+
+            nativeWindow.MouseMove += (e) => {
+                EventManager.SetMousePos(new(e.X, e.Y), dockspace);
+            };
+
+            nativeWindow.MouseDown += (e) => {
+                if (e.Action == OpenTK.Windowing.GraphicsLibraryFramework.InputAction.Press && e.Button == OpenTK.Windowing.GraphicsLibraryFramework.MouseButton.Left)
+                    EventManager.MouseClicked();
+            };
+
+            nativeWindow.FocusedChanged += (e) => {
+                if (e.IsFocused)
+                    EventManager.DockspaceFocused(dockspace);
+            };
+
+            nativeWindow.KeyDown += (e) => {
+                if (e.Key == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Tab)
+                    EventManager.TabNavigationNext();
+            };
+        }
+
+        public void DestroySubWindow(Dockspace dockspace)
+        {
+            var subWindow = subWindows[dockspace];
 
             subWindow.NativeWindow.MakeCurrent();
             GL.DeleteVertexArray(subWindow.VertexArrayObject);
             subWindow.NativeWindow.Dispose();
-            subWindows.Remove(window);
+            subWindows.Remove(dockspace);
         }
 
         // Creates a vao for the window

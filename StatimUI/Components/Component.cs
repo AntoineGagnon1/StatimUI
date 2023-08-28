@@ -93,6 +93,27 @@ namespace StatimUI
         public Property<int> BorderRadius { get; set; } = new ValueProperty<int>(0);
 
 
+        #region Events
+        public event Action OnHover = delegate { };
+        public event Action OnHoverEnd = delegate { };
+        public bool IsHovered => EventManager.Hovered == this;
+        internal void OnMouseEnter() => OnHover?.Invoke();
+        internal void OnMouseExit() => OnHoverEnd?.Invoke();
+
+
+        public event Action Clicked = delegate { };
+        internal void OnMouseClick() => Clicked?.Invoke();
+
+
+        public event Action Focused = delegate { };
+        public bool IsFocused => EventManager.Focused == this;
+
+
+        public event Action TabNavigation = delegate { };
+        public bool IsTabFocused => EventManager.TabNavigation == this;
+        internal void OnTabNavigate() => TabNavigation?.Invoke();
+
+        #endregion
 
         private float oldWidth = 0, oldHeight = 0; // Used by HasSizeChanged()
 
@@ -104,7 +125,7 @@ namespace StatimUI
 
         private void RenderOutline(Vector2 drawPosition)
         {
-            if (!Focused)
+            if (!IsTabFocused)
                 return;
             
             if (OutlineStyle == StatimUI.OutlineStyle.Solid)
@@ -112,6 +133,24 @@ namespace StatimUI
                 var topLeft = drawPosition - Padding.Value.TopLeft;
                 Renderer.CurrentLayer.AddRectangle(topLeft, topLeft + new Vector2(PixelWidth, PixelHeight), Color.FromHex(0x3b82f6), 4f);
             }
+        }
+
+        public Component? FindComponentAt(Vector2 pos)
+        {
+            var topLeft = DrawPosition - Padding.Value.TopLeft;
+            var bottomRight = topLeft + new Vector2(PixelWidth, PixelHeight);
+
+            if (pos.X < topLeft.X || pos.X > bottomRight.X || pos.Y < topLeft.Y || pos.Y > bottomRight.Y)
+                return null;
+
+            foreach (var child in Children)
+            {
+                var found = child.FindComponentAt(pos - DrawPosition);
+                if (found != null)
+                    return found;
+            }
+
+            return this;
         }
 
         /// <summary>
@@ -164,6 +203,10 @@ namespace StatimUI
         public Component()
         {
             Children.OnChildAdded += (sender, child) => { child.Parent = this; };
+
+            Color oldColor = Color.Transparent;
+            OnHover += delegate { oldColor = BackgroundColor.Value; BackgroundColor = new ValueProperty<Color>(Color.FromRGBA(1, 0, 0)); };
+            OnHoverEnd += delegate { BackgroundColor = new ValueProperty<Color>(oldColor); };
         }
     }
 }

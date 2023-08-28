@@ -96,7 +96,7 @@ namespace StatimUI
             return instance;
         }
 
-        public Panel? CreatePanel(string name, Size size)
+        public Panel? CreatePanel(string name)
         {
             var type = Assembly?.GetType("StatimUIXmlComponents." + name);
 
@@ -104,8 +104,6 @@ namespace StatimUI
                 return null;
 
             var instance = Activator.CreateInstance(type) as Panel;
-            if (instance != null)
-                instance.Size = size;
             return instance;
         }
 
