@@ -216,7 +216,7 @@ namespace StatimCodeGenerator
                 }
 
                 if (lexer.Current.Type == TokenType.Slash)
-                    throw new Exception("An if componentcan't be self-closed");
+                    throw new Exception("An if component can't be self-closed");
 
             }
             throw new Exception("An if component must follow this syntax:\n<if {condition}>\n    [children here]\n</if>");
