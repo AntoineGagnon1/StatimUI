@@ -77,22 +77,22 @@ namespace StatimUI
 
 
         #region Events
-        public event Action OnHover = delegate { };
-        public event Action OnHoverEnd = delegate { };
+        public event Action? Hovered;
+        public event Action? HoverEnded;
         public bool IsHovered => EventManager.Hovered == this;
-        internal void OnMouseEnter() => OnHover?.Invoke();
-        internal void OnMouseExit() => OnHoverEnd?.Invoke();
+        internal void OnMouseEnter() => Hovered?.Invoke();
+        internal void OnMouseExit() => HoverEnded?.Invoke();
 
 
-        public event Action Clicked = delegate { };
+        public event Action? Clicked;
         internal void OnMouseClick() => Clicked?.Invoke();
 
 
-        public event Action Focused = delegate { };
+        public event Action? Focused;
         public bool IsFocused => EventManager.Focused == this;
 
 
-        public event Action TabNavigation = delegate { };
+        public event Action? TabNavigation;
         public bool IsTabFocused => EventManager.TabNavigation == this;
         internal void OnTabNavigate() => TabNavigation?.Invoke();
 

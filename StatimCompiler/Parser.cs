@@ -241,6 +241,8 @@ namespace StatimCodeGenerator
                             var children = MatchChildren(lexer);
                             EnsureClosingTag(lexer);
 
+                            // TODO: known bug if the user type contains a coma like in a tuple: (one, two) it won't work, might consider using a ; as a separator instead
+
                             var parts = item.Replace(" ", "").Split(',');
                             return new ForEachSyntax(children, parts[0], items, parts.ElementAtOrDefault(1) ?? "_");
                         }
