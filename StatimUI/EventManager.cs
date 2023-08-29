@@ -21,7 +21,7 @@ namespace StatimUI
         public static void SetMousePos(Vector2 pos, Dockspace dockspace)
         {
             HoveredPanel = dockspace.FindPanelAt(pos, out var offset);
-            var component = HoveredPanel?.Children.FirstOrDefault()?.FindComponentAt(pos - offset);
+            var component = HoveredPanel?.Children.FirstOrDefault()?.FindComponentAt(pos - offset - HoveredPanel.Padding.Value.TopLeft);
             if (Hovered != component)
             {
                 Hovered?.OnMouseExit();
