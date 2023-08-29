@@ -270,7 +270,7 @@ namespace StatimUIXmlComponents
             content.AppendLine($"var {variableName} = Component.CreateForEach({foreachSyntax.Items});");
             InitProperty(content, variableName, "Items", foreachSyntax.Items, PropertyType.Binding);
 
-            foreachContent.AppendLineNoIndent($"{variableName}.ComponentsCreator = {foreachSyntax.Item} => {{");
+            foreachContent.AppendLineNoIndent($"{variableName}.ComponentsCreator = ({foreachSyntax.Item}, {foreachSyntax.Index}) => {{");
             foreachContent.Indent();
 
 

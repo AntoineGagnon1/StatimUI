@@ -12,7 +12,7 @@ namespace StatimUI.Components
     [Component("foreach")]
     public class ForEach<T> : Component
     {
-        public Func<T, List<Component>> ComponentsCreator;
+        public Func<T, int, List<Component>> ComponentsCreator;
 
         public Property<IEnumerable<T>> Items = new ValueProperty<IEnumerable<T>>(new T[] {});
         private List<T> lastItems = new();
@@ -50,7 +50,7 @@ namespace StatimUI.Components
                     else
                         lastItems[i] = newItem;
 
-                    var slots = ComponentsCreator(newItem);
+                    var slots = ComponentsCreator(newItem, i);
                     var slotIndex = StartIndex + i * slots.Count;
                     if (i < Count)
                     {

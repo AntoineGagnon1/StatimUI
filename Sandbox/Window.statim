@@ -13,8 +13,8 @@
 		</stack>
 	</stack>
 	<stack>
-		<foreach {item} in {items}>
-			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF" Rotation={{value += 0.001f; return Angle.FromRadians(value);}}/>
+		<foreach {item, i} in {items}>
+			<Label Content={item + i} Margin="0" Padding="15" TextColor="0xFFFFFF" Rotation={{value += 0.001f; return Angle.FromRadians(value);}}/>
 		</foreach>
 	</stack>
 </stack>

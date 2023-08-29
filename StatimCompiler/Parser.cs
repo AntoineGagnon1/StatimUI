@@ -240,7 +240,9 @@ namespace StatimCodeGenerator
                             lexer.MoveNext();
                             var children = MatchChildren(lexer);
                             EnsureClosingTag(lexer);
-                            return new ForEachSyntax(children, item, items);
+
+                            var parts = item.Replace(" ", "").Split(',');
+                            return new ForEachSyntax(children, parts[0], items, parts.ElementAtOrDefault(1) ?? "_");
                         }
 
                         if (lexer.Current.Type == TokenType.Slash)
@@ -492,12 +494,14 @@ namespace StatimCodeGenerator
     public class ForEachSyntax : ComponentSyntax
     {
         public string Item { get; }
+        public string Index { get; }
         public string Items { get; }
 
-        public ForEachSyntax(List<ComponentSyntax> slots, string item, string items) : base("foreach", slots)
+        public ForEachSyntax(List<ComponentSyntax> slots, string item, string items, string index) : base("foreach", slots)
         {
             Item = item;
             Items = items;
+            Index = index;
         }
     }
 }
