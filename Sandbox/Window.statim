@@ -5,16 +5,16 @@
 	float value = 0f;
 }</script>
 
-<stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A" >
+<stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A" x:Name="ROOT">
 	<stack Rotation="25deg">
 		<text Content="heyy"></text>
 		<stack>
-			<text Content="heyy2" Rotation={Angle.FromRadians(value)}></text>
+			<text Content="heyy2" Rotation={Angle.FromDegrees(ROOT.Height.Value.Scalar)}></text>
 		</stack>
 	</stack>
 	<stack>
 		<foreach {item, i} in {items}>
-			<Label Content={item + i} Margin="0" Padding="15" TextColor="0xFFFFFF" Rotation={{value += 0.001f; return Angle.FromRadians(value);}}/>
+			<Label Content={item + i} Margin="0" Padding="15" TextColor="0xFFFFFF" Rotation={{value += 0.001f; return Angle.FromRadians(value + i);}}/>
 		</foreach>
 	</stack>
 </stack>

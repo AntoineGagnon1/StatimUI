@@ -23,7 +23,7 @@ namespace StatimCodeGenerator
             for (int i = 1; i < t.Length; i++)
             {
                 c = t[i];
-                if (!char.IsLetterOrDigit(c) && c != '_' && c != '-' && c != '.')
+                if (!char.IsLetterOrDigit(c) && c != '_' && c != '-' && c != '.' )
                     return new Match(i, t.Slice(0, i));
             }
             return new Match(t.Length, t);
@@ -149,6 +149,7 @@ namespace StatimCodeGenerator
             ClosedAngleBracket,
             Slash,
             Equal,
+            Colon,
 
             Code,
             Identifier,
@@ -163,9 +164,10 @@ namespace StatimCodeGenerator
             new (TokenType.ClosedAngleBracket, t => isChar(t, '>')),
             new (TokenType.Slash, t => isChar(t, '/')),
             new (TokenType.Equal, t => isChar(t, '=')),
+            new (TokenType.Colon, t => isChar(t, ':')),
             new (TokenType.Code, MatchCode),
             new (TokenType.Identifier, IsIdentifier),
-            new (TokenType.String, MatchString),
+            new (TokenType.String, MatchString)
         };
 
         static Lexer<TokenType> lexer = new (tokens, TokenType.Invalid);
@@ -186,16 +188,31 @@ namespace StatimCodeGenerator
             {
                 var name = lexer.Current.Content;
                 lexer.MoveNext();
+
+                string? modifier = null;
+                if (lexer.Current.Type == TokenType.Colon)
+                {
+                    lexer.MoveNext();
+                    if (lexer.Current.Type == TokenType.Identifier)
+                    {
+                        modifier = name;
+                        name = lexer.Current.Content;
+                        lexer.MoveNext();
+                    }
+                    else
+                        throw new Exception("TODO");
+                }
+
                 if (lexer.Current.Type == TokenType.Equal)
                 {
                     lexer.MoveNext();
                     var type = TokenToPropertyType(lexer.Current.Type);
                     var content = lexer.Current.Content.ToString();
                     lexer.MoveNext();
-                    return new PropertySyntax(content, type, name.ToString());
+                    return new PropertySyntax(content, type, name.ToString(), modifier);
                 }
 
-                return new PropertySyntax("true", PropertyType.Value, name.ToString());
+                return new PropertySyntax("true", PropertyType.Value, name.ToString(), modifier);
             }
 
             return null;
@@ -439,15 +456,17 @@ namespace StatimCodeGenerator
 
     public class PropertySyntax
     {
+        public string? Modifier { get; set; }
         public string Name { get; }
         public string Value { get; }
         public PropertyType Type { get; }
 
-        public PropertySyntax(string value, PropertyType type, string name)
+        public PropertySyntax(string value, PropertyType type, string name, string? modifier = null)
         {
             Value = value;
             Type = type;
             Name = name;
+            Modifier = modifier;
         }
     }
 

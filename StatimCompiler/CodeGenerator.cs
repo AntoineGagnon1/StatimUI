@@ -21,6 +21,7 @@ namespace StatimCodeGenerator
     public class CodeGenerator
     {
         public Dictionary<string, string> ComponentNames = new();
+        public Dictionary<string, int> ComponentCounts = new();
 
         public CodeGenerator(Dictionary<string, string> componentNames)
         {
@@ -29,6 +30,7 @@ namespace StatimCodeGenerator
 
         public SyntaxTree GenerateTree(string name, string statimSyntax)
         {
+            ComponentCounts.Clear();
             var tree = CSharpSyntaxTree.ParseText(GenerateClass(name, statimSyntax));
 
             return AddProperties(tree);
@@ -137,11 +139,11 @@ namespace StatimCodeGenerator
             {
 
                 var startMethods = new List<string>();
-                InitComponent(startContent, startMethods, parsingResult.Root, "__child", "this");
+                var rootName = InitComponent(startContent, startMethods, parsingResult.Root, "this");
                 AddStartMethods(startContent, startMethods);
 
                 if (parsingResult.Root != null)
-                    startContent.AppendLine("Children.Add(__child);");
+                    startContent.AppendLine($"Children.Add({rootName});");
 
             }
             startContent.Unindent(3);
@@ -222,36 +224,35 @@ namespace StatimUIXmlComponents
         }
 
 
-        private void InitComponent(ScriptBuilder content, List<string> startMethods, ComponentSyntax syntax, string variableName, string parentName)
+        private string InitComponent(ScriptBuilder content, List<string> endContent, ComponentSyntax syntax, string parentName)
         {
             if (syntax is ForEachSyntax foreachSyntax)
-            {
-                InitForeach(content, startMethods, foreachSyntax, variableName, parentName);
-                return;
-            }
-
-            List<string> childNames = new();
-            int i = 0;
-            foreach (var child in syntax.Slots)
-            {
-                var childName = $"{variableName}_{i}";
-                childNames.Add(childName);
-                InitComponent(content, startMethods, child, childName, variableName);
-                i++;
-            }
+                return InitForeach(content, endContent, foreachSyntax, parentName);
 
             var name = GetComponentName(syntax.Name);
+            var variableName = GetVariableName(syntax);
+
             content.AppendLine($"{name} {variableName} = new {name}();");
 
             foreach (var property in syntax.Properties)
             {
+                if (property.Name == "Name" && property.Modifier == "x")
+                    continue;
+
                 InitProperty(
                     content, variableName,
                     property.Name,
                     property.Value, property.Type);
             }
 
-            startMethods.Add($"{variableName}.Start(new List<Component> {{ {string.Join(",", childNames)} }});");
+            List<string> childNames = new();
+
+            foreach (var child in syntax.Slots)
+                childNames.Add(InitComponent(content, endContent, child, variableName));
+
+            endContent.Add($"{variableName}.Start(new List<Component> {{ {string.Join(",", childNames)} }});");
+
+            return variableName;
         }
 
         private string GetComponentName(string name)
@@ -262,11 +263,29 @@ namespace StatimUIXmlComponents
             return name;
         }
 
-        private void InitForeach(ScriptBuilder content, List<string> startMethods, ForEachSyntax foreachSyntax, string variableName, string parentName)
+        private string GetVariableName(ComponentSyntax component)
+        {
+            var name = component.Properties.FirstOrDefault(prop => prop.Name == "Name" && prop.Modifier == "x")?.Value;
+            if (name != null)
+                return name;
+
+            if (ComponentCounts.TryGetValue(component.Name, out int count))
+            {
+                ComponentCounts[component.Name] = ++count;
+                return component.Name + count.ToString();
+            }
+
+            ComponentCounts.Add(component.Name, 0);
+            return component.Name + "0";
+        }
+
+        private string InitForeach(ScriptBuilder content, List<string> endContent, ForEachSyntax foreachSyntax, string parentName)
         {
             var foreachContent = new ScriptBuilder();
-            var foreachStartMethods = new List<string>();
-            
+            var foreachEndContent = new List<string>();
+            var variableName = GetVariableName(foreachSyntax);
+
+
             content.AppendLine($"var {variableName} = Component.CreateForEach({foreachSyntax.Items});");
             InitProperty(content, variableName, "Items", foreachSyntax.Items, PropertyType.Binding);
 
@@ -275,30 +294,28 @@ namespace StatimUIXmlComponents
 
 
             List<string> childNames = new();
-            int i = 0;
             foreach (var child in foreachSyntax.Slots)
-            {
-                var childName = $"{variableName}_{i}";
-                childNames.Add(childName);
-                InitComponent(foreachContent, foreachStartMethods, child, $"{variableName}_{i}", variableName);
-                i++;
-            }
+                childNames.Add(InitComponent(foreachContent, foreachEndContent, child, variableName));
 
             foreach (var childName in childNames)
                 foreachContent.AppendLine($"{childName}.Parent = {parentName};");
 
-            AddStartMethods(foreachContent, foreachStartMethods);
+            AddStartMethods(foreachContent, foreachEndContent);
 
             foreachContent.AppendLine($"return new List<Component> {{ {string.Join(",", childNames)} }};");
             foreachContent.Unindent();
             foreachContent.AppendLine("};");
 
             foreachContent.AppendLine($"{variableName}.Start(new List<Component> {{ }});");
-            startMethods.Add(foreachContent.ToString());
+            endContent.Add(foreachContent.ToString());
+
+            return variableName;
         }
 
         private static void InitProperty(ScriptBuilder content, string variableName, string name, string value, PropertyType propertyType)
         {
+
+
             if (propertyType == PropertyType.Binding)
             {
                 content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToBinding(() => {value});");

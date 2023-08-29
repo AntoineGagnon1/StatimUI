@@ -190,8 +190,8 @@ namespace StatimUI
             Children.OnChildAdded += (sender, child) => { child.Parent = this; };
 
             Color oldColor = Color.Transparent;
-            OnHover += delegate { oldColor = BackgroundColor.Value; BackgroundColor = new ValueProperty<Color>(Color.FromRGBA(1, 0, 0)); };
-            OnHoverEnd += delegate { BackgroundColor = new ValueProperty<Color>(oldColor); };
+            Hovered += delegate { oldColor = BackgroundColor.Value; BackgroundColor = new ValueProperty<Color>(Color.FromRGBA(1, 0, 0)); };
+            HoverEnded += delegate { BackgroundColor = new ValueProperty<Color>(oldColor); };
         }
     }
 }
