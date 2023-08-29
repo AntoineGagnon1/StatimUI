@@ -16,7 +16,7 @@ namespace StatimUI
             Scale = scale;
         }
 
-        public static Transform FromComponent(Vector2 drawPos, Component component) => new Transform(drawPos + component.Origin.Value, component.Rotation.Value, component.Scale.Value);
+        public static Transform FromComponent(Vector2 componentPos, Component component) => new Transform(componentPos + component.Origin.Value, component.Rotation.Value, component.Scale.Value);
     }
 
     public static class TransformManager
@@ -30,29 +30,30 @@ namespace StatimUI
         public static Matrix3x2 Matrix => _matrix;
         public static bool IsEmpty = true;
 
-        private static void ApplyTransform(Vector2 origin)
+        private static void SetTotalMatrix()
         {
-            _matrix = Matrix3x2.CreateTranslation(Vector2.One - origin) * Matrix3x2.CreateScale(Scale) *
-                      Matrix3x2.CreateRotation(Rotation) * Matrix3x2.CreateTranslation(origin);
+            Matrix3x2 scaleMatrix = Matrix3x2.Identity;
+            foreach (Transform transform in transforms)
+                scaleMatrix *= Matrix3x2.CreateScale(transform.Scale, transform.Origin);
+
+            Matrix3x2 totalMatrix = scaleMatrix;
+            foreach (Transform transform in transforms)
+                totalMatrix *= Matrix3x2.CreateRotation(transform.Rotation, Vector2.Transform(transform.Origin, scaleMatrix));
+
+            _matrix = totalMatrix;
             IsEmpty = _matrix.IsIdentity;
         }
 
         public static void PushTransform(Transform transform)
         {
             transforms.Push(transform);
-            Scale += transform.Scale - Vector2.One;
-            Rotation += transform.Rotation;
-            ApplyTransform(transform.Origin);
+            SetTotalMatrix();
         }
 
         public static void PopTransform()
         {
-            var transform = transforms.Pop();
-
-            Scale -= transform.Scale - Vector2.One;
-            Rotation -= transform.Rotation;
-
-            ApplyTransform(transform.Origin);
+            transforms.Pop();
+            SetTotalMatrix();
         }
     }
 }

@@ -1,5 +1,3 @@
-﻿<script base="Panel" BackgroundColor="Gray" BorderRadius="10" Padding="10">{
-
-}</script>
+﻿<script base="Panel" BackgroundColor="Gray" BorderRadius="10" Padding="10"/>
 
 <text Content="Panel Here" BackgroundColor="Purple" BorderRadius="6" TextColor="White" Padding="5"></text>

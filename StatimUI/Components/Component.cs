@@ -15,23 +15,6 @@ namespace StatimUI
     {
         public abstract bool Focusable { get; }
 
-        /*public bool Focused => FocusManager.FocusedComponent == this;
-
-        /// <summary>
-        ///     Tries to focus this component.
-        /// </summary>
-        /// <returns>Whether the component got focused. True if it is Focusable, otherwise false.</returns>
-        public bool Focus()
-        {
-            if (Focusable)
-            {
-                FocusManager.FocusedComponent = this;
-                return true;
-            }
-
-            return false;
-        }*/
-
         public bool Visible { get; set; } = true;
 
         public ChildList Children { get; } = new();
@@ -75,7 +58,7 @@ namespace StatimUI
 
         #region Position
         public Property<Vector2> Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
-        public Vector2 DrawPosition => Position.Value + Margin.Value.TopLeft + Padding.Value.TopLeft;
+        public Vector2 DrawPosition => Position.Value + Margin.Value.TopLeft + Padding.Value.TopLeft + Translation.Value;
         #endregion // Position
 
         #region Transform
@@ -162,13 +145,13 @@ namespace StatimUI
         {
             if (Visible)
             {
-                var drawPos = offset + DrawPosition + Translation.Value;
+                var drawPos = offset + DrawPosition;
                 if (Translation.Value != Vector2.Zero)
                     Console.WriteLine("");
 
                 bool transform = Scale.Value != Vector2.One || Rotation.Value != 0;
                 if (transform)
-                    TransformManager.PushTransform(Transform.FromComponent(drawPos, this));
+                    TransformManager.PushTransform(Transform.FromComponent(offset + Position.Value, this));
 
                 RenderOutline(drawPos);
                 OnRender(drawPos);
