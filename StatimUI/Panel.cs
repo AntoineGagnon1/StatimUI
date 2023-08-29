@@ -59,6 +59,7 @@ namespace StatimUI
             ValueProperty<Dimension>.StringConverter = new DimensionConverter();
             ValueProperty<Vector2>.StringConverter = new Vector2Converter();
             ValueProperty<StatimUI.Rendering.Color>.StringConverter = new ColorConverter();
+            ValueProperty<Angle>.StringConverter = new AngleConverter();
         }
     }
 }

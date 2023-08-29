@@ -65,7 +65,7 @@ namespace StatimUI
         public Property<Vector2> Origin { get; set; } = new ValueProperty<Vector2>();
         public Property<Vector2> Translation { get; set; } = new ValueProperty<Vector2>();
         public Property<Vector2> Scale { get; set; } = new ValueProperty<Vector2>(new Vector2(1f));
-        public Property<float> Rotation { get; set; } = new ValueProperty<float>();
+        public Property<Angle> Rotation { get; set; } = new ValueProperty<Angle>();
         #endregion
 
         public Property<Thickness> Padding { get; set; } = new ValueProperty<Thickness>(Thickness.Zero);
@@ -149,7 +149,7 @@ namespace StatimUI
                 if (Translation.Value != Vector2.Zero)
                     Console.WriteLine("");
 
-                bool transform = Scale.Value != Vector2.One || Rotation.Value != 0;
+                bool transform = Scale.Value != Vector2.One || Rotation.Value != Angle.Empty;
                 if (transform)
                     TransformManager.PushTransform(Transform.FromComponent(offset + Position, this));
 

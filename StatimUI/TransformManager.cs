@@ -6,10 +6,10 @@ namespace StatimUI
     public struct Transform
     {
         public Vector2 Origin;
-        public float Rotation;
+        public Angle Rotation;
         public Vector2 Scale;
 
-        public Transform(Vector2 origin, float rotation, Vector2 scale)
+        public Transform(Vector2 origin, Angle rotation, Vector2 scale)
         {
             Origin = origin;
             Rotation = rotation;
@@ -38,7 +38,7 @@ namespace StatimUI
 
             Matrix3x2 totalMatrix = scaleMatrix;
             foreach (Transform transform in transforms)
-                totalMatrix *= Matrix3x2.CreateRotation(transform.Rotation, Vector2.Transform(transform.Origin, scaleMatrix));
+                totalMatrix *= Matrix3x2.CreateRotation(transform.Rotation.Radians, Vector2.Transform(transform.Origin, scaleMatrix));
 
             _matrix = totalMatrix;
             IsEmpty = _matrix.IsIdentity;

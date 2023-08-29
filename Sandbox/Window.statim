@@ -6,15 +6,15 @@
 }</script>
 
 <stack Padding="0" Width="500" Height="300" Direction="Vertical" Align="SpaceEvenly" CrossAlign="Start" BackgroundColor="#18191A" >
-	<stack>
+	<stack Rotation="25deg">
 		<text Content="heyy"></text>
 		<stack>
-			<text Content="heyy2" Scale="2, 1" Rotation={value}></text>
+			<text Content="heyy2" Rotation={Angle.FromRadians(value)}></text>
 		</stack>
 	</stack>
 	<stack>
 		<foreach {item} in {items}>
-			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF" Rotation={{value += 0.001f; return value;}}/>
+			<Label Content={item} Margin="0" Padding="15" TextColor="0xFFFFFF" Rotation={{value += 0.001f; return Angle.FromRadians(value);}}/>
 		</foreach>
 	</stack>
 </stack>
