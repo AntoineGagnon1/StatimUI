@@ -57,8 +57,8 @@ namespace StatimUI
         #endregion // Height
 
         #region Position
-        public Property<Vector2> Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
-        public Vector2 DrawPosition => Position.Value + Margin.Value.TopLeft + Padding.Value.TopLeft + Translation.Value;
+        public Vector2 Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
+        public Vector2 DrawPosition => Position + Margin.Value.TopLeft + Padding.Value.TopLeft + Translation.Value;
         #endregion // Position
 
         #region Transform
@@ -151,7 +151,7 @@ namespace StatimUI
 
                 bool transform = Scale.Value != Vector2.One || Rotation.Value != 0;
                 if (transform)
-                    TransformManager.PushTransform(Transform.FromComponent(offset + Position.Value, this));
+                    TransformManager.PushTransform(Transform.FromComponent(offset + Position, this));
 
                 RenderOutline(drawPos);
                 OnRender(drawPos);

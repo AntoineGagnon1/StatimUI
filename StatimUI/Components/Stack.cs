@@ -75,7 +75,7 @@ namespace StatimUI.Components
             {
                 foreach (var child in layout.Children)
                 {
-                    child.Position.Value = GetChildPos(child, new Vector2(layout.MainPos, layout.CrossPos), layout.SubstractMain, layout.SubstractCross);
+                    child.Position = GetChildPos(child, new Vector2(layout.MainPos, layout.CrossPos), layout.SubstractMain, layout.SubstractCross);
                     if (layout.DirectionReversed)
                         layout.MainPos -= child.TotalPixelWidth + layout.Spacing;
                     else
@@ -90,7 +90,7 @@ namespace StatimUI.Components
             {
                 foreach (var child in layout.Children)
                 {
-                    child.Position.Value = GetChildPos(child, new Vector2(layout.CrossPos, layout.MainPos), layout.SubstractCross, layout.SubstractMain);
+                    child.Position = GetChildPos(child, new Vector2(layout.CrossPos, layout.MainPos), layout.SubstractCross, layout.SubstractMain);
                     if (layout.DirectionReversed)
                         layout.MainPos -= child.TotalPixelHeight + layout.Spacing;
                     else
