@@ -1,0 +1,5 @@
+﻿<script>{
+	public float Hello = 5f;	
+}</script>
+
+<text Height={Hello}/>

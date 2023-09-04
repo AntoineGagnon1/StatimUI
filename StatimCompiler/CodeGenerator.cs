@@ -28,62 +28,80 @@ namespace StatimCodeGenerator
             ComponentNames = componentNames;
         }
 
-        public SyntaxTree GenerateTree(string name, string statimSyntax)
+        public IEnumerable<SyntaxTree> GenerateTrees(List<ComponentData> componentsData)
+        {
+            var componentProperties = new ComponentProperties();
+            var trees = new List<(string name, SyntaxNode root)>();
+            foreach (var componentData in componentsData)
+            {
+                var properties = new HashSet<string>();
+                var root = AddProperties(GenerateTree(componentData.Name, componentData.Code), properties);
+                componentProperties.SetProperties(componentData.Name, properties);
+
+                trees.Add((componentData.Name, root));
+            }
+
+            foreach (var tree in trees)
+            {
+                var dotValueRewriter = new DotValueSyntaxRewriter(componentProperties, tree.name);
+                var root = dotValueRewriter.Visit(tree.root);
+                yield return CSharpSyntaxTree.Create((CSharpSyntaxNode)root);
+            }
+        }
+
+        private SyntaxTree GenerateTree(string name, string statimSyntax)
         {
             ComponentCounts.Clear();
             var tree = CSharpSyntaxTree.ParseText(GenerateClass(name, statimSyntax));
 
-            return AddProperties(tree);
+            return tree;
         }
 
-        private static SyntaxTree AddProperties(SyntaxTree tree)
+        private static SyntaxNode AddProperties(SyntaxTree tree, HashSet<string> properties)
         {
             var root = tree.GetRoot();
             var classRoot = root
                 .ChildNodes().OfType<NamespaceDeclarationSyntax>().Single()
                 .ChildNodes().OfType<ClassDeclarationSyntax>().Single();
 
-            HashSet<string> propertyNames = new();
-            SyntaxNode newClassRoot = classRoot.ReplaceNodes(classRoot.ChildNodes(), (node, n2) =>
+            var newClassRoot = classRoot.ReplaceNodes(classRoot.ChildNodes(), (node, n2) =>
             {
-                if (node is FieldDeclarationSyntax field)
-                {
-                    var oldNode = node;
-                    if (!field.Modifiers.Any(modif => modif.Text == "public"))
-                        return node;
+               if (node is FieldDeclarationSyntax field)
+               {
+                   var oldNode = node;
+                   if (!field.Modifiers.Any(modif => modif.Text == "public"))
+                       return node;
 
-                    TypeSyntax variablePropertyType = CreateGenericType("ValueProperty", field.Declaration.Type);
-                    var variables = new List<VariableDeclaratorSyntax>();
+                   TypeSyntax variablePropertyType = CreateGenericType("ValueProperty", field.Declaration.Type);
+                   var variables = new List<VariableDeclaratorSyntax>();
 
-                    foreach (var variable in field.Declaration.Variables)
-                    {
-                        propertyNames.Add(variable.Identifier.Text);
+                   foreach (var variable in field.Declaration.Variables)
+                   {
+                       properties.Add(variable.Identifier.Text);
 
-                        var arguments = new List<ArgumentSyntax>();
-                        if (variable.Initializer != null)
-                            arguments.Add(SyntaxFactory.Argument(variable.Initializer.Value));
-                        var argumentsSeparated = SyntaxFactory.SeparatedList(arguments);
-                        var objectCreationExpression = SyntaxFactory.ObjectCreationExpression(variablePropertyType, SyntaxFactory.ArgumentList(argumentsSeparated), null);
-                        var equalsValueClause = SyntaxFactory.EqualsValueClause(objectCreationExpression);
+                       var arguments = new List<ArgumentSyntax>();
+                       if (variable.Initializer != null)
+                           arguments.Add(SyntaxFactory.Argument(variable.Initializer.Value));
+                       var argumentsSeparated = SyntaxFactory.SeparatedList(arguments);
+                       var objectCreationExpression = SyntaxFactory.ObjectCreationExpression(variablePropertyType, SyntaxFactory.ArgumentList(argumentsSeparated), null);
+                       var equalsValueClause = SyntaxFactory.EqualsValueClause(objectCreationExpression);
 
-                        variables.Add(variable.WithInitializer(equalsValueClause).NormalizeWhitespace());
-                    }
+                       variables.Add(variable.WithInitializer(equalsValueClause).NormalizeWhitespace());
+                   }
 
-                    var variablesSeparated = SyntaxFactory.SeparatedList(variables);
-                    var newNode = field.WithDeclaration(
-                        field.Declaration
-                            .WithType(CreateGenericType("Property", field.Declaration.Type))
-                            .WithVariables(variablesSeparated)
-                    );
-                    return newNode;
-                }
+                   var variablesSeparated = SyntaxFactory.SeparatedList(variables);
+                   var newNode = field.WithDeclaration(
+                       field.Declaration
+                           .WithType(CreateGenericType("Property", field.Declaration.Type))
+                           .WithVariables(variablesSeparated)
+                   );
+                   return newNode;
+               }
 
                 return node;
             });
-            var dotValueRewriter = new DotValueSyntaxRewriter(propertyNames);
-            newClassRoot = dotValueRewriter.Visit(newClassRoot);
 
-            return CSharpSyntaxTree.Create((CSharpSyntaxNode)root.ReplaceNode(classRoot, newClassRoot));
+            return root.ReplaceNode(classRoot, newClassRoot);
         }
         private static GenericNameSyntax CreateGenericType(string name, TypeSyntax genericType)
             => SyntaxFactory.GenericName(SyntaxFactory.Identifier(name), SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(new TypeSyntax[] { genericType })));
