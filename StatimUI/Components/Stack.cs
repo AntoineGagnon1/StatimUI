@@ -6,12 +6,6 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
-
-namespace System.Runtime.CompilerServices
-{
-    internal static class IsExternalInit { }
-}
-
 namespace StatimUI.Components
 {
     public enum StackDirection
@@ -36,7 +30,6 @@ namespace StatimUI.Components
         public Property<StackAlign> Align = new ValueProperty<StackAlign>(StackAlign.Start);
         public Property<StackCrossAlign> CrossAlign = new ValueProperty<StackCrossAlign>(StackCrossAlign.Start);
         private int lastChildrenCount = 0;
-
 
         public override bool Focusable => false;
 

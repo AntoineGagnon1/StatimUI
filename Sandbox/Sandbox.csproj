@@ -11,13 +11,11 @@
   <ItemGroup>
     <None Remove="Label.statim" />
     <None Remove="MyPanel.statim" />
-    <None Remove="Test.statim" />
     <None Remove="Window.statim" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="MyPanel.statim" />
-    <EmbeddedResource Include="Test.statim" />
     <EmbeddedResource Include="Window.statim" />
     <EmbeddedResource Include="Label.statim" />
   </ItemGroup>

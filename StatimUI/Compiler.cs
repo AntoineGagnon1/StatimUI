@@ -5,11 +5,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
-using System.Linq;
 
 namespace StatimUI
 {
@@ -37,7 +37,8 @@ namespace StatimUI
 
         public void LoadEmbedded()
         {
-            List<ComponentData> components = new List<ComponentData>();
+            List<SyntaxTree> trees = new List<SyntaxTree>();
+            codeGenerator = new CodeGenerator(GetComponentDefinitions());
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
@@ -52,23 +53,19 @@ namespace StatimUI
                     if (stream == null)
                         continue;
                     var parts = name.Split('.');
-                    components.Add(new ComponentData(parts[parts.Length - 2], (new StreamReader(stream)).ReadToEnd()));
+                    var tree = codeGenerator.GenerateTree(parts[parts.Length - 2], (new StreamReader (stream)).ReadToEnd());
+                    trees.Add(tree);
                 }
             }
-
-            codeGenerator = new CodeGenerator(GetComponentDefinitions());
-            var trees = codeGenerator.GenerateTrees(components);
 
             foreach (var tree in trees)
                 Console.WriteLine(tree);
 
-            Assembly =  Compile(trees.ToList(), GetGlobalReferences());
-            
+            Assembly =  Compile(trees, GetGlobalReferences());
         }
 
         public Assembly Compile(List<SyntaxTree> trees, IEnumerable<MetadataReference> references)
         {
-
             using MemoryStream dllStream = new MemoryStream();
             using MemoryStream pdbStream = new MemoryStream();
             var res = CSharpCompilation.Create("StatimUIXmlComponents", options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
