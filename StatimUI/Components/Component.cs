@@ -90,6 +90,7 @@ namespace StatimUI
 
 
         public event Action? Focused;
+        public event Action? LostFocus;
         public bool IsFocused => EventManager.Focused == this;
 
 
@@ -106,6 +107,17 @@ namespace StatimUI
         public static ForEach<T> CreateForEach<T>(IEnumerable<T> _) => new ForEach<T>();
 
         public Property<OutlineStyle> OutlineStyle { get; set; } = new ValueProperty<OutlineStyle>(StatimUI.OutlineStyle.Solid);
+
+        public void RegisterStyleModifiers(Action styleModifiers)
+        {
+            Hovered += styleModifiers;
+            HoverEnded += styleModifiers;
+            Focused += styleModifiers;
+            LostFocus += styleModifiers;
+            // todo: tab
+            styleModifiers();
+        }
+
 
         private void RenderOutline(Vector2 drawPosition)
         {
@@ -215,9 +227,9 @@ namespace StatimUI
         {
             Children.OnChildAdded += (sender, child) => { child.Parent = this; };
 
-            Color oldColor = Color.Transparent;
-            Hovered += delegate { oldColor = BackgroundColor.Value; BackgroundColor = new ValueProperty<Color>(Color.FromRGBA(1, 0, 0)); };
-            HoverEnded += delegate { BackgroundColor = new ValueProperty<Color>(oldColor); };
+            //Color oldColor = Color.Transparent;
+            //Hovered += delegate { oldColor = BackgroundColor.Value; BackgroundColor = new ValueProperty<Color>(Color.FromRGBA(1, 0, 0)); };
+            //HoverEnded += delegate { BackgroundColor = new ValueProperty<Color>(oldColor); };
         }
     }
 }

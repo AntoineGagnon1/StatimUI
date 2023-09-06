@@ -24,9 +24,10 @@ namespace StatimUI
             var component = HoveredPanel?.Children.FirstOrDefault()?.FindComponentAt(pos - offset - HoveredPanel.Padding.Value.TopLeft, Vector2.One);
             if (Hovered != component)
             {
-                Hovered?.OnMouseExit();
-                component?.OnMouseEnter();
+                var oldHovered = Hovered; // necessary otherwise IsHovered won't be true on the hovered component at the moment of the callback
                 Hovered = component;
+                oldHovered?.OnMouseExit();
+                Hovered?.OnMouseEnter();
             }
         }
 
@@ -35,7 +36,10 @@ namespace StatimUI
             TabNavigation = null;
 
             if (Hovered?.Focusable ?? false)
+            {
+                //if (Focused ==)
                 Focused = Hovered;
+            }
 
             Hovered?.OnMouseClick();
 

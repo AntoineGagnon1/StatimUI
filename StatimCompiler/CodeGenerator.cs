@@ -95,7 +95,7 @@ namespace StatimCodeGenerator
                 if (property.Name == "base")
                     continue;
 
-                InitProperty(content, "base", property.Name, property.Value, property.Type);
+                InitProperty(content, "base", property);
             }
         }
 
@@ -234,16 +234,7 @@ namespace StatimUIXmlComponents
 
             content.AppendLine($"{name} {variableName} = new {name}();");
 
-            foreach (var property in syntax.Properties)
-            {
-                if (property.Name == "Name" && property.Modifier == "x")
-                    continue;
-
-                InitProperty(
-                    content, variableName,
-                    property.Name,
-                    property.Value, property.Type);
-            }
+            InitProperties(content, variableName, syntax.Properties);
 
             List<string> childNames = new();
 
@@ -285,9 +276,8 @@ namespace StatimUIXmlComponents
             var foreachEndContent = new List<string>();
             var variableName = GetVariableName(foreachSyntax);
 
-
             content.AppendLine($"var {variableName} = Component.CreateForEach({foreachSyntax.Items});");
-            InitProperty(content, variableName, "Items", foreachSyntax.Items, PropertyType.Binding);
+            content.AppendLine($"{variableName}.Items = {variableName}.Items.ToBinding(() => {foreachSyntax.Items});");
 
             foreachContent.AppendLineNoIndent($"{variableName}.ComponentsCreator = ({foreachSyntax.Item}, {foreachSyntax.Index}) => {{");
             foreachContent.Indent();
@@ -312,17 +302,85 @@ namespace StatimUIXmlComponents
             return variableName;
         }
 
-        private static void InitProperty(ScriptBuilder content, string variableName, string name, string value, PropertyType propertyType)
+        private static void InitProperties(ScriptBuilder content, string variableName, List<PropertySyntax> properties)
+        {
+            ScriptBuilder defaultContent = new();
+            ScriptBuilder hoveredContent = new();
+            ScriptBuilder focusedContent = new();
+
+            foreach (var property in properties)
+            {
+                if (property.Modifier == "x")
+                    continue;
+
+                if (property.Modifier == null)
+                {
+                    var modifierIndex = properties.FindIndex(p => HasStyleModifier(p) && p.Name == property.Name);
+                    if (modifierIndex == -1)
+                        InitProperty(content, variableName, property);
+                    else
+                    {
+                        InitProperty(defaultContent, variableName, property);
+                        if (property.Modifier == "Hovered")
+                            InitProperty(hoveredContent, variableName, property);
+                        else if (property.Modifier == "Focused")
+                            InitProperty(focusedContent, variableName, property);
+                    }
+                }
+                else
+                {
+                    var noModifierIndex = properties.FindIndex(p => !HasStyleModifier(p) && p.Name == property.Name);
+                    if (noModifierIndex == -1)
+                    {
+                        content.AppendLine($"var {variableName}Default{property.Name} = {variableName}.{property.Name};");
+                        defaultContent.AppendLine($"{variableName}.{property.Name} = {variableName}Default{property.Name};");
+                    }
+                    if (property.Modifier == "Hovered")
+                        InitProperty(hoveredContent, variableName, property);
+                    else if (property.Modifier == "Focused")
+                        InitProperty(focusedContent, variableName, property);
+                }
+            }
+
+            if (hoveredContent.Length == 0 && focusedContent.Length == 0)
+            {
+                content.Append(defaultContent.ToString());
+                return;
+            }
+
+            content.AppendLine($"{variableName}.RegisterStyleModifiers(() =>");
+            content.AppendLine("{");
+            content.Indent();
+            AddModifier(content, $"{variableName}.IsHovered", hoveredContent);
+            AddModifier(content, $"{variableName}.IsFocused", focusedContent);
+            AddModifier(content, $"!{variableName}.IsFocused && !{variableName}.IsHovered", defaultContent);
+            content.Unindent();
+            content.AppendLine("});");
+        }
+
+        private static bool HasStyleModifier(PropertySyntax property) => (property.Modifier == "Hovered" || property.Modifier == "Focused");
+
+        private static void AddModifier(ScriptBuilder content, string condition, ScriptBuilder modifierContent)
+        {
+            if (modifierContent.Length == 0)
+                return;
+
+            content.AppendLine($"if ({condition})");
+            content.AppendLine("{");
+            content.Append(modifierContent.ToString());
+            content.AppendLine("}");
+        }
+
+        private static void InitProperty(ScriptBuilder content, string variableName, PropertySyntax property)
         {
 
-
-            if (propertyType == PropertyType.Binding)
+            if (property.Type == PropertyType.Binding)
             {
-                content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToBinding(() => {value});");
+                content.AppendLine($"{variableName}.{property.Name} = {variableName}.{property.Name}.ToBinding(() => {property.Value});");
             }
             else
             {
-                content.AppendLine($"{variableName}.{name} = {variableName}.{name}.ToValueProperty(\"{value}\");");
+                content.AppendLine($"{variableName}.{property.Name} = {variableName}.{property.Name}.ToValueProperty(\"{property.Value}\");");
             }
         }
 
