@@ -8,15 +8,17 @@ namespace StatimUI
         public Vector2 Origin;
         public Angle Rotation;
         public Vector2 Scale;
+        public Vector2 Translation;
 
-        public Transform(Vector2 origin, Angle rotation, Vector2 scale)
+        public Transform(Vector2 origin, Angle rotation, Vector2 scale, Vector2 translation)
         {
             Origin = origin;
             Rotation = rotation;
             Scale = scale;
+            Translation = translation;
         }
 
-        public static Transform FromComponent(Vector2 componentPos, Component component) => new Transform(componentPos + component.Origin.Value, component.Rotation.Value, component.Scale.Value);
+        public static Transform FromComponent(Vector2 componentPos, Component component) => new Transform(componentPos + component.Origin.Value, component.Rotation.Value, component.Scale.Value, component.Translation.Value);
     }
 
     public static class TransformManager
@@ -39,6 +41,9 @@ namespace StatimUI
             Matrix3x2 totalMatrix = scaleMatrix;
             foreach (Transform transform in transforms)
                 totalMatrix *= Matrix3x2.CreateRotation(transform.Rotation.Radians, Vector2.Transform(transform.Origin, scaleMatrix));
+
+            foreach (Transform transform in transforms)
+                totalMatrix *= Matrix3x2.CreateTranslation(transform.Translation);
 
             _matrix = totalMatrix;
             IsEmpty = _matrix.IsIdentity;

@@ -1,3 +1,5 @@
 ﻿<script base="Panel" BackgroundColor="Gray" BorderRadius="10" Padding="10"/>
 
-<text Content="Panel Here" BackgroundColor="Purple" BorderRadius="6" TextColor="White" Padding="5"></text>
+<stack Padding="0" Width="500" Height="500" Direction="Horizontal" Align="Center" CrossAlign="Start" Rotation="45 deg" Scale="1,2" Translation="20,0">
+  <text Content="Panel Here" BackgroundColor="Purple" BorderRadius="6" TextColor="White" Padding="5" Rotation="15 deg" Scale="2,1"></text>
+</stack>

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using Color = StatimUI.Rendering.Color;
@@ -58,7 +59,7 @@ namespace StatimUI
 
         #region Position
         public Vector2 Position { get; set; } = new ValueProperty<Vector2>(new Vector2(0, 0));
-        public Vector2 DrawPosition => Position + Margin.Value.TopLeft + Padding.Value.TopLeft + Translation.Value;
+        public Vector2 DrawPosition => Position + Margin.Value.TopLeft + Padding.Value.TopLeft;
         #endregion // Position
 
         #region Transform
@@ -118,20 +119,47 @@ namespace StatimUI
             }
         }
 
-        public Component? FindComponentAt(Vector2 pos)
+        public Component? FindComponentAt(Vector2 at, Vector2 offset)
         {
-            var topLeft = DrawPosition - Padding.Value.TopLeft;
+            var drawPos = offset + DrawPosition - Padding.Value.TopLeft;
+
+            bool transform = Scale.Value != Vector2.One || Rotation.Value != Angle.Empty;
+            if (transform)
+            {
+                TransformManager.PushTransform(Transform.FromComponent(Position, this));
+
+            }
+
+            Vector2 transformedPos = at;
+            if (!TransformManager.IsEmpty)
+            {
+                Matrix3x2.Invert(TransformManager.Matrix, out var inverted);
+                transformedPos = Vector2.Transform(at, inverted);
+            }
+
+
+            var topLeft = drawPos;
             var bottomRight = topLeft + new Vector2(PixelWidth, PixelHeight);
 
-            if (pos.X < topLeft.X || pos.X > bottomRight.X || pos.Y < topLeft.Y || pos.Y > bottomRight.Y)
+            if (transformedPos.X < topLeft.X || transformedPos.X > bottomRight.X || transformedPos.Y < topLeft.Y || transformedPos.Y > bottomRight.Y)
+            {
+                if (transform)
+                    TransformManager.PopTransform();
                 return null;
+            }
 
             foreach (var child in Children)
             {
-                var found = child.FindComponentAt(pos - DrawPosition);
+                var found = child.FindComponentAt(at, drawPos);
                 if (found != null)
+                {
+                    TransformManager.PopTransform();
                     return found;
+                }
             }
+
+            if (transform)
+                TransformManager.PopTransform();
 
             return this;
         }
@@ -146,8 +174,6 @@ namespace StatimUI
             if (Visible)
             {
                 var drawPos = offset + DrawPosition;
-                if (Translation.Value != Vector2.Zero)
-                    Console.WriteLine("");
 
                 bool transform = Scale.Value != Vector2.One || Rotation.Value != Angle.Empty;
                 if (transform)

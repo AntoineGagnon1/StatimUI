@@ -30,5 +30,7 @@ namespace StatimUI
         public static bool operator ==(Angle a, Angle b) => a.Equals(b);
         public static bool operator !=(Angle a, Angle b) => !a.Equals(b);
         public bool Equals(Angle other) => Radians == other.Radians;
+
+        public static Angle operator -(Angle a) => new Angle { Radians = -a.Radians };
     }
 }
