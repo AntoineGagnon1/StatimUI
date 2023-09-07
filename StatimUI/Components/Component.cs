@@ -135,13 +135,13 @@ namespace StatimUI
         {
             var drawPos = offset + DrawPosition - Padding.Value.TopLeft;
 
-            bool transform = Scale.Value != Vector2.One || Rotation.Value != Angle.Empty;
+            bool transform = Scale.Value != Vector2.One || Rotation.Value != Angle.Empty || Translation.Value != Vector2.Zero;
             if (transform)
             {
                 TransformManager.PushTransform(Transform.FromComponent(Position, this));
 
             }
-
+            
             Vector2 transformedPos = at;
             if (!TransformManager.IsEmpty)
             {
@@ -165,7 +165,8 @@ namespace StatimUI
                 var found = child.FindComponentAt(at, drawPos);
                 if (found != null)
                 {
-                    TransformManager.PopTransform();
+                    if (transform)
+                        TransformManager.PopTransform();
                     return found;
                 }
             }
@@ -187,7 +188,7 @@ namespace StatimUI
             {
                 var drawPos = offset + DrawPosition;
 
-                bool transform = Scale.Value != Vector2.One || Rotation.Value != Angle.Empty;
+                bool transform = Scale.Value != Vector2.One || Rotation.Value != Angle.Empty || Translation.Value != Vector2.Zero;
                 if (transform)
                     TransformManager.PushTransform(Transform.FromComponent(offset + Position, this));
 
